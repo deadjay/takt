@@ -10,7 +10,8 @@ import UIKit
 
 struct ContentView: View {
     @StateObject private var textRecognitionService = TextRecognitionService()
-    @StateObject private var eventStorage = EventStorageService()
+    @StateObject private var eventStorage = EventStorageService() // Temporary: Still used by Calendar and Import tabs
+    @State private var eventsListViewModel = DIContainer.shared.makeEventsListViewModel()
     @State private var selectedImage: UIImage?
     @State private var showingAddEventSheet = false
     
@@ -125,7 +126,7 @@ struct ContentView: View {
             
             // Events List Tab
             NavigationView {
-                EventsListView(events: $eventStorage.events)
+                EventsListView(viewModel: eventsListViewModel)
                     .navigationTitle("All Events")
                     .navigationBarItems(trailing: Button("Add") {
                         showingAddEventSheet = true
@@ -147,71 +148,6 @@ struct ContentView: View {
         textRecognitionService.extractedEvent = nil
         // Show success feedback
         // You could add a toast or alert here
-    }
-}
-
-struct EventsListView: View {
-    @Binding var events: [Event]
-    @State private var searchText = ""
-    @State private var showingEventDetail = false
-    @State private var selectedEvent: Event?
-    
-    var filteredEvents: [Event] {
-        if searchText.isEmpty {
-            return events.sorted { $0.date < $1.date }
-        } else {
-            return events.filter { event in
-                event.name.localizedCaseInsensitiveContains(searchText) ||
-                (event.notes?.localizedCaseInsensitiveContains(searchText) ?? false)
-            }.sorted { $0.date < $1.date }
-        }
-    }
-    
-    var body: some View {
-        VStack {
-            if events.isEmpty {
-                VStack(spacing: 16) {
-                    Image(systemName: "calendar.badge.plus")
-                        .font(.system(size: 60))
-                        .foregroundColor(.gray)
-                    
-                    Text("No Events Yet")
-                        .font(.title2)
-                        .fontWeight(.medium)
-                    
-                    Text("Import an image or manually add events to get started")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                List {
-                    ForEach(filteredEvents) { event in
-                        EventRow(event: event)
-                            .onTapGesture {
-                                selectedEvent = event
-                                showingEventDetail = true
-                            }
-                    }
-                    .onDelete(perform: deleteEvents)
-                }
-                .searchable(text: $searchText, prompt: "Search events...")
-            }
-        }
-        .sheet(isPresented: $showingEventDetail) {
-            if let event = selectedEvent {
-                EventDetailView(event: event, events: $events)
-            }
-        }
-    }
-    
-    private func deleteEvents(offsets: IndexSet) {
-        let eventsToDelete = offsets.map { filteredEvents[$0] }
-        events.removeAll { event in
-            eventsToDelete.contains { $0.id == event.id }
-        }
     }
 }
 
