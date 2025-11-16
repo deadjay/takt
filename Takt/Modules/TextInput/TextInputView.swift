@@ -29,6 +29,5 @@ struct TextInputView: View {
 // MARK: - Preview
 #Preview {
     TextInputView(
-        viewModel: TextInputViewModel()
-    )
+        viewModel: DIContainer.shared.makeTextInputViewModel())
 }
