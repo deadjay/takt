@@ -14,14 +14,16 @@ struct ContentView: View {
     @State private var eventsListViewModel = DIContainer.shared.makeEventsListViewModel()
     @State private var selectedImage: UIImage?
     @State private var showingAddEventSheet = false
+    @State private var inputText: String = ""
     
     var body: some View {
         TabView {
-            // Image Processing Tab
+            // Image/Text Processing Tab
             NavigationView {
                 VStack(spacing: 20) {
                     ImagePickerView(selectedImage: $selectedImage)
-                    
+                    TextInputPickerView(inputText: $inputText)
+
                     if let image = selectedImage {
                         Button(action: {
                             Task {

@@ -37,20 +37,6 @@
 			);
 			target = 944E69012DFA27A6006271D8 /* Takt */;
 		};
-		94B8C9052ECA241C00A44E37 /* Exceptions for "TaktTests" folder in "Takt" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				TextInputViewModelTests.swift,
-			);
-			target = 944E69012DFA27A6006271D8 /* Takt */;
-		};
-		94B8C9062ECA241C00A44E37 /* Exceptions for "TaktTests" folder in "TaktTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				TextInputViewModelTests.swift,
-			);
-			target = 944E69122DFA27A8006271D8 /* TaktTests */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -64,10 +50,6 @@
 		};
 		944E69162DFA27A8006271D8 /* TaktTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				94B8C9052ECA241C00A44E37 /* Exceptions for "TaktTests" folder in "Takt" target */,
-				94B8C9062ECA241C00A44E37 /* Exceptions for "TaktTests" folder in "TaktTests" target */,
-			);
 			path = TaktTests;
 			sourceTree = "<group>";
 		};

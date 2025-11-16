@@ -44,13 +44,20 @@ final class DIContainer {
     lazy var getEventsForDateUseCase: GetEventsForDateUseCaseProtocol = {
         GetEventsForDateUseCase(repository: eventRepository)
     }()
-
+    
     // MARK: - ViewModels
     func makeEventsListViewModel() -> EventsListViewModel {
         EventsListViewModel(
             getEventsUseCase: getEventsUseCase,
             deleteEventUseCase: deleteEventUseCase,
             searchEventsUseCase: searchEventsUseCase
+        )
+    }
+    
+    func makeTextInputViewModel() -> TextInputViewModel {
+        TextInputViewModel(
+            textRecognitionService: TextRecognitionService(),
+            addEventUseCase: addEventUseCase
         )
     }
 
