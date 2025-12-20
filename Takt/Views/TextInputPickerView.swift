@@ -43,27 +43,6 @@ struct TextInputPickerView: View {
                 .padding()
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(12)
-            } else {
-                // Empty state
-                VStack(spacing: 16) {
-                    Image(systemName: "text.viewfinder")
-                        .font(.system(size: 60))
-                        .foregroundColor(.green)
-                    
-                    Text("Paste Text with Dates")
-                        .font(.title2)
-                        .fontWeight(.medium)
-                    
-                    Text("Paste or type text containing dates, deadlines, and event information")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                .frame(height: 220)
-                .frame(maxWidth: .infinity)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
             }
             
             Button(action: {
