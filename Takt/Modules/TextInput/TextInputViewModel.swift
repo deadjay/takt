@@ -22,12 +22,12 @@ final class TextInputViewModel {
     
     // MARK: - Dependencies
     // private let someUseCase: SomeUseCaseProtocol
-    private let textRecognitionService: TextRecognitionService
+    private let textRecognitionService: TextRecognitionServiceProtocol
     private let addEventUseCase: AddEventUseCaseProtocol
     
     // MARK: - Init
     init(
-        textRecognitionService: TextRecognitionService,
+        textRecognitionService: TextRecognitionServiceProtocol,
         addEventUseCase: AddEventUseCaseProtocol
     ) {
         self.textRecognitionService = textRecognitionService
@@ -36,6 +36,7 @@ final class TextInputViewModel {
     
     // MARK: - Actions
     
+    @MainActor
     func processText() async {
         guard !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             errorMessage = "Please enter some text"
@@ -48,12 +49,9 @@ final class TextInputViewModel {
         
         defer { isLoading = false }
         
-        // TODO: Parse text to extract events
-        // For now, we'll use the existing TextRecognitionService's parsing logic
-        // Later we'll refactor to a unified parser (AI/Apple frameworks/etc.)
-        
-        let parsedEvents = [Event]()
-        
+        let parser = TextEventParser()
+        let parsedEvents = parser.parseEvents(from: inputText)
+
         guard !parsedEvents.isEmpty else {
             errorMessage = "No events with dates found in the text"
             return

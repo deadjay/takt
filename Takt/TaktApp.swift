@@ -11,7 +11,7 @@ import SwiftUI
 struct TaktApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: DIContainer.shared.makeContentViewModel())
         }
     }
 }
