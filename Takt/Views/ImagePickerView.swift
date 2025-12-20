@@ -3,24 +3,27 @@ import PhotosUI
 import UIKit
 
 struct ImagePickerView: View {
-    @Binding var selectedImage: UIImage?
-    @State private var showingImagePicker = false
+    @Binding var selectedImageData: Data?
+
+    @State private var selectedImage: UIImage?
     @State private var showingPhotoLibrary = false
     @State private var showingCamera = false
     @State private var showingActionSheet = false
-    
+
     var body: some View {
         VStack(spacing: 20) {
-            if let image = selectedImage {
-                Image(uiImage: image)
+            if let imageData = selectedImageData,
+               let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: 300)
                     .cornerRadius(12)
                     .overlay(
-                        Button(action: {
+                        Button {
                             selectedImage = nil
-                        }) {
+                            selectedImageData = nil
+                        } label: {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.white)
                                 .background(Color.black.opacity(0.6))
@@ -29,34 +32,16 @@ struct ImagePickerView: View {
                         .padding(8),
                         alignment: .topTrailing
                     )
-            } else {
-                VStack(spacing: 16) {
-                    Image(systemName: "photo.on.rectangle.angled")
-                        .font(.system(size: 60))
-                        .foregroundColor(.blue)
-                    
-                    Text("Select or Paste an Image")
-                        .font(.title2)
-                        .fontWeight(.medium)
-                    
-                    Text("Import an image containing event details to extract dates, names, and deadlines")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                .frame(height: 220)
-                .frame(maxWidth: .infinity)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
             }
-            
-            Button(action: {
+
+            Button {
                 showingActionSheet = true
-            }) {
+            } label: {
                 HStack {
-                    Image(systemName: selectedImage == nil ? "photo.badge.plus" : "arrow.clockwise")
-                    Text(selectedImage == nil ? "Select Image" : "Change Image")
+                    Image(systemName: selectedImageData == nil
+                          ? "photo.badge.plus"
+                          : "arrow.clockwise")
+                    Text(selectedImageData == nil ? "Select Image" : "Change Image")
                 }
                 .font(.headline)
                 .foregroundColor(.white)
@@ -65,25 +50,11 @@ struct ImagePickerView: View {
                 .background(Color.blue)
                 .cornerRadius(12)
             }
-            
-            if selectedImage != nil {
-                Button(action: {
-                    // This will be handled by the parent view
-                }) {
-                    HStack {
-                        Image(systemName: "text.viewfinder")
-                        Text("Extract Event Details")
-                    }
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green)
-                    .cornerRadius(12)
-                }
-            }
         }
         .padding()
+        .onChange(of: selectedImage) { image in
+            selectedImageData = image?.jpegData(compressionQuality: 0.9)
+        }
         .actionSheet(isPresented: $showingActionSheet) {
             ActionSheet(
                 title: Text("Select Image Source"),
@@ -108,7 +79,7 @@ struct ImagePickerView: View {
             CameraView(selectedImage: $selectedImage)
         }
     }
-    
+
     private func pasteFromClipboard() {
         if let image = UIPasteboard.general.image {
             selectedImage = image
@@ -197,5 +168,5 @@ struct CameraView: UIViewControllerRepresentable {
 }
 
 #Preview {
-    ImagePickerView(selectedImage: .constant(nil))
+    ImagePickerView(selectedImageData: .constant(nil))
 }

@@ -15,6 +15,16 @@ final class DIContainer {
     private lazy var eventRepository: EventRepositoryProtocol = {
         UserDefaultsEventRepository()
     }()
+    
+    // MARK: - Services
+    
+    lazy var textRecognitionService: TextRecognitionServiceProtocol = {
+        DefaultTextRecognitionService()
+    }()
+    
+    lazy var textEventParserService: TextEventParserServiceProtocol = {
+        TextEventParser()
+    }()
 
     // MARK: - Use Cases
     lazy var getEventsUseCase: GetEventsUseCaseProtocol = {
@@ -56,8 +66,18 @@ final class DIContainer {
     
     func makeTextInputViewModel() -> TextInputViewModel {
         TextInputViewModel(
-            textRecognitionService: TextRecognitionService(),
+            textRecognitionService: textRecognitionService,
             addEventUseCase: addEventUseCase
+        )
+    }
+    
+    func makeContentViewModel() -> ContentViewModel {
+        ContentViewModel(getEventsUseCase: getEventsUseCase,
+                         addEventUseCase: addEventUseCase,
+                         updateEventUseCase: updateEventUseCase,
+                         deleteEventUseCase: deleteEventUseCase,
+                         textRecognitionService: textRecognitionService,
+                         textParser: textEventParserService
         )
     }
 

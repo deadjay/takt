@@ -9,7 +9,7 @@ struct Event: Identifiable, Codable {
     var isCompleted: Bool = false
     var createdAt: Date = Date()
 
-    init(name: String, date: Date, deadline: Date? = nil, notes: String? = nil) {
+    public init(name: String, date: Date, deadline: Date? = nil, notes: String? = nil) {
         self.name = name
         self.date = date
         self.deadline = deadline
