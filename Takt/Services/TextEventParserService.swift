@@ -170,12 +170,25 @@ final class TextEventParser: TextEventParserServiceProtocol {
             return date
         }
 
+        // Handle 2-digit years FIRST (e.g., "25.12.24" -> "25.12.2024")
+        // This must come before no-year handling to avoid conflicts
+        if format.contains("yy") && !format.contains("yyyy") {
+            let components = text.components(separatedBy: CharacterSet(charactersIn: "./- "))
+            if components.count >= 3, let year = Int(components[2]), year < 100 {
+                let fullYear = 2000 + year
+                let fullDateText = "\(components[0]).\(components[1]).\(fullYear)"
+                formatter.dateFormat = format.replacingOccurrences(of: "yy", with: "yyyy")
+                return formatter.date(from: fullDateText)
+            }
+        }
+
         // Handle dates without year - default to current year for ALL formats
         let currentYear = Calendar.current.component(.year, from: Date())
 
         // German format without year (e.g., "02.12." -> "02.12.2024")
         if format == "dd.MM." {
             let components = text.components(separatedBy: ".")
+            // Only take first 2 components to avoid picking up trailing numbers
             if components.count >= 2 {
                 let fullDateText = "\(components[0]).\(components[1]).\(currentYear)"
                 formatter.dateFormat = "dd.MM.yyyy"
@@ -199,17 +212,6 @@ final class TextEventParser: TextEventParserServiceProtocol {
             if components.count >= 2 {
                 let fullDateText = "\(currentYear)-\(components[0])-\(components[1])"
                 formatter.dateFormat = "yyyy-MM-dd"
-                return formatter.date(from: fullDateText)
-            }
-        }
-
-        // Handle 2-digit years (e.g., "25.12.24" -> "25.12.2024")
-        if format.contains("yy") && !format.contains("yyyy") {
-            let components = text.components(separatedBy: CharacterSet(charactersIn: "./- "))
-            if components.count >= 3, let year = Int(components[2]), year < 100 {
-                let fullYear = 2000 + year
-                let fullDateText = "\(components[0]).\(components[1]).\(fullYear)"
-                formatter.dateFormat = format.replacingOccurrences(of: "yy", with: "yyyy")
                 return formatter.date(from: fullDateText)
             }
         }
