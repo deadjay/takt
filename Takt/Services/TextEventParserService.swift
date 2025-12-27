@@ -165,11 +165,44 @@ final class TextEventParser: TextEventParserServiceProtocol {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "de_DE")
         formatter.dateFormat = format
-        
+
         if let date = formatter.date(from: text) {
             return date
         }
-        
+
+        // Handle dates without year - default to current year for ALL formats
+        let currentYear = Calendar.current.component(.year, from: Date())
+
+        // German format without year (e.g., "02.12." -> "02.12.2024")
+        if format == "dd.MM." {
+            let components = text.components(separatedBy: ".")
+            if components.count >= 2 {
+                let fullDateText = "\(components[0]).\(components[1]).\(currentYear)"
+                formatter.dateFormat = "dd.MM.yyyy"
+                return formatter.date(from: fullDateText)
+            }
+        }
+
+        // English format without year (e.g., "12/25" -> "12/25/2024")
+        if format == "MM/dd" {
+            let components = text.components(separatedBy: "/")
+            if components.count >= 2 {
+                let fullDateText = "\(components[0])/\(components[1])/\(currentYear)"
+                formatter.dateFormat = "MM/dd/yyyy"
+                return formatter.date(from: fullDateText)
+            }
+        }
+
+        // ISO format without year (e.g., "12-25" -> "2024-12-25")
+        if format == "MM-dd" {
+            let components = text.components(separatedBy: "-")
+            if components.count >= 2 {
+                let fullDateText = "\(currentYear)-\(components[0])-\(components[1])"
+                formatter.dateFormat = "yyyy-MM-dd"
+                return formatter.date(from: fullDateText)
+            }
+        }
+
         // Handle 2-digit years (e.g., "25.12.24" -> "25.12.2024")
         if format.contains("yy") && !format.contains("yyyy") {
             let components = text.components(separatedBy: CharacterSet(charactersIn: "./- "))
@@ -180,7 +213,7 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 return formatter.date(from: fullDateText)
             }
         }
-        
+
         return nil
     }
     
@@ -249,7 +282,7 @@ final class TextEventParser: TextEventParserServiceProtocol {
     // MARK: - Date Patterns
 
     private let datePatterns: [DatePattern] = [
-        // German with deadline keywords
+        // German with deadline keywords (with year - must come before no-year patterns)
         DatePattern(regex: #"bis\s+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
         DatePattern(regex: #"fällig\s+(?:am\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
         DatePattern(regex: #"(?:return|rücksendung)\s+(?:by|bis)\s+(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
@@ -258,14 +291,22 @@ final class TextEventParser: TextEventParserServiceProtocol {
         // Food expiry (must come before standard formats to match MHD: prefix)
         DatePattern(regex: #"(?:MHD|mhd):?\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
 
-        // Standard German formats
+        // German with deadline keywords (no year - defaults to current year)
+        DatePattern(regex: #"bis\s+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
+        DatePattern(regex: #"fällig\s+(?:am\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
+
+        // Standard German formats (with year)
         DatePattern(regex: #"\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b"#, format: "dd.MM.yyyy", isDeadline: false),
         DatePattern(regex: #"\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b"#, format: "dd.MM.yy", isDeadline: false),
 
-        // English formats
+        // English formats (with year)
         DatePattern(regex: #"deadline\s+(\d{1,2})/(\d{1,2})/(\d{4})"#, format: "MM/dd/yyyy", isDeadline: true),
         DatePattern(regex: #"\b(\d{1,2})/(\d{1,2})/(\d{4})\b"#, format: "MM/dd/yyyy", isDeadline: false),
         DatePattern(regex: #"\b(\d{4})-(\d{2})-(\d{2})\b"#, format: "yyyy-MM-dd", isDeadline: false),
+
+        // English formats (no year - defaults to current year)
+        DatePattern(regex: #"deadline\s+(\d{1,2})/(\d{1,2})\b"#, format: "MM/dd", isDeadline: true),
+        DatePattern(regex: #"\b(\d{1,2})/(\d{1,2})\b"#, format: "MM/dd", isDeadline: false),
     ]
 }
 

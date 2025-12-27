@@ -299,4 +299,93 @@ struct TextEventParserTests {
             }
         }
     }
+
+    // MARK: - No Year Tests (Default to Current Year)
+
+    @Test("Parse deadline without year - defaults to current year")
+    func testDeadlineWithoutYear() throws {
+        let text = "BLACK DEAL nur bis zum 02.12. 11 Uhr"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1, "Should extract one event from date without year")
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+
+        // Should have deadline
+        #expect(event.deadline != nil, "Should have deadline set")
+
+        if let deadline = event.deadline {
+            let deadlineComponents = calendar.dateComponents([.day, .month, .year], from: deadline)
+            #expect(deadlineComponents.day == 2, "Deadline day should be 2")
+            #expect(deadlineComponents.month == 12, "Deadline month should be December (12)")
+            #expect(deadlineComponents.year == currentYear, "Deadline year should default to current year")
+        }
+
+        // Event name should be extracted
+        #expect(event.name.contains("BLACK DEAL"), "Event name should contain 'BLACK DEAL'")
+    }
+
+    @Test("Parse fällig without year")
+    func testFaelligWithoutYear() throws {
+        let text = "Zahlung fällig am 15.03."
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+
+        #expect(event.deadline != nil)
+
+        if let deadline = event.deadline {
+            let components = calendar.dateComponents([.day, .month, .year], from: deadline)
+            #expect(components.day == 15)
+            #expect(components.month == 3)
+            #expect(components.year == currentYear)
+        }
+    }
+
+    @Test("Parse English deadline without year")
+    func testEnglishDeadlineWithoutYear() throws {
+        let text = "Payment deadline 12/25"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+
+        #expect(event.deadline != nil)
+
+        if let deadline = event.deadline {
+            let components = calendar.dateComponents([.day, .month, .year], from: deadline)
+            #expect(components.day == 25)
+            #expect(components.month == 12)
+            #expect(components.year == currentYear)
+        }
+    }
+
+    @Test("Parse English date without year (no keyword)")
+    func testEnglishDateWithoutYear() throws {
+        let text = "Meeting on 6/15"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+        #expect(components.day == 15)
+        #expect(components.month == 6)
+        #expect(components.year == currentYear)
+
+        // Should not be a deadline (no keyword)
+        #expect(event.deadline == nil)
+    }
 }
