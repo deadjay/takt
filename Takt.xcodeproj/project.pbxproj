@@ -27,6 +27,7 @@
 		944E69022DFA27A6006271D8 /* Takt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Takt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		944E69132DFA27A8006271D8 /* TaktTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TaktTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		944E691D2DFA27A8006271D8 /* TaktUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TaktUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		94A4A5FE2F0060CD004B683E /* Takt.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Takt.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,6 +89,7 @@
 		944E68F92DFA27A6006271D8 = {
 			isa = PBXGroup;
 			children = (
+				94A4A5FE2F0060CD004B683E /* Takt.xctestplan */,
 				944E69042DFA27A6006271D8 /* Takt */,
 				944E69162DFA27A8006271D8 /* TaktTests */,
 				944E69202DFA27A8006271D8 /* TaktUITests */,

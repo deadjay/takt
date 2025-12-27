@@ -256,3 +256,5 @@ struct EventRow: View {
         Event(name: "Project Deadline", date: Date().addingTimeInterval(86400), deadline: Date().addingTimeInterval(172800))
     ]))
 }
+
+

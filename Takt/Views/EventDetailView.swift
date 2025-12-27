@@ -208,3 +208,5 @@ struct DetailRow: View {
         events: .constant([])
     )
 }
+
+

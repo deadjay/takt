@@ -72,3 +72,5 @@ struct AddEventView: View {
 #Preview {
     AddEventView(events: .constant([]))
 }
+
+

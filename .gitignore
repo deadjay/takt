@@ -63,3 +63,7 @@ fastlane/test_output
 
 # Claude Code internal files
 .claude/
+
+# Design files
+
+Design/
