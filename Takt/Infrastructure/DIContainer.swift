@@ -63,14 +63,22 @@ final class DIContainer {
             searchEventsUseCase: searchEventsUseCase
         )
     }
-    
+
+    func makeScanViewModel() -> ScanViewModel {
+        ScanViewModel(
+            textRecognitionService: textRecognitionService,
+            textEventParserService: textEventParserService,
+            addEventUseCase: addEventUseCase
+        )
+    }
+
     func makeTextInputViewModel() -> TextInputViewModel {
         TextInputViewModel(
             textRecognitionService: textRecognitionService,
             addEventUseCase: addEventUseCase
         )
     }
-    
+
     func makeContentViewModel() -> ContentViewModel {
         ContentViewModel(getEventsUseCase: getEventsUseCase,
                          addEventUseCase: addEventUseCase,
