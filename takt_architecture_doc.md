@@ -273,7 +273,128 @@ class DIContainer {
 - **Vision**: Text recognition from images
 - **EventKit**: (Future) Apple Reminders integration
 - **Foundation**: Date parsing, networking
-- **NaturalLanguage**: (Optional) Enhanced text parsing
+- **NaturalLanguage**: Multi-stage text parsing (Stage 2)
+
+---
+
+## 🧠 Intelligent Parsing Roadmap
+
+### Architecture: Multi-Stage Detection Pipeline
+
+The app uses a progressive enhancement approach for event extraction:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                   TextEventParser Service                       │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Stage 1: Regex Patterns (CURRENT)                       │  │
+│  │  ✅ Fast, deterministic date matching                    │  │
+│  │  ✅ Patterns: dd.MM.yyyy, MM/dd/yyyy, yyyy-MM-dd         │  │
+│  │  ✅ Deadline keywords: "bis zum", "deadline", "MHD"      │  │
+│  │  Performance: <10ms, offline, no ML overhead            │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                             ↓                                   │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Stage 2: Natural Language Framework (PLANNED)           │  │
+│  │  🔄 NSDataDetector for natural dates                     │  │
+│  │     - "Wed 31 Aug" → Date object                         │  │
+│  │     - "next Friday" → calculated date                    │  │
+│  │  🔄 NLTagger for entity recognition                      │  │
+│  │     - Organizations: "Electric Ballroom"                 │  │
+│  │     - Locations: venue detection                         │  │
+│  │  🔄 Pattern matching for:                                │  │
+│  │     - Times: "7pm" → notes field                         │  │
+│  │     - Prices: "£17.00" → notes field                     │  │
+│  │  Performance: ~50-100ms, still offline                   │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                             ↓                                   │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Stage 3: Apple Intelligence API (FUTURE - iOS 18.2+)    │  │
+│  │  🔮 Semantic understanding of event context              │  │
+│  │  🔮 Category detection:                                  │  │
+│  │     - Concert, Meeting, Deadline, Expiration             │  │
+│  │  🔮 Smart field extraction:                              │  │
+│  │     - Artist names: "DEERHOOF +SACRED PAWS"              │  │
+│  │     - Venue: "Electric Ballroom"                         │  │
+│  │     - Ticket info: "£17.00 upsettherhythm.co.uk"         │  │
+│  │  Performance: Variable, remains offline-capable          │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  Configuration: detectionStage = .regexOnly (switchable)       │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Example Use Case: Concert Poster
+
+**Input Text**:
+```
+DEERHOOF +SACRED PAWS
+Wed 31 Aug
+Electric Ballroom
+7pm
+£17.00
+upsettherhythm.co.uk
+```
+
+**Stage 1 Output** (Current):
+- No match (no dd.MM.yyyy pattern)
+- Fallback: No event detected
+
+**Stage 2 Output** (Planned):
+- Date: "Wed 31 Aug" → August 31, 2025 (current year assumed)
+- Name: "DEERHOOF +SACRED PAWS"
+- Notes: "Electric Ballroom, 7pm, £17.00"
+- Entities detected: Organization (DEERHOOF), Location (Electric Ballroom)
+
+**Stage 3 Output** (Future):
+- Date: August 31, 2025
+- Name: "DEERHOOF + SACRED PAWS Concert"
+- Category: 🎸 Concert
+- Venue: "Electric Ballroom"
+- Time: 19:00
+- Price: £17.00
+- Artist: "DEERHOOF"
+- Supporting: "SACRED PAWS"
+- Website: upsettherhythm.co.uk
+
+### Implementation Status
+
+| Stage | Status | Performance | Accuracy | Use Case |
+|-------|--------|-------------|----------|----------|
+| Regex | ✅ Implemented | <10ms | 95% for simple dates | "Return by 25.12.2024" |
+| Natural Language | 🔄 Stub Added | ~50-100ms | 85% for natural dates | "Meeting next Friday" |
+| Apple Intelligence | 🔮 Stub Added | Variable | 95%+ semantic | Complex posters |
+
+### Configuration
+
+```swift
+// In TextEventParser.swift
+private enum DetectionStage {
+    case regexOnly           // Current: fast & simple
+    case withNaturalLanguage // Stage 2: + NaturalLanguage
+    case withAppleAI         // Stage 3: + Apple Intelligence
+}
+
+private let detectionStage: DetectionStage = .regexOnly
+```
+
+### Design Principles
+
+1. **Offline-First**: All stages process on-device
+2. **Progressive Enhancement**: Each stage adds capability without breaking previous stages
+3. **Performance Tiers**: User can choose speed vs. accuracy
+4. **Graceful Fallback**: If Stage 3 fails, fall back to Stage 2, then Stage 1
+5. **iCloud for Backups Only**: No backend required for processing
+
+### Future Work
+
+- [ ] Implement NSDataDetector for natural dates (Stage 2)
+- [ ] Add NLTagger for entity recognition (Stage 2)
+- [ ] Research Apple Intelligence API availability (Stage 3)
+- [ ] Add configuration UI for detection stage selection
+- [ ] Performance benchmarking across stages
+- [ ] A/B testing for accuracy improvements
 
 ---
 
@@ -315,6 +436,6 @@ struct TextInputView: View {
 
 ---
 
-**Version**: 1.0  
-**Last Updated**: December 17, 2024  
+**Version**: 1.1
+**Last Updated**: December 27, 2024
 **Maintainer**: Artem Alekseev

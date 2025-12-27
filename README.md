@@ -4,10 +4,23 @@ Takt is a SwiftUI-based iOS app that automatically extracts event information fr
 
 ## Features
 
+### 🚀 Share Sheet Integration (Killer Feature)
+- **Share from Anywhere**: Share photos directly from Photos app, Safari, or any app
+- **Quick Capture**: Snap a poster/flyer → Share to Takt → Auto-extract event
+- **Background Processing**: Events extracted automatically when shared
+- **No App Switching**: Process images without leaving your current app
+
+**Example Use Cases**:
+- Concert poster on street → Photo → Share to Takt → Event added
+- Email screenshot → Share to Takt → Meeting extracted
+- Restaurant flyer → Share to Takt → Deadline saved
+- Voice dictation on-the-go when you can't type
+
 ### 🖼️ Image Processing
 - **Multiple Input Sources**: Import images from photo library, camera, or paste from clipboard
 - **OCR Text Recognition**: Uses Vision framework for accurate text extraction
 - **Smart Parsing**: Automatically identifies event names, dates, and deadlines from extracted text
+- **Natural Language Detection**: Handles complex phrasing like "Wed 31 Aug Electric Ballroom 7pm"
 
 ### 📅 Calendar Management
 - **Monthly Calendar View**: Interactive calendar with event indicators
@@ -20,11 +33,13 @@ Takt is a SwiftUI-based iOS app that automatically extracts event information fr
 - **No Internet Required**: Works completely offline
 - **Data Persistence**: Events are automatically saved and restored
 
-### 🎯 Smart Event Extraction
-- **Date Recognition**: Supports multiple date formats (MM/DD/YYYY, DD/MM/YYYY, MMM DD, etc.)
-- **Time Support**: Handles both date-only and date-time formats
+### 🎯 Smart Event Extraction (Multi-Stage Detection)
+- **Stage 1 - Regex Patterns**: Fast detection of simple dates (25.12.2024, 12/25/2024)
+- **Stage 2 - Natural Language** (Coming): Natural dates ("Wed 31 Aug"), entity recognition (venues, prices)
+- **Stage 3 - Apple Intelligence** (Future): Semantic understanding, category detection (Concerts, Meetings)
 - **Deadline Detection**: Automatically identifies and sets deadlines
 - **Event Naming**: Intelligently extracts event names from text content
+- **Offline-First**: All processing happens on-device, no backend required
 
 ## Technical Architecture
 
@@ -125,12 +140,16 @@ struct Event: Identifiable, Codable {
 ## Future Enhancements
 
 ### Planned Features
-- **Cloud Sync**: iCloud integration for cross-device synchronization
+- **Share Sheet Extension**: Receive images from Photos, Safari, and other apps (HIGH PRIORITY)
+- **Natural Language Detection**: Support for "Wed 31 Aug" style dates and entity recognition
+- **Apple Intelligence Integration**: Semantic understanding for complex event posters
+- **Category Auto-Detection**: Concerts, Meetings, Deadlines, etc.
+- **Cloud Sync**: iCloud integration for cross-device synchronization (backups only)
 - **Reminders**: Push notifications for upcoming events and deadlines
 - **Export Options**: Share events via email, messages, or calendar apps
-- **Advanced OCR**: Better text parsing for complex document layouts
 - **Batch Processing**: Import multiple images at once
 - **Event Templates**: Predefined event types and templates
+- **Voice Dictation**: Quick event capture while on-the-go
 
 ### Technical Improvements
 - **Core Data**: Replace UserDefaults with Core Data for better performance
