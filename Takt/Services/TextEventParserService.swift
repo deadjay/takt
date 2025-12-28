@@ -65,14 +65,17 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 
                 processedDates.insert(dateKey)
                 
+                // Extract time (if present)
+                let timeInfo = extractTime(from: trimmedLine)
+
                 // Extract event name
-                let eventName = extractEventName(from: trimmedLine, dateInfo: dateInfo)
-                
+                let eventName = extractEventName(from: trimmedLine, dateInfo: dateInfo, timeInfo: timeInfo)
+
                 // Look for additional context
                 let notes = extractNotes(from: lines, currentIndex: index)
-                
-                // Determine dates
-                let (eventDate, deadline) = determineEventAndDeadline(dateInfo: dateInfo)
+
+                // Determine dates (with time if available)
+                let (eventDate, deadline) = determineEventAndDeadline(dateInfo: dateInfo, timeInfo: timeInfo)
                 
                 let event = Event(
                     name: eventName.isEmpty ? "Reminder" : eventName,
@@ -218,9 +221,62 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
         return nil
     }
-    
-    private func extractEventName(from text: String, dateInfo: DateInfo) -> String {
+
+    private func extractTime(from text: String) -> TimeInfo? {
+        for pattern in timePatterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern.regex, options: [.caseInsensitive]) else {
+                continue
+            }
+
+            let nsText = text as NSString
+            guard let match = regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: nsText.length)) else {
+                continue
+            }
+
+            // Extract the full matched text
+            let matchedText = nsText.substring(with: match.range)
+
+            // Extract hour
+            guard match.numberOfRanges > pattern.hourGroup else { continue }
+            let hourRange = match.range(at: pattern.hourGroup)
+            guard hourRange.location != NSNotFound else { continue }
+            let hourString = nsText.substring(with: hourRange)
+            guard var hour = Int(hourString) else { continue }
+
+            // Extract minute (if pattern has it)
+            var minute = 0
+            if let minuteGroup = pattern.minuteGroup, match.numberOfRanges > minuteGroup {
+                let minuteRange = match.range(at: minuteGroup)
+                if minuteRange.location != NSNotFound {
+                    let minuteString = nsText.substring(with: minuteRange)
+                    minute = Int(minuteString) ?? 0
+                }
+            }
+
+            // Handle AM/PM for English formats
+            if matchedText.lowercased().contains("pm") && hour < 12 {
+                hour += 12
+            } else if matchedText.lowercased().contains("am") && hour == 12 {
+                hour = 0
+            }
+
+            // Validate time
+            guard hour >= 0 && hour < 24 && minute >= 0 && minute < 60 else { continue }
+
+            return TimeInfo(hour: hour, minute: minute, matchedText: matchedText)
+        }
+
+        return nil
+    }
+
+    private func extractEventName(from text: String, dateInfo: DateInfo, timeInfo: TimeInfo?) -> String {
         var nameText = text.replacingOccurrences(of: dateInfo.matchedText, with: "")
+
+        // Remove time string if present
+        if let timeInfo = timeInfo {
+            nameText = nameText.replacingOccurrences(of: timeInfo.matchedText, with: "")
+        }
+
         nameText = nameText.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?"))
         nameText = nameText.trimmingCharacters(in: .whitespacesAndNewlines)
         
@@ -245,12 +301,27 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return notes.joined(separator: " ")
     }
     
-    private func determineEventAndDeadline(dateInfo: DateInfo) -> (eventDate: Date, deadline: Date?) {
+    private func determineEventAndDeadline(dateInfo: DateInfo, timeInfo: TimeInfo?) -> (eventDate: Date, deadline: Date?) {
+        // Apply time to the date if available
+        let dateWithTime = applyTime(to: dateInfo.date, timeInfo: timeInfo)
+
         if dateInfo.isDeadline {
-            let reminderDate = Calendar.current.date(byAdding: .day, value: -1, to: dateInfo.date) ?? dateInfo.date
-            return (reminderDate, dateInfo.date)
+            let reminderDate = Calendar.current.date(byAdding: .day, value: -1, to: dateWithTime) ?? dateWithTime
+            return (reminderDate, dateWithTime)
         }
-        return (dateInfo.date, nil)
+        return (dateWithTime, nil)
+    }
+
+    private func applyTime(to date: Date, timeInfo: TimeInfo?) -> Date {
+        guard let timeInfo = timeInfo else { return date }
+
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: date)
+        components.hour = timeInfo.hour
+        components.minute = timeInfo.minute
+        components.second = 0
+
+        return calendar.date(from: components) ?? date
     }
     
     // MARK: - Stage 2: Natural Language Enhancement (Stub)
@@ -280,6 +351,22 @@ final class TextEventParser: TextEventParserServiceProtocol {
         // Remains offline-first with fallback to Stage 1 & 2
         return events
     }
+
+    // MARK: - Time Patterns
+
+    private let timePatterns: [TimePattern] = [
+        // German formats with "Uhr"
+        TimePattern(regex: #"(\d{1,2}):(\d{2})\s*Uhr"#, hourGroup: 1, minuteGroup: 2),  // "14:30 Uhr"
+        TimePattern(regex: #"(\d{1,2})\.(\d{2})\s*Uhr"#, hourGroup: 1, minuteGroup: 2),  // "14.30 Uhr"
+        TimePattern(regex: #"(\d{1,2})\s*Uhr"#, hourGroup: 1, minuteGroup: nil),         // "11 Uhr"
+
+        // English formats with AM/PM
+        TimePattern(regex: #"(\d{1,2}):(\d{2})\s*([ap]m)"#, hourGroup: 1, minuteGroup: 2),  // "3:30pm", "3:30 PM"
+        TimePattern(regex: #"(\d{1,2})\s*([ap]m)"#, hourGroup: 1, minuteGroup: nil),        // "3pm", "3 PM"
+
+        // 24-hour format (ISO-style)
+        TimePattern(regex: #"\b(\d{2}):(\d{2})\b"#, hourGroup: 1, minuteGroup: 2),  // "14:30", "09:00"
+    ]
 
     // MARK: - Date Patterns
 
@@ -324,4 +411,16 @@ private struct DateInfo {
     let date: Date
     let isDeadline: Bool
     let matchedText: String
+}
+
+private struct TimeInfo {
+    let hour: Int
+    let minute: Int
+    let matchedText: String
+}
+
+private struct TimePattern {
+    let regex: String
+    let hourGroup: Int    // Which capture group contains the hour
+    let minuteGroup: Int? // Which capture group contains the minute (nil if no minutes)
 }

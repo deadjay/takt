@@ -388,4 +388,194 @@ struct TextEventParserTests {
         // Should not be a deadline (no keyword)
         #expect(event.deadline == nil)
     }
+
+    // MARK: - Time Extraction Tests
+
+    @Test("Parse German time with 'Uhr' (hour only)")
+    func testGermanTimeHourOnly() throws {
+        let text = "BLACK DEAL bis zum 02.12. 11 Uhr"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        // Event name should NOT contain "11 Uhr"
+        #expect(!event.name.contains("11 Uhr"), "Event name should not contain time string")
+        #expect(event.name.contains("BLACK DEAL"), "Event name should contain 'BLACK DEAL'")
+
+        // Deadline should have time set to 11:00
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let components = calendar.dateComponents([.hour, .minute], from: deadline)
+            #expect(components.hour == 11, "Hour should be 11")
+            #expect(components.minute == 0, "Minute should be 0")
+        }
+    }
+
+    @Test("Parse German time with minutes (14:30 Uhr)")
+    func testGermanTimeWithMinutes() throws {
+        let text = "Meeting 15.03.2025 14:30 Uhr"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        // Event name should NOT contain "14:30 Uhr"
+        #expect(!event.name.contains("14:30"))
+        #expect(!event.name.contains("Uhr"))
+
+        // Date should have time set to 14:30
+        let components = calendar.dateComponents([.hour, .minute], from: event.date)
+        #expect(components.hour == 14)
+        #expect(components.minute == 30)
+    }
+
+    @Test("Parse German time with dot notation (14.30 Uhr)")
+    func testGermanTimeDotNotation() throws {
+        let text = "Zahlung fällig 25.12.2024 14.30 Uhr"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        // Deadline should have time set to 14:30
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let components = calendar.dateComponents([.hour, .minute], from: deadline)
+            #expect(components.hour == 14)
+            #expect(components.minute == 30)
+        }
+    }
+
+    @Test("Parse English time with PM (3pm)")
+    func testEnglishTimePM() throws {
+        let text = "Meeting deadline 12/25/2024 3pm"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        // Deadline should have time converted to 24-hour (15:00)
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let components = calendar.dateComponents([.hour, .minute], from: deadline)
+            #expect(components.hour == 15, "3pm should be 15:00 in 24-hour format")
+            #expect(components.minute == 0)
+        }
+    }
+
+    @Test("Parse English time with minutes (3:30pm)")
+    func testEnglishTimeWithMinutesPM() throws {
+        let text = "Deadline 6/15 3:30pm"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        // Deadline should have time set to 15:30
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let components = calendar.dateComponents([.hour, .minute], from: deadline)
+            #expect(components.hour == 15)
+            #expect(components.minute == 30)
+        }
+    }
+
+    @Test("Parse English time with AM (9am)")
+    func testEnglishTimeAM() throws {
+        let text = "Meeting 12/25/2024 9am"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        let components = calendar.dateComponents([.hour, .minute], from: event.date)
+        #expect(components.hour == 9)
+        #expect(components.minute == 0)
+    }
+
+    @Test("Parse 24-hour format (14:30)")
+    func test24HourFormat() throws {
+        let text = "Concert 25.12.2024 14:30"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        let components = calendar.dateComponents([.hour, .minute], from: event.date)
+        #expect(components.hour == 14)
+        #expect(components.minute == 30)
+    }
+
+    @Test("Parse midnight 12am correctly")
+    func testMidnight() throws {
+        let text = "Event 25.12.2024 12am"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        let components = calendar.dateComponents([.hour, .minute], from: event.date)
+        #expect(components.hour == 0, "12am should be 00:00")
+        #expect(components.minute == 0)
+    }
+
+    @Test("Parse noon 12pm correctly")
+    func testNoon() throws {
+        let text = "Lunch 25.12.2024 12pm"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        let components = calendar.dateComponents([.hour, .minute], from: event.date)
+        #expect(components.hour == 12, "12pm should be 12:00")
+        #expect(components.minute == 0)
+    }
+
+    @Test("Real-world example: BLACK DEAL with time")
+    func testRealWorldBlackDeal() throws {
+        let text = "BLACK DEAL nur bis zum 02.12. 11 Uhr"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+
+        // Event name should contain BLACK DEAL and NOT contain time
+        #expect(event.name.contains("BLACK DEAL"), "Event name should contain 'BLACK DEAL'")
+        #expect(!event.name.contains("11 Uhr"), "Event name should not contain '11 Uhr'")
+        #expect(!event.name.contains("02.12"), "Event name should not contain date")
+
+        // Deadline should be Dec 2, 2025 at 11:00
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: deadline)
+            #expect(components.year == currentYear)
+            #expect(components.month == 12)
+            #expect(components.day == 2)
+            #expect(components.hour == 11)
+            #expect(components.minute == 0)
+        }
+    }
 }
