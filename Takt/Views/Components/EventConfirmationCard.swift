@@ -57,7 +57,7 @@ struct EventConfirmationView: View {
 
                         EventDetailRowView(
                             icon: "calendar",
-                            label: "Date",
+                            label: "Reminder Date",
                             value: event.formattedDate
                         )
 
@@ -65,7 +65,7 @@ struct EventConfirmationView: View {
                             EventDetailRowView(
                                 icon: "clock.badge.exclamationmark",
                                 label: "Deadline",
-                                value: formatDate(deadline),
+                                value: event.formattedDeadline ?? "",
                                 isDeadline: true
                             )
                         }
@@ -157,13 +157,6 @@ struct EventConfirmationView: View {
             Spacer()
         }
         .padding(.top, 40)
-    }
-
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
     }
 }
 

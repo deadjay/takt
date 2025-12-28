@@ -11,9 +11,10 @@ import NaturalLanguage
 // MARK: - Text Event Parser
 /// Unified parser for extracting events from text (used by both image scanner and text input)
 /// Supports multiple detection stages:
-/// - Stage 1: Regex patterns (fast, simple dates like "25.12.2024")
-/// - Stage 2: Natural Language Framework (natural dates like "Wed 31 Aug", entity recognition)
-/// - Stage 3: Apple Intelligence API (future, iOS 18.2+)
+/// - Stage 1: NSDataDetector (natural language dates, built-in iOS)
+/// - Stage 2: Regex Fallback (deadline keywords like "bis zum", "MHD", specific patterns)
+/// - Stage 3: Natural Language Framework (future - entity recognition, prices, etc.)
+/// - Stage 4: Apple Intelligence API (future, iOS 18.2+)
 final class TextEventParser: TextEventParserServiceProtocol {
 
     // MARK: - Configuration
@@ -30,15 +31,30 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
     /// Parse text and extract all events with dates
     func parseEvents(from text: String) -> [Event] {
-        // Stage 1: Regex-based extraction (current implementation)
-        var events = parseEventsWithRegex(from: text)
+        // Smart detection: check if text contains deadline keywords
+        let hasDeadlineKeywords = containsDeadlineKeywords(text)
 
-        // Stage 2: Natural Language enhancement (stub for future)
+        var events: [Event] = []
+
+        if hasDeadlineKeywords {
+            // Stage 1a: Use regex for texts with deadline keywords ("bis zum", "MHD", "fällig")
+            events = parseEventsWithRegex(from: text)
+        } else {
+            // Stage 1b: Use NSDataDetector for natural language dates
+            events = parseEventsWithDataDetector(from: text)
+
+            // Stage 2: If NSDataDetector fails, try regex as fallback
+            if events.isEmpty {
+                events = parseEventsWithRegex(from: text)
+            }
+        }
+
+        // Stage 3: Natural Language enhancement (stub for future)
         if detectionStage == .withNaturalLanguage || detectionStage == .withAppleAI {
             events = enhanceWithNaturalLanguage(events, text: text)
         }
 
-        // Stage 3: Apple Intelligence enhancement (stub for future)
+        // Stage 4: Apple Intelligence enhancement (stub for future)
         if detectionStage == .withAppleAI {
             events = enhanceWithAppleIntelligence(events, text: text)
         }
@@ -46,7 +62,68 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return events
     }
 
-    // MARK: - Stage 1: Regex Parsing
+    // MARK: - Helper Methods
+
+    private func containsDeadlineKeywords(_ text: String) -> Bool {
+        let keywords = ["bis zum", "bis", "fällig", "deadline", "due", "mhd", "return", "rücksendung", "pay", "zahlen", "until", "by"]
+        let lowercasedText = text.lowercased()
+        return keywords.contains { lowercasedText.contains($0) }
+    }
+
+    // MARK: - Stage 1: NSDataDetector Parsing
+
+    private func parseEventsWithDataDetector(from text: String) -> [Event] {
+        var events: [Event] = []
+
+        // Create data detector for dates
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) else {
+            return []
+        }
+
+        let nsText = text as NSString
+        let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
+
+        var processedDates: Set<String> = []
+
+        for match in matches {
+            guard let date = match.date else { continue }
+
+            // Avoid duplicates
+            let dateKey = "\(date.timeIntervalSince1970)"
+            guard !processedDates.contains(dateKey) else { continue }
+            processedDates.insert(dateKey)
+
+            // Extract the matched text to use as event name
+            let matchedRange = match.range
+            let matchedText = nsText.substring(with: matchedRange)
+
+            // Extract event name (everything except the matched date)
+            var eventName = text.replacingOccurrences(of: matchedText, with: "")
+            eventName = eventName.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?"))
+            eventName = eventName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if eventName.isEmpty || eventName.count < 3 {
+                eventName = "Reminder"
+            } else {
+                // Capitalize first letter
+                eventName = eventName.prefix(1).uppercased() + eventName.dropFirst()
+            }
+
+            // NSDataDetector doesn't distinguish deadlines, so just create a regular event
+            let event = Event(
+                name: eventName,
+                date: date,
+                deadline: nil,
+                notes: nil
+            )
+
+            events.append(event)
+        }
+
+        return events
+    }
+
+    // MARK: - Stage 2: Regex Fallback
 
     private func parseEventsWithRegex(from text: String) -> [Event] {
         var events: [Event] = []
@@ -324,22 +401,20 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return calendar.date(from: components) ?? date
     }
     
-    // MARK: - Stage 2: Natural Language Enhancement (Stub)
+    // MARK: - Stage 3: Natural Language Enhancement (Stub)
 
     /// Enhance events using Natural Language framework
     /// TODO: Implement entity recognition (venues, prices, categories)
-    /// TODO: Detect natural language dates ("Wed 31 Aug", "next Friday")
     /// Example use case: "DEERHOOF +SACRED PAWS Wed 31 Aug Electric Ballroom 7pm £17.00"
     private func enhanceWithNaturalLanguage(_ events: [Event], text: String) -> [Event] {
-        // Stub for Stage 2 implementation
+        // Stub for Stage 3 implementation
         // Will use:
-        // - NSDataDetector for natural date detection
         // - NLTagger for entity recognition (places, organizations)
-        // - Pattern matching for prices, times, categories
+        // - Pattern matching for prices, categories
         return events
     }
 
-    // MARK: - Stage 3: Apple Intelligence Enhancement (Stub)
+    // MARK: - Stage 4: Apple Intelligence Enhancement (Stub)
 
     /// Enhance events using Apple Intelligence API (iOS 18.2+)
     /// TODO: Integrate with Apple Intelligence for semantic understanding
