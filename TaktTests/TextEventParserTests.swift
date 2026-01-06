@@ -578,4 +578,194 @@ struct TextEventParserTests {
             #expect(components.minute == 0)
         }
     }
+
+    // MARK: - Real-World Test Cases (from actual screenshots)
+
+    @Test("App subscription: Starting on date (English)")
+    func testAppSubscriptionEnglish() throws {
+        let text = "38,99 € per year Starting on 13 Jan 2026"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        #expect(components.day == 13)
+        #expect(components.month == 1)
+        #expect(components.year == 2026)
+    }
+
+    @Test("App subscription: Ab dem date (German)")
+    func testAppSubscriptionGerman() throws {
+        let text = "38,99 € pro Jahr Ab dem 13.01.2026"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        #expect(components.day == 13)
+        #expect(components.month == 1)
+        #expect(components.year == 2026)
+    }
+
+    @Test("App subscription: Continues date")
+    func testAppSubscriptionContinues() throws {
+        let text = "Continues 6 April"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        #expect(components.day == 6)
+        #expect(components.month == 4)
+        #expect(components.year == currentYear)
+    }
+
+    @Test("Amazon Prime: Renewal Date (English)")
+    func testAmazonPrimeRenewalEnglish() throws {
+        let text = "Renewal Date 21 January 2026"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        #expect(components.day == 21)
+        #expect(components.month == 1)
+        #expect(components.year == 2026)
+    }
+
+    @Test("Amazon Prime: Nächste Zahlung (German)")
+    func testAmazonPrimeRenewalGerman() throws {
+        let text = "Nächste Zahlung 21. Januar 2026"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        #expect(components.day == 21)
+        #expect(components.month == 1)
+        #expect(components.year == 2026)
+    }
+
+    @Test("Concert: German format with time")
+    func testConcertGermanFormat() throws {
+        let text = "18.05.26 in Berlin • Einlass: 19:00, Beginn: 20:00"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count >= 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year, .hour, .minute], from: event.date)
+
+        #expect(components.day == 18)
+        #expect(components.month == 5)
+        #expect(components.year == 2026)
+        // Time could be 19:00 or 20:00 depending on parsing
+    }
+
+    @Test("Concert: Instagram story format")
+    func testConcertInstagramStory() throws {
+        let text = "TierPark Sessions 21.06.2025 📅 7PM Doors 🕖"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count >= 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        #expect(components.day == 21)
+        #expect(components.month == 6)
+        #expect(components.year == 2025)
+    }
+
+    @Test("Food expiry: zu verbrauchen bis")
+    func testFoodExpiryZuVerbrauchenBis() throws {
+        let text = "Hähnchen-Innenfilet frisch bei max. +4°C zu verbrauchen bis: 30.12.25"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        // Should create reminder 1 day before deadline
+        #expect(components.day == 29)
+        #expect(components.month == 12)
+        #expect(components.year == 2025)
+
+        // Should have deadline set
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let deadlineComponents = calendar.dateComponents([.day, .month, .year], from: deadline)
+            #expect(deadlineComponents.day == 30)
+            #expect(deadlineComponents.month == 12)
+            #expect(deadlineComponents.year == 2025)
+        }
+    }
+
+    @Test("Food expiry: Short date on cheese")
+    func testFoodExpiryCheeseShortDate() throws {
+        let text = "26.02.26 LOS329"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        #expect(components.day == 26)
+        #expect(components.month == 2)
+        #expect(components.year == 2026)
+    }
+
+    @Test("Food expiry: MINDESTENS HALTBAR BIS")
+    func testFoodExpiryMindestensHaltbarBis() throws {
+        let text = "MINDESTENS HALTBAR BIS: 23.01."
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        // Should create reminder 1 day before deadline
+        #expect(components.day == 22)
+        #expect(components.month == 1)
+        #expect(components.year == currentYear)
+
+        // Should have deadline set
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let deadlineComponents = calendar.dateComponents([.day, .month, .year], from: deadline)
+            #expect(deadlineComponents.day == 23)
+            #expect(deadlineComponents.month == 1)
+            #expect(deadlineComponents.year == currentYear)
+        }
+    }
+
+    @Test("Food expiry: Condensed milk can format")
+    func testFoodExpiryCondensedMilk() throws {
+        let text = "21.08.2026 L04"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year], from: event.date)
+
+        #expect(components.day == 21)
+        #expect(components.month == 8)
+        #expect(components.year == 2026)
+    }
 }

@@ -1,0 +1,147 @@
+{
+  "testCases": [
+    {
+      "id": "app_subscription_english",
+      "category": "app_subscriptions",
+      "text": "38,99 € per year Starting on 13 Jan 2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 13,
+        "month": 1,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_subscription_german",
+      "category": "app_subscriptions",
+      "text": "38,99 € pro Jahr Ab dem 13.01.2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 13,
+        "month": 1,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_subscription_continues",
+      "category": "app_subscriptions",
+      "text": "Continues 6 April",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 6,
+        "month": 4,
+        "year": "current"
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "amazon_prime_renewal_english",
+      "category": "streaming_services",
+      "text": "Renewal Date 21 January 2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 21,
+        "month": 1,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "amazon_prime_renewal_german",
+      "category": "streaming_services",
+      "text": "Nächste Zahlung 21. Januar 2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 21,
+        "month": 1,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "concert_german_format",
+      "category": "live_concerts",
+      "text": "18.05.26 in Berlin • Einlass: 19:00, Beginn: 20:00",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 18,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Time could be 19:00 or 20:00 depending on parsing"
+    },
+    {
+      "id": "concert_instagram_story",
+      "category": "live_concerts",
+      "text": "TierPark Sessions 21.06.2025 📅 7PM Doors 🕖",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 21,
+        "month": 6,
+        "year": 2025
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "food_expiry_zu_verbrauchen_bis",
+      "category": "food_expiry",
+      "text": "Hähnchen-Innenfilet frisch bei max. +4°C zu verbrauchen bis: 30.12.25",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 29,
+        "month": 12,
+        "year": 2025
+      },
+      "hasDeadline": true,
+      "expectedDeadline": {
+        "day": 30,
+        "month": 12,
+        "year": 2025
+      }
+    },
+    {
+      "id": "food_expiry_cheese_short_date",
+      "category": "food_expiry",
+      "text": "26.02.26 LOS329",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 26,
+        "month": 2,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "food_expiry_mindestens_haltbar_bis",
+      "category": "food_expiry",
+      "text": "MINDESTENS HALTBAR BIS: 23.01.",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 22,
+        "month": 1,
+        "year": "current"
+      },
+      "hasDeadline": true,
+      "expectedDeadline": {
+        "day": 23,
+        "month": 1,
+        "year": "current"
+      }
+    },
+    {
+      "id": "food_expiry_condensed_milk",
+      "category": "food_expiry",
+      "text": "21.08.2026 L04",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 21,
+        "month": 8,
+        "year": 2026
+      },
+      "hasDeadline": false
+    }
+  ]
+}
