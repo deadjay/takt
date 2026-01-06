@@ -457,15 +457,16 @@ final class TextEventParser: TextEventParserServiceProtocol {
         DatePattern(regex: #"(?:pay|zahlen)\s+(?:until|bis)\s+(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
 
         // Food expiry (must come before standard formats to match MHD: prefix)
-        DatePattern(regex: #"(?:MHD|mhd):?\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
-        DatePattern(regex: #"(?:mindestens\s+)?haltbar\s+bis:?\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
-        DatePattern(regex: #"(?:zu\s+)?verbrauchen\s+bis:?\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
+        // Note: [\s\S] matches any character including newlines (for multiline OCR text)
+        DatePattern(regex: #"(?:MHD|mhd):?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
+        DatePattern(regex: #"(?:mindestens\s+)?haltbar\s+bis:?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
+        DatePattern(regex: #"(?:zu\s+)?verbrauchen\s+bis:?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
 
         // German with deadline keywords (no year - defaults to current year)
         DatePattern(regex: #"bis\s+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
         DatePattern(regex: #"fällig\s+(?:am\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
-        DatePattern(regex: #"(?:mindestens\s+)?haltbar\s+bis:?\s*(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
-        DatePattern(regex: #"(?:zu\s+)?verbrauchen\s+bis:?\s*(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
+        DatePattern(regex: #"(?:mindestens\s+)?haltbar\s+bis:?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
+        DatePattern(regex: #"(?:zu\s+)?verbrauchen\s+bis:?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
 
         // Standard German formats (with year)
         DatePattern(regex: #"\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b"#, format: "dd.MM.yyyy", isDeadline: false),

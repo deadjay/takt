@@ -690,7 +690,18 @@ struct TextEventParserTests {
 
     @Test("Food expiry: zu verbrauchen bis")
     func testFoodExpiryZuVerbrauchenBis() throws {
-        let text = "Hähnchen-Innenfilet frisch bei max. +4°C zu verbrauchen bis: 30.12.25"
+        // Full OCR text from chicken packaging with price, weight, etc.
+        let text = """
+        Hähnchen-Innenfilet frisch
+        bei max. +4°C zu verbrauchen bis:
+        Festgewicht
+        . €/kg
+        30.12.25
+        e400g
+        12,4
+        Preis
+        4,99
+        """
         let events = parser.parseEvents(from: text)
 
         #expect(events.count == 1)
@@ -715,7 +726,16 @@ struct TextEventParserTests {
 
     @Test("Food expiry: Short date on cheese")
     func testFoodExpiryCheeseShortDate() throws {
-        let text = "26.02.26 LOS329"
+        // Full OCR text from cheese packaging with nutrition score
+        let text = """
+        26.02.26
+        LOS329
+        NUTRI-SCORE
+        A B
+        DE
+        edeka.de/nutri-score
+        Weidechart
+        """
         let events = parser.parseEvents(from: text)
 
         #expect(events.count == 1)
@@ -730,7 +750,15 @@ struct TextEventParserTests {
 
     @Test("Food expiry: MINDESTENS HALTBAR BIS")
     func testFoodExpiryMindestensHaltbarBis() throws {
-        let text = "MINDESTENS HALTBAR BIS: 23.01."
+        // Full OCR text from eggs packaging with batch codes
+        let text = """
+        MINDESTENS HALTBAR BIS:
+        23.01.
+        PN DE-1201
+        Geu.Kl.:
+        11417231075
+        M
+        """
         let events = parser.parseEvents(from: text)
 
         #expect(events.count == 1)
