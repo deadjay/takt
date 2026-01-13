@@ -4,7 +4,7 @@ import Foundation
 
 /// Tests using REAL images with actual Vision OCR
 /// These tests validate the full pipeline with real-world photos
-@Suite("Real Image OCR Tests")
+@Suite("Real Image OCR Tests", .serialized)
 struct RealImageOCRTests {
 
     // MARK: - Helper Methods
@@ -52,6 +52,13 @@ struct RealImageOCRTests {
         return TextEventParser()
     }
 
+    /// Cleanup helper to release Vision framework resources between tests
+    private func cleanupAfterOCR() async throws {
+        // Small delay to let Vision framework release memory and resources
+        // Prevents simulator crashes when running all tests together
+        try await Task.sleep(nanoseconds: 100_000_000) // 0.1 second
+    }
+
     enum TestError: Error {
         case imageNotFound(String)
         case testBundleNotFound
@@ -80,6 +87,8 @@ struct RealImageOCRTests {
             #expect(components.month == 4, "Expected month April (4)")
             #expect(components.year == 2026, "Expected year 2026")
         }
+
+        try await cleanupAfterOCR()
     }
 
     @Test("Real OCR: Fabulous subscription (English)")
@@ -103,6 +112,8 @@ struct RealImageOCRTests {
             #expect(components.month == 1, "Expected month January (1)")
             #expect(components.year == 2026, "Expected year 2026")
         }
+
+        try await cleanupAfterOCR()
     }
 
     @Test("Real OCR: Fabulous subscription (German)")
@@ -126,6 +137,8 @@ struct RealImageOCRTests {
             #expect(components.month == 1, "Expected month January (1)")
             #expect(components.year == 2026, "Expected year 2026")
         }
+
+        try await cleanupAfterOCR()
     }
 
     // MARK: - Concert Tests
@@ -151,6 +164,8 @@ struct RealImageOCRTests {
             #expect(components.month == 5, "Expected month May (5)")
             #expect(components.year == 2026, "Expected year 2026")
         }
+
+        try await cleanupAfterOCR()
     }
 
     // MARK: - Food Expiry Tests
@@ -185,6 +200,8 @@ struct RealImageOCRTests {
                 #expect(deadlineComponents.year == 2025, "Expected deadline year 2025")
             }
         }
+
+        try await cleanupAfterOCR()
     }
 
     @Test("Real OCR: Cheese (Käse)")
@@ -208,6 +225,8 @@ struct RealImageOCRTests {
             #expect(components.month == 2, "Expected month February (2)")
             #expect(components.year == 2026, "Expected year 2026")
         }
+
+        try await cleanupAfterOCR()
     }
 
     @Test("Real OCR: Eggs (Eiern)")
@@ -232,5 +251,7 @@ struct RealImageOCRTests {
             // Year should default to current year (2026)
             #expect(components.year == 2026, "Expected year 2026 (current year default)")
         }
+
+        try await cleanupAfterOCR()
     }
 }
