@@ -270,131 +270,246 @@ class DIContainer {
 ## 📚 Core Dependencies
 
 - **SwiftUI**: UI framework
-- **Vision**: Text recognition from images
-- **EventKit**: (Future) Apple Reminders integration
-- **Foundation**: Date parsing, networking
-- **NaturalLanguage**: Multi-stage text parsing (Stage 2)
+- **Vision/VisionKit**: Text recognition (OCR) from images
+- **EventKit**: Apple Reminders/Calendar integration
+- **Foundation**: Date parsing (NSDataDetector), networking
+- **NaturalLanguage**: (Optional) Enhanced text parsing, language detection
 
 ---
 
-## 🧠 Intelligent Parsing Roadmap
+## 🔬 Research Findings (Jan 7, 2026)
 
-### Architecture: Multi-Stage Detection Pipeline
+### Date Extraction & OCR Pipeline Research
 
-The app uses a progressive enhancement approach for event extraction:
+**Research Goal**: Determine best iOS frameworks/libraries for extracting dates from images (food labels, subscriptions, tickets, bills) with multilingual support (German/English), offline/privacy-first.
 
+#### Key Recommendations:
+1. **OCR Layer**: Vision/VisionKit framework (handles multilingual, noisy text, fully offline)
+2. **Date Parsing**: NSDataDetector for natural language + regex for specific formats (MHD, bis, fällig)
+3. **Enhanced Parsing** (optional): SwiftDate or SoulverCore for complex multilingual date parsing
+4. **Language Detection**: NSLinguisticTagger for keyword/language tagging
+5. **Event Creation**: EventKit for calendar events and reminders
+
+#### Architecture Pipeline:
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                   TextEventParser Service                       │
-│                                                                 │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Stage 1: Regex Patterns (CURRENT)                       │  │
-│  │  ✅ Fast, deterministic date matching                    │  │
-│  │  ✅ Patterns: dd.MM.yyyy, MM/dd/yyyy, yyyy-MM-dd         │  │
-│  │  ✅ Deadline keywords: "bis zum", "deadline", "MHD"      │  │
-│  │  Performance: <10ms, offline, no ML overhead            │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                             ↓                                   │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Stage 2: Natural Language Framework (PLANNED)           │  │
-│  │  🔄 NSDataDetector for natural dates                     │  │
-│  │     - "Wed 31 Aug" → Date object                         │  │
-│  │     - "next Friday" → calculated date                    │  │
-│  │  🔄 NLTagger for entity recognition                      │  │
-│  │     - Organizations: "Electric Ballroom"                 │  │
-│  │     - Locations: venue detection                         │  │
-│  │  🔄 Pattern matching for:                                │  │
-│  │     - Times: "7pm" → notes field                         │  │
-│  │     - Prices: "£17.00" → notes field                     │  │
-│  │  Performance: ~50-100ms, still offline                   │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                             ↓                                   │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Stage 3: Apple Intelligence API (FUTURE - iOS 18.2+)    │  │
-│  │  🔮 Semantic understanding of event context              │  │
-│  │  🔮 Category detection:                                  │  │
-│  │     - Concert, Meeting, Deadline, Expiration             │  │
-│  │  🔮 Smart field extraction:                              │  │
-│  │     - Artist names: "DEERHOOF +SACRED PAWS"              │  │
-│  │     - Venue: "Electric Ballroom"                         │  │
-│  │     - Ticket info: "£17.00 upsettherhythm.co.uk"         │  │
-│  │  Performance: Variable, remains offline-capable          │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                                                                 │
-│  Configuration: detectionStage = .regexOnly (switchable)       │
-└────────────────────────────────────────────────────────────────┘
+1. Image Input → Vision OCR → Raw Text
+2. Clean Noise + Detect Keywords/Language (NSLinguisticTagger)
+3. Parse Dates (Regex for specific formats / NSDataDetector for natural language)
+4. Structure into EKEvent/EKReminder
 ```
 
-### Example Use Case: Concert Poster
+#### Parsing Approach Decision:
+- **MVP**: Rule-based (regex + NSDataDetector) ✅
+  - Pros: Fast, lightweight, 85%+ accuracy, fully offline
+  - Cons: Manual regex maintenance, less flexible with edge cases
+- **Future Enhancement**: On-device LLM/CoreML models
+  - Pros: Better accuracy on unstructured/noisy inputs
+  - Cons: Slower, larger binary size, overkill for MVP
 
-**Input Text**:
+#### Commercial App Inspirations:
+- **Fantastical**: Natural language date parsing
+- **Prizmo**: Robust OCR scanning
+- **Text Scanner**: Excellent noisy text handling
+
+#### MVP Priorities:
+1. ✅ 85%+ accuracy on core use cases (food expiry, subscriptions, tickets, bills)
+2. ✅ Fully offline/private (no cloud APIs)
+3. ✅ Test with real images from target scenarios
+4. Smart routing: Keyword detection → specialized parser
+
+#### Current Implementation Status:
+- ✅ NSDataDetector integration (enhanced Jan 11, 2026)
+- ✅ Regex patterns for German/English deadline keywords
+- ✅ Multiline/noisy text support
+- ✅ 44/44 unit tests passing
+- ✅ 6/7 real image OCR tests passing (86% success rate)
+- ✅ Vision framework integration (complete)
+- ✅ In-app event storage (UserDefaults)
+- ⏳ EventKit export (post-MVP feature - optional iCal export)
+
+---
+
+## 🧪 TextEventParser Implementation (Jan 11, 2026)
+
+### Two-Stage Parsing Pipeline
+
+The `TextEventParserService` uses a sophisticated two-stage pipeline to extract dates from OCR text:
+
 ```
-DEERHOOF +SACRED PAWS
-Wed 31 Aug
-Electric Ballroom
-7pm
-£17.00
-upsettherhythm.co.uk
+┌─────────────────────────────────────────────┐
+│         TextEventParserService              │
+├─────────────────────────────────────────────┤
+│                                             │
+│  Stage 1: Regex Parsing                     │
+│  ├─ German formats (dd.MM.yyyy, dd.MM.yy)   │
+│  ├─ English formats (MM/dd/yyyy)            │
+│  ├─ Deadline keywords in regex              │
+│  └─ Returns: [Event] array                  │
+│                                             │
+│  Stage 2: NSDataDetector Enhancement        │
+│  ├─ Natural language dates                  │
+│  ├─ Filter vague dates                      │
+│  ├─ 200-char context window                 │
+│  ├─ Day-based duplicate detection           │
+│  ├─ Smart replacement logic                 │
+│  └─ Returns: Enhanced [Event] array         │
+│                                             │
+│  Stage 3: Apple Intelligence (Future)       │
+│  └─ Semantic understanding (iOS 18.2+)      │
+│                                             │
+└─────────────────────────────────────────────┘
 ```
 
-**Stage 1 Output** (Current):
-- No match (no dd.MM.yyyy pattern)
-- Fallback: No event detected
+### Stage 1: Regex-Based Extraction
 
-**Stage 2 Output** (Planned):
-- Date: "Wed 31 Aug" → August 31, 2025 (current year assumed)
-- Name: "DEERHOOF +SACRED PAWS"
-- Notes: "Electric Ballroom, 7pm, £17.00"
-- Entities detected: Organization (DEERHOOF), Location (Electric Ballroom)
+**Purpose**: Fast, deterministic parsing of structured date formats
 
-**Stage 3 Output** (Future):
-- Date: August 31, 2025
-- Name: "DEERHOOF + SACRED PAWS Concert"
-- Category: 🎸 Concert
-- Venue: "Electric Ballroom"
-- Time: 19:00
-- Price: £17.00
-- Artist: "DEERHOOF"
-- Supporting: "SACRED PAWS"
-- Website: upsettherhythm.co.uk
+**Supported Formats**:
+- German: `dd.MM.yyyy`, `dd.MM.yy`, `dd.MM.`
+- English: `MM/dd/yyyy`, `yyyy-MM-dd`
+- Deadline keywords: "bis", "fällig", "MHD", "verbrauchen"
 
-### Implementation Status
+**Limitations**:
+- Cannot parse natural language dates ("13 Jan 2026")
+- Single-line context only
+- Misses deadline keywords on separate lines
 
-| Stage | Status | Performance | Accuracy | Use Case |
-|-------|--------|-------------|----------|----------|
-| Regex | ✅ Implemented | <10ms | 95% for simple dates | "Return by 25.12.2024" |
-| Natural Language | 🔄 Stub Added | ~50-100ms | 85% for natural dates | "Meeting next Friday" |
-| Apple Intelligence | 🔮 Stub Added | Variable | 95%+ semantic | Complex posters |
+### Stage 2: NSDataDetector Enhancement
 
-### Configuration
+**Purpose**: Capture natural language dates and improve context awareness
+
+**Key Features**:
+
+#### 1. Natural Language Date Parsing
+```swift
+guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue)
+let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
+```
+- Parses: "13 Jan 2026", "Starting on 6 Apr 2026", "6. Januar 2026"
+- Handles both English and German natural language dates
+
+#### 2. Vague Date Filtering
+**Problem**: NSDataDetector picks up unhelpful dates
+**Solution**: Filter out:
+- Relative dates: "today", "tomorrow", "heute", "morgen"
+- Day-of-week dates: "Montag 18.05.26", "Tuesday, 6 January 2026"
+- Time-only matches: "19:00", "20:00"
+- App message dates: "Starting today"
 
 ```swift
-// In TextEventParser.swift
-private enum DetectionStage {
-    case regexOnly           // Current: fast & simple
-    case withNaturalLanguage // Stage 2: + NaturalLanguage
-    case withAppleAI         // Stage 3: + Apple Intelligence
+if lowercasedMatch == "today" ||
+   lowercasedMatch == "tomorrow" ||
+   lowercasedMatch.contains("dienstag") || // + all day names
+   lowercasedMatch.range(of: "^\\d{1,2}:\\d{2}$", options: .regularExpression) != nil {
+    continue // Skip this match
 }
-
-private let detectionStage: DetectionStage = .regexOnly
 ```
 
-### Design Principles
+#### 3. 200-Character Context Window
+**Problem**: Deadline keywords often on different line from date
+**Example**:
+```
+verbrauchen bis:
+30.12.25
+```
 
-1. **Offline-First**: All stages process on-device
-2. **Progressive Enhancement**: Each stage adds capability without breaking previous stages
-3. **Performance Tiers**: User can choose speed vs. accuracy
-4. **Graceful Fallback**: If Stage 3 fails, fall back to Stage 2, then Stage 1
-5. **iCloud for Backups Only**: No backend required for processing
+**Solution**: Check 200 characters (100 before + 100 after) for deadline keywords
+```swift
+let startIndex = max(0, matchRange.location - 200)
+let endIndex = min(nsText.length, matchRange.location + matchRange.length + 200)
+let contextRange = NSRange(location: startIndex, length: endIndex - startIndex)
+let contextText = nsText.substring(with: contextRange)
 
-### Future Work
+let isDeadline = contextText.lowercased().contains("verbrauchen") ||
+                contextText.lowercased().contains("haltbar") ||
+                contextText.lowercased().contains("mhd")
+```
 
-- [ ] Implement NSDataDetector for natural dates (Stage 2)
-- [ ] Add NLTagger for entity recognition (Stage 2)
-- [ ] Research Apple Intelligence API availability (Stage 3)
-- [ ] Add configuration UI for detection stage selection
-- [ ] Performance benchmarking across stages
-- [ ] A/B testing for accuracy improvements
+**Note**: "starting on" and "ab dem" are NOT deadline keywords (they indicate subscription start dates)
+
+#### 4. Smart Duplicate Detection
+**Problem**: Regex and NSDataDetector both find the same date, but with different context
+**Example**:
+- Regex: Finds "30.12.25" → event with day=30, no deadline
+- NSDataDetector: Finds "30.12.25" WITH "verbrauchen" context → reminder on day=29, deadline on day=30
+
+**Challenge**: Dates have different timestamps due to timezones
+```
+Regex event:     2025-12-29 23:00:00 +0000  (day 30 in local time)
+NSDataDetector:  2025-12-30 11:00:00 +0000
+Difference:      43200 seconds (12 hours)
+```
+
+**Solution**: Compare by calendar day instead of exact timestamp
+```swift
+let calendar = Calendar.current
+let eventComponents = calendar.dateComponents([.year, .month, .day], from: event.date)
+let nsDataDetectorComponents = calendar.dateComponents([.year, .month, .day], from: date)
+
+let isSameDay = eventComponents.year == nsDataDetectorComponents.year &&
+               eventComponents.month == nsDataDetectorComponents.month &&
+               eventComponents.day == nsDataDetectorComponents.day
+```
+
+#### 5. Context-Based Replacement
+**Logic**: If NSDataDetector has better context (deadline detection), replace the regex event
+```swift
+if let duplicateIndex = duplicateIndex {
+    let existingEvent = allEvents[duplicateIndex]
+
+    if isDeadline && existingEvent.deadline == nil {
+        // NSDataDetector found deadline context but regex didn't
+        allEvents.remove(at: duplicateIndex)  // Replace!
+    } else {
+        continue  // Skip duplicate
+    }
+}
+```
+
+### Deadline Logic
+
+When `isDeadline: true`, the parser creates a **reminder 1 day before** the actual deadline:
+
+```swift
+if dateInfo.isDeadline {
+    let reminderDate = Calendar.current.date(byAdding: .day, value: -1, to: dateWithTime) ?? dateWithTime
+    return (reminderDate, dateWithTime)  // event.date = reminder, event.deadline = actual deadline
+}
+```
+
+**Example**: Expiry date "30.12.25" with "verbrauchen bis:"
+- `event.date` = Dec 29, 2025 (reminder date - shown in calendar)
+- `event.deadline` = Dec 30, 2025 (actual deadline - stored for reference)
+
+### Test Results (Real Image OCR)
+
+| Test | Status | Date Format | Challenge |
+|------|--------|-------------|-----------|
+| Deerhoof concert | ✅ | `18.05.26` | German short format |
+| Fabulous EN | ✅ | `Starting on 13 Jan 2026` | Natural language + filtering "today" |
+| Fabulous DE | ✅ | `Ab dem 13.01.2026` | German natural language |
+| one sec pro | ✅ | `Starting on 6 Apr 2026` | Natural language + filtering "Starting today" |
+| Cheese | ✅ | `26.02.26` | German short format |
+| **Chicken** | ✅ | `30.12.25` | **Multi-line deadline + timezone handling** |
+| Eggs | ❌ | N/A | OCR too garbled (known limitation) |
+
+**Success Rate**: 86% (6/7 tests)
+
+### Code Locations
+
+- **Parser Service**: `Takt/Services/TextEventParserService.swift`
+- **Test File**: `TaktTests/RealImageOCRTests.swift`
+- **Test Images**: `TaktTests/Resources/*.jpeg`
+- **Detection Stage**: Line 27 - `private let detectionStage: DetectionStage = .withNaturalLanguage`
+- **NSDataDetector Logic**: Lines 329-461 - `enhanceWithNaturalLanguage()` method
+
+### Future Enhancements (Stage 3)
+
+**Apple Intelligence Integration** (iOS 18.2+):
+- Semantic understanding of event types
+- Automatic category detection (Concert, Meeting, Deadline, Subscription, Food Expiry)
+- Smart field extraction (artist names, venues, ticket info, subscription details)
+- Improved handling of ambiguous or noisy OCR text
 
 ---
 
@@ -436,6 +551,6 @@ struct TextInputView: View {
 
 ---
 
-**Version**: 1.1
-**Last Updated**: December 27, 2024
+**Version**: 1.2
+**Last Updated**: January 11, 2026 - NSDataDetector Enhancement
 **Maintainer**: Artem Alekseev

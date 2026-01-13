@@ -11,10 +11,9 @@ import NaturalLanguage
 // MARK: - Text Event Parser
 /// Unified parser for extracting events from text (used by both image scanner and text input)
 /// Supports multiple detection stages:
-/// - Stage 1: NSDataDetector (natural language dates, built-in iOS)
-/// - Stage 2: Regex Fallback (deadline keywords like "bis zum", "MHD", specific patterns)
-/// - Stage 3: Natural Language Framework (future - entity recognition, prices, etc.)
-/// - Stage 4: Apple Intelligence API (future, iOS 18.2+)
+/// - Stage 1: Regex patterns (fast, simple dates like "25.12.2024")
+/// - Stage 2: Natural Language Framework (natural dates like "Wed 31 Aug", entity recognition)
+/// - Stage 3: Apple Intelligence API (future, iOS 18.2+)
 final class TextEventParser: TextEventParserServiceProtocol {
 
     // MARK: - Configuration
@@ -25,36 +24,21 @@ final class TextEventParser: TextEventParserServiceProtocol {
         case withAppleAI         // Stage 3: + Apple Intelligence (future)
     }
 
-    private let detectionStage: DetectionStage = .regexOnly // Currently using Stage 1
+    private let detectionStage: DetectionStage = .withNaturalLanguage // Stage 2: Regex + NSDataDetector
 
     // MARK: - Public Interface
 
     /// Parse text and extract all events with dates
     func parseEvents(from text: String) -> [Event] {
-        // Smart detection: check if text contains deadline keywords
-        let hasDeadlineKeywords = containsDeadlineKeywords(text)
+        // Stage 1: Regex-based extraction (current implementation)
+        var events = parseEventsWithRegex(from: text)
 
-        var events: [Event] = []
-
-        if hasDeadlineKeywords {
-            // Stage 1a: Use regex for texts with deadline keywords ("bis zum", "MHD", "fällig")
-            events = parseEventsWithRegex(from: text)
-        } else {
-            // Stage 1b: Use NSDataDetector for natural language dates
-            events = parseEventsWithDataDetector(from: text)
-
-            // Stage 2: If NSDataDetector fails, try regex as fallback
-            if events.isEmpty {
-                events = parseEventsWithRegex(from: text)
-            }
-        }
-
-        // Stage 3: Natural Language enhancement (stub for future)
+        // Stage 2: Natural Language enhancement (stub for future)
         if detectionStage == .withNaturalLanguage || detectionStage == .withAppleAI {
             events = enhanceWithNaturalLanguage(events, text: text)
         }
 
-        // Stage 4: Apple Intelligence enhancement (stub for future)
+        // Stage 3: Apple Intelligence enhancement (stub for future)
         if detectionStage == .withAppleAI {
             events = enhanceWithAppleIntelligence(events, text: text)
         }
@@ -62,72 +46,7 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return events
     }
 
-    // MARK: - Helper Methods
-
-    private func containsDeadlineKeywords(_ text: String) -> Bool {
-        let keywords = [
-            "bis zum", "bis", "fällig", "deadline", "due", "mhd",
-            "return", "rücksendung", "pay", "zahlen", "until", "by",
-            "haltbar", "verbrauchen", "mindestens"
-        ]
-        let lowercasedText = text.lowercased()
-        return keywords.contains { lowercasedText.contains($0) }
-    }
-
-    // MARK: - Stage 1: NSDataDetector Parsing
-
-    private func parseEventsWithDataDetector(from text: String) -> [Event] {
-        var events: [Event] = []
-
-        // Create data detector for dates
-        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) else {
-            return []
-        }
-
-        let nsText = text as NSString
-        let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
-
-        var processedDates: Set<String> = []
-
-        for match in matches {
-            guard let date = match.date else { continue }
-
-            // Avoid duplicates
-            let dateKey = "\(date.timeIntervalSince1970)"
-            guard !processedDates.contains(dateKey) else { continue }
-            processedDates.insert(dateKey)
-
-            // Extract the matched text to use as event name
-            let matchedRange = match.range
-            let matchedText = nsText.substring(with: matchedRange)
-
-            // Extract event name (everything except the matched date)
-            var eventName = text.replacingOccurrences(of: matchedText, with: "")
-            eventName = eventName.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?"))
-            eventName = eventName.trimmingCharacters(in: .whitespacesAndNewlines)
-
-            if eventName.isEmpty || eventName.count < 3 {
-                eventName = "Reminder"
-            } else {
-                // Capitalize first letter
-                eventName = eventName.prefix(1).uppercased() + eventName.dropFirst()
-            }
-
-            // NSDataDetector doesn't distinguish deadlines, so just create a regular event
-            let event = Event(
-                name: eventName,
-                date: date,
-                deadline: nil,
-                notes: nil
-            )
-
-            events.append(event)
-        }
-
-        return events
-    }
-
-    // MARK: - Stage 2: Regex Fallback
+    // MARK: - Stage 1: Regex Parsing
 
     private func parseEventsWithRegex(from text: String) -> [Event] {
         var events: [Event] = []
@@ -405,20 +324,142 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return calendar.date(from: components) ?? date
     }
     
-    // MARK: - Stage 3: Natural Language Enhancement (Stub)
+    // MARK: - Stage 2: Natural Language Enhancement
 
     /// Enhance events using Natural Language framework
-    /// TODO: Implement entity recognition (venues, prices, categories)
-    /// Example use case: "DEERHOOF +SACRED PAWS Wed 31 Aug Electric Ballroom 7pm £17.00"
+    /// Uses NSDataDetector for natural language dates ("13 Jan 2026", "6 Apr 2026", etc.)
     private func enhanceWithNaturalLanguage(_ events: [Event], text: String) -> [Event] {
-        // Stub for Stage 3 implementation
-        // Will use:
-        // - NLTagger for entity recognition (places, organizations)
-        // - Pattern matching for prices, categories
-        return events
+        var allEvents = events
+
+        // Use NSDataDetector to find dates that regex didn't catch
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) else {
+            return allEvents
+        }
+
+        let nsText = text as NSString
+        let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
+
+        for match in matches {
+            guard let date = match.date else { continue }
+
+            // Check if this date was already found by regex
+            // If so, we might want to REPLACE it if NSDataDetector has better context
+            var duplicateIndex: Int? = nil
+
+            let calendar = Calendar.current
+            let nsDataDetectorComponents = calendar.dateComponents([.year, .month, .day], from: date)
+
+            for (index, event) in allEvents.enumerated() {
+                // Compare dates by day/month/year, not by exact timestamp
+                // This handles timezone differences and different time components
+                let eventComponents = calendar.dateComponents([.year, .month, .day], from: event.date)
+                let isSameDay = eventComponents.year == nsDataDetectorComponents.year &&
+                               eventComponents.month == nsDataDetectorComponents.month &&
+                               eventComponents.day == nsDataDetectorComponents.day
+
+                if isSameDay {
+                    duplicateIndex = index
+                    break
+                }
+
+                // Or if regex found this as a deadline
+                if let deadline = event.deadline {
+                    let deadlineComponents = calendar.dateComponents([.year, .month, .day], from: deadline)
+                    let isSameDeadlineDay = deadlineComponents.year == nsDataDetectorComponents.year &&
+                                           deadlineComponents.month == nsDataDetectorComponents.month &&
+                                           deadlineComponents.day == nsDataDetectorComponents.day
+                    if isSameDeadlineDay {
+                        duplicateIndex = index
+                        break
+                    }
+                }
+            }
+
+            // Extract the matched text and surrounding context
+            let matchRange = match.range
+            let matchedText = nsText.substring(with: matchRange)
+
+            // Skip vague relative dates, app message dates, and time-only matches
+            let lowercasedMatch = matchedText.lowercased()
+            if lowercasedMatch == "today" ||
+               lowercasedMatch == "tomorrow" ||
+               lowercasedMatch == "heute" ||
+               lowercasedMatch == "morgen" ||
+               lowercasedMatch.contains("starting today") ||
+               lowercasedMatch.contains("ab heute") ||
+               lowercasedMatch.range(of: "^\\d{1,2}:\\d{2}$", options: .regularExpression) != nil ||
+               (lowercasedMatch.contains("dienstag") || lowercasedMatch.contains("tuesday") ||
+                lowercasedMatch.contains("montag") || lowercasedMatch.contains("monday") ||
+                lowercasedMatch.contains("mittwoch") || lowercasedMatch.contains("wednesday") ||
+                lowercasedMatch.contains("donnerstag") || lowercasedMatch.contains("thursday") ||
+                lowercasedMatch.contains("freitag") || lowercasedMatch.contains("friday") ||
+                lowercasedMatch.contains("samstag") || lowercasedMatch.contains("saturday") ||
+                lowercasedMatch.contains("sonntag") || lowercasedMatch.contains("sunday")) {
+                continue
+            }
+
+            // Check surrounding context (200 chars) for deadline keywords
+            let startIndex = max(0, matchRange.location - 200)
+            let endIndex = min(nsText.length, matchRange.location + matchRange.length + 200)
+            let contextRange = NSRange(location: startIndex, length: endIndex - startIndex)
+            let contextText = nsText.substring(with: contextRange)
+
+            // NOTE: "starting on" and "ab dem" for subscriptions are NOT deadlines
+            let lowercasedContext = contextText.lowercased()
+            let isDeadline = lowercasedContext.contains("renewal date") ||
+                            lowercasedContext.contains("deadline") ||
+                            lowercasedContext.contains("due") ||
+                            lowercasedContext.contains("verbrauchen") ||
+                            lowercasedContext.contains("haltbar") ||
+                            lowercasedContext.contains("mhd")
+
+            // If we found a duplicate from regex, decide whether to replace or skip
+            if let dupIndex = duplicateIndex {
+                let existingEvent = allEvents[dupIndex]
+
+                // If NSDataDetector found deadline context but regex didn't, replace the regex event
+                if isDeadline && existingEvent.deadline == nil {
+                    // Remove the regex event and continue to add the NSDataDetector event
+                    allEvents.remove(at: dupIndex)
+                } else {
+                    // Otherwise skip this duplicate
+                    continue
+                }
+            }
+
+            // Get the line containing this date for event name extraction
+            let lineRange = nsText.lineRange(for: matchRange)
+            let lineText = nsText.substring(with: lineRange)
+
+            // Extract event name from the line
+            var eventName = lineText.replacingOccurrences(of: matchedText, with: "")
+            eventName = eventName.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?"))
+            eventName = eventName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if eventName.isEmpty || eventName.count < 3 {
+                eventName = "Reminder"
+            }
+
+            // Create event
+            let (eventDate, deadline) = determineEventAndDeadline(
+                dateInfo: DateInfo(date: date, isDeadline: isDeadline, matchedText: matchedText),
+                timeInfo: nil
+            )
+
+            let event = Event(
+                name: eventName,
+                date: eventDate,
+                deadline: deadline,
+                notes: nil
+            )
+
+            allEvents.append(event)
+        }
+
+        return allEvents
     }
 
-    // MARK: - Stage 4: Apple Intelligence Enhancement (Stub)
+    // MARK: - Stage 3: Apple Intelligence Enhancement (Stub)
 
     /// Enhance events using Apple Intelligence API (iOS 18.2+)
     /// TODO: Integrate with Apple Intelligence for semantic understanding
@@ -457,16 +498,11 @@ final class TextEventParser: TextEventParserServiceProtocol {
         DatePattern(regex: #"(?:pay|zahlen)\s+(?:until|bis)\s+(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
 
         // Food expiry (must come before standard formats to match MHD: prefix)
-        // Note: [\s\S] matches any character including newlines (for multiline OCR text)
-        DatePattern(regex: #"(?:MHD|mhd):?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
-        DatePattern(regex: #"(?:mindestens\s+)?haltbar\s+bis:?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
-        DatePattern(regex: #"(?:zu\s+)?verbrauchen\s+bis:?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
+        DatePattern(regex: #"(?:MHD|mhd):?\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
 
         // German with deadline keywords (no year - defaults to current year)
         DatePattern(regex: #"bis\s+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
         DatePattern(regex: #"fällig\s+(?:am\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
-        DatePattern(regex: #"(?:mindestens\s+)?haltbar\s+bis:?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
-        DatePattern(regex: #"(?:zu\s+)?verbrauchen\s+bis:?[\s\S]{0,20}?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
 
         // Standard German formats (with year)
         DatePattern(regex: #"\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b"#, format: "dd.MM.yyyy", isDeadline: false),
