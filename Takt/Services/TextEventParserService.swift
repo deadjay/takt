@@ -25,6 +25,15 @@ final class TextEventParser: TextEventParserServiceProtocol {
     }
 
     private let detectionStage: DetectionStage = .withNaturalLanguage // Stage 2: Regex + NSDataDetector
+    private let dataDetector: NSDataDetector?
+
+    // MARK: - Initialization
+
+    init(dataDetector: NSDataDetector? = nil) {
+        // Create data detector for natural language date parsing
+        // If one isn't provided, create it lazily
+        self.dataDetector = dataDetector ?? (try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue))
+    }
 
     // MARK: - Public Interface
 
@@ -62,20 +71,34 @@ final class TextEventParser: TextEventParserServiceProtocol {
             if let dateInfo = extractDate(from: trimmedLine) {
                 let dateKey = "\(dateInfo.date.timeIntervalSince1970)"
                 guard !processedDates.contains(dateKey) else { continue }
-                
+
                 processedDates.insert(dateKey)
-                
+
+                // Check previous line for food expiry keywords if date wasn't marked as deadline
+                var updatedDateInfo = dateInfo
+                if !dateInfo.isDeadline && index > 0 {
+                    let previousLine = lines[index - 1].lowercased()
+                    if previousLine.contains("haltbar") ||  // "Haltbar bis", "Mindestens haltbar bis"
+                       previousLine.contains("zu verbrauchen") ||
+                       previousLine.contains("best before") ||
+                       previousLine.contains("use by") ||
+                       previousLine.contains("mhd") ||
+                       previousLine.range(of: "bis\\s*[:.]?\\s*$", options: .regularExpression) != nil {  // "bis:" or "bis." at end
+                        updatedDateInfo = DateInfo(date: dateInfo.date, isDeadline: true, matchedText: dateInfo.matchedText)
+                    }
+                }
+
                 // Extract time (if present)
                 let timeInfo = extractTime(from: trimmedLine)
 
                 // Extract event name
-                let eventName = extractEventName(from: trimmedLine, dateInfo: dateInfo, timeInfo: timeInfo)
+                let eventName = extractEventName(from: trimmedLine, dateInfo: updatedDateInfo, timeInfo: timeInfo)
 
                 // Look for additional context
                 let notes = extractNotes(from: lines, currentIndex: index)
 
                 // Determine dates (with time if available)
-                let (eventDate, deadline) = determineEventAndDeadline(dateInfo: dateInfo, timeInfo: timeInfo)
+                let (eventDate, deadline) = determineEventAndDeadline(dateInfo: updatedDateInfo, timeInfo: timeInfo)
                 
                 let event = Event(
                     name: eventName.isEmpty ? "Reminder" : eventName,
@@ -331,8 +354,8 @@ final class TextEventParser: TextEventParserServiceProtocol {
     private func enhanceWithNaturalLanguage(_ events: [Event], text: String) -> [Event] {
         var allEvents = events
 
-        // Use NSDataDetector to find dates that regex didn't catch
-        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) else {
+        // Use injected NSDataDetector to find dates that regex didn't catch
+        guard let detector = dataDetector else {
             return allEvents
         }
 
@@ -427,23 +450,65 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 }
             }
 
+            // Extract time from the full text (not just this line)
+            // This handles cases where time is on a different line (e.g., "20 Juni 2026\nSa. 16:00")
+            let timeInfo = extractTime(from: contextText)
+
+            // If no time found, default to 09:00 instead of noon
+            let dateWithTime: Date
+            if let timeInfo = timeInfo {
+                dateWithTime = applyTime(to: date, timeInfo: timeInfo)
+            } else {
+                // Default to 09:00 for events without explicit time
+                let calendar = Calendar.current
+                var components = calendar.dateComponents([.year, .month, .day], from: date)
+                components.hour = 9
+                components.minute = 0
+                components.second = 0
+                dateWithTime = calendar.date(from: components) ?? date
+            }
+
             // Get the line containing this date for event name extraction
             let lineRange = nsText.lineRange(for: matchRange)
             let lineText = nsText.substring(with: lineRange)
 
-            // Extract event name from the line
+            // Extract event name from nearby lines (not just the date line)
             var eventName = lineText.replacingOccurrences(of: matchedText, with: "")
             eventName = eventName.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?"))
             eventName = eventName.trimmingCharacters(in: .whitespacesAndNewlines)
 
+            // If the date line doesn't have a good name, look at surrounding lines
             if eventName.isEmpty || eventName.count < 3 {
+                // Get all lines and find the first substantial one that isn't a date/time
+                let lines = text.components(separatedBy: .newlines)
+                for line in lines {
+                    let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                    // Skip if line contains the matched date or is too short
+                    if trimmed.contains(matchedText) || trimmed.count < 3 {
+                        continue
+                    }
+                    // Skip if line looks like a time
+                    if extractTime(from: trimmed) != nil {
+                        continue
+                    }
+                    // Skip if line contains another date
+                    if extractDate(from: trimmed) != nil {
+                        continue
+                    }
+                    // This line looks like a good event name
+                    eventName = trimmed
+                    break
+                }
+            }
+
+            if eventName.isEmpty {
                 eventName = "Reminder"
             }
 
-            // Create event
+            // Create event using the date with applied time
             let (eventDate, deadline) = determineEventAndDeadline(
-                dateInfo: DateInfo(date: date, isDeadline: isDeadline, matchedText: matchedText),
-                timeInfo: nil
+                dateInfo: DateInfo(date: dateWithTime, isDeadline: isDeadline, matchedText: matchedText),
+                timeInfo: nil  // Already applied time to date above
             )
 
             let event = Event(
@@ -500,6 +565,12 @@ final class TextEventParser: TextEventParserServiceProtocol {
         // Food expiry (must come before standard formats to match MHD: prefix)
         DatePattern(regex: #"(?:MHD|mhd):?\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
 
+        // Food expiry with full German text (multiline, so date might be on next line)
+        DatePattern(regex: #"(?:MINDESTENS\s+HALTBAR\s+BIS|mindestens\s+haltbar\s+bis)[:\s]*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
+        DatePattern(regex: #"(?:MINDESTENS\s+HALTBAR\s+BIS|mindestens\s+haltbar\s+bis)[:\s]*(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
+        DatePattern(regex: #"(?:ZU\s+VERBRAUCHEN\s+BIS|zu\s+verbrauchen\s+bis)[:\s]*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
+        DatePattern(regex: #"(?:ZU\s+VERBRAUCHEN\s+BIS|zu\s+verbrauchen\s+bis)[:\s]*(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
+
         // German with deadline keywords (no year - defaults to current year)
         DatePattern(regex: #"bis\s+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
         DatePattern(regex: #"fällig\s+(?:am\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
@@ -516,6 +587,10 @@ final class TextEventParser: TextEventParserServiceProtocol {
         // English formats (no year - defaults to current year)
         DatePattern(regex: #"deadline\s+(\d{1,2})/(\d{1,2})\b"#, format: "MM/dd", isDeadline: true),
         DatePattern(regex: #"\b(\d{1,2})/(\d{1,2})\b"#, format: "MM/dd", isDeadline: false),
+
+        // German format without year (must be LAST - catches standalone dates like "23.01" or "23.01.")
+        // Will be marked as deadline if previous line contains food expiry keywords
+        DatePattern(regex: #"\b(\d{1,2})\.(\d{1,2})\.?"#, format: "dd.MM.", isDeadline: false),
     ]
 }
 

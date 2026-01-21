@@ -9,6 +9,7 @@ import Testing
 import Foundation
 @testable import Takt
 
+@Suite("Text Event Parser Tests", .serialized)
 struct TextEventParserTests {
 
     let parser = TextEventParser()
@@ -686,6 +687,40 @@ struct TextEventParserTests {
         #expect(components.day == 21)
         #expect(components.month == 6)
         #expect(components.year == 2025)
+    }
+
+    @Test("Concert: Eventim format with German month name and time")
+    func testConcertEventimFormat() throws {
+        let text = """
+        20 Juni 2026
+        Sa. 16:00
+        BERLIN
+        Die Schlagernacht des Jahres 2026 - DAS ORIGINAL
+        Waldbühne Berlin
+        """
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+
+        // Event name should NOT contain time or date, should contain actual event text
+        #expect(!event.name.contains("16:00"))
+        #expect(!event.name.contains("Sa."))
+        #expect(!event.name.contains("20 Juni"))
+        #expect(event.name.contains("BERLIN") || event.name.contains("Schlagernacht"))
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year, .hour, .minute], from: event.date)
+
+        // Event date should be 20 Jun 2026 at 16:00 (time extracted from "Sa. 16:00")
+        #expect(components.day == 20)
+        #expect(components.month == 6)
+        #expect(components.year == 2026)
+        #expect(components.hour == 16)
+        #expect(components.minute == 0)
+
+        // TODO: In future, concerts should be treated as deadlines (reminder 24h before)
+        // For now, they're regular events (no deadline)
     }
 
     @Test("Food expiry: zu verbrauchen bis")
