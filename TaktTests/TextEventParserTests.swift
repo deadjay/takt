@@ -638,9 +638,19 @@ struct TextEventParserTests {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.day, .month, .year], from: event.date)
 
-        #expect(components.day == 21)
+        // Reminder should be 1 day before renewal (to give user time to cancel)
+        #expect(components.day == 20)
         #expect(components.month == 1)
         #expect(components.year == 2026)
+
+        // Deadline (actual renewal date) should be 21 January
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let deadlineComponents = calendar.dateComponents([.day, .month, .year], from: deadline)
+            #expect(deadlineComponents.day == 21)
+            #expect(deadlineComponents.month == 1)
+            #expect(deadlineComponents.year == 2026)
+        }
     }
 
     @Test("Amazon Prime: Nächste Zahlung (German)")

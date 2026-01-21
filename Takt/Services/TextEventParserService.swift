@@ -69,7 +69,10 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
             // Try to find dates in this line using regex
             if let dateInfo = extractDate(from: trimmedLine) {
-                let dateKey = "\(dateInfo.date.timeIntervalSince1970)"
+                // Use day/month/year for deduplication (ignore time component)
+                let calendar = Calendar.current
+                let components = calendar.dateComponents([.year, .month, .day], from: dateInfo.date)
+                let dateKey = "\(components.year ?? 0)-\(components.month ?? 0)-\(components.day ?? 0)"
                 guard !processedDates.contains(dateKey) else { continue }
 
                 processedDates.insert(dateKey)
@@ -427,9 +430,12 @@ final class TextEventParser: TextEventParserServiceProtocol {
             let contextRange = NSRange(location: startIndex, length: endIndex - startIndex)
             let contextText = nsText.substring(with: contextRange)
 
-            // NOTE: "starting on" and "ab dem" for subscriptions are NOT deadlines
+            // NOTE: "starting on" and "ab dem" are NOT deadlines (new subscription starting)
+            // BUT "renewal date" IS a deadline - user needs advance warning to cancel
             let lowercasedContext = contextText.lowercased()
             let isDeadline = lowercasedContext.contains("renewal date") ||
+                            lowercasedContext.contains("renewal") ||
+                            lowercasedContext.contains("renews") ||
                             lowercasedContext.contains("deadline") ||
                             lowercasedContext.contains("due") ||
                             lowercasedContext.contains("verbrauchen") ||
