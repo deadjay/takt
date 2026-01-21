@@ -77,16 +77,27 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
                 processedDates.insert(dateKey)
 
-                // Check previous line for food expiry keywords if date wasn't marked as deadline
+                // Check previous lines (up to 3 lines back) for food expiry keywords if date wasn't marked as deadline
                 var updatedDateInfo = dateInfo
                 if !dateInfo.isDeadline && index > 0 {
-                    let previousLine = lines[index - 1].lowercased()
-                    if previousLine.contains("haltbar") ||  // "Haltbar bis", "Mindestens haltbar bis"
-                       previousLine.contains("zu verbrauchen") ||
-                       previousLine.contains("best before") ||
-                       previousLine.contains("use by") ||
-                       previousLine.contains("mhd") ||
-                       previousLine.range(of: "bis\\s*[:.]?\\s*$", options: .regularExpression) != nil {  // "bis:" or "bis." at end
+                    // Check up to 3 previous lines for deadline keywords
+                    let linesToCheck = max(0, index - 3)..<index
+                    var foundDeadlineKeyword = false
+
+                    for i in linesToCheck {
+                        let lineToCheck = lines[i].lowercased()
+                        if lineToCheck.contains("haltbar") ||  // "Haltbar bis", "Mindestens haltbar bis"
+                           lineToCheck.contains("zu verbrauchen") ||
+                           lineToCheck.contains("best before") ||
+                           lineToCheck.contains("use by") ||
+                           lineToCheck.contains("mhd") ||
+                           lineToCheck.range(of: "bis\\s*[:.]?\\s*$", options: .regularExpression) != nil {  // "bis:" or "bis." at end
+                            foundDeadlineKeyword = true
+                            break
+                        }
+                    }
+
+                    if foundDeadlineKeyword {
                         updatedDateInfo = DateInfo(date: dateInfo.date, isDeadline: true, matchedText: dateInfo.matchedText)
                     }
                 }
@@ -385,10 +396,16 @@ final class TextEventParser: TextEventParserServiceProtocol {
             guard var date = match.date else { continue }
 
             let calendar = Calendar.current
+            let matchRange = match.range
+            let matchedText = nsText.substring(with: matchRange)
 
-            // If date is in the past, assume next year (for dates without explicit year)
-            // This matches the logic in parseDate() for regex patterns
-            if date < Date() {
+            // Only adjust year if the matched text doesn't contain a year
+            // Check for 4-digit years OR 2-digit years in date formats (dd.MM.yy, MM/dd/yy)
+            let containsExplicitYear = matchedText.range(of: #"\b(19|20)\d{2}\b"#, options: .regularExpression) != nil ||
+                                      matchedText.range(of: #"\d{1,2}[./]\d{1,2}[./]\d{2}\b"#, options: .regularExpression) != nil
+
+            if !containsExplicitYear && date < Date() {
+                // Date has no explicit year and is in the past, assume next year
                 if let nextYearDate = calendar.date(byAdding: .year, value: 1, to: date) {
                     date = nextYearDate
                 }
@@ -425,10 +442,6 @@ final class TextEventParser: TextEventParserServiceProtocol {
                     }
                 }
             }
-
-            // Extract the matched text and surrounding context
-            let matchRange = match.range
-            let matchedText = nsText.substring(with: matchRange)
 
             // Skip vague relative dates, app message dates, and time-only matches
             let lowercasedMatch = matchedText.lowercased()
@@ -467,18 +480,10 @@ final class TextEventParser: TextEventParserServiceProtocol {
                             lowercasedContext.contains("haltbar") ||
                             lowercasedContext.contains("mhd")
 
-            // If we found a duplicate from regex, decide whether to replace or skip
-            if let dupIndex = duplicateIndex {
-                let existingEvent = allEvents[dupIndex]
-
-                // If NSDataDetector found deadline context but regex didn't, replace the regex event
-                if isDeadline && existingEvent.deadline == nil {
-                    // Remove the regex event and continue to add the NSDataDetector event
-                    allEvents.remove(at: dupIndex)
-                } else {
-                    // Otherwise skip this duplicate
-                    continue
-                }
+            // If we found a duplicate from regex, skip it
+            // Regex patterns are more specific and should take precedence
+            if duplicateIndex != nil {
+                continue
             }
 
             // Extract time from the full text (not just this line)
@@ -611,7 +616,7 @@ final class TextEventParser: TextEventParserServiceProtocol {
         DatePattern(regex: #"\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b"#, format: "dd.MM.yy", isDeadline: false),
 
         // English formats (with year)
-        DatePattern(regex: #"deadline\s+(\d{1,2})/(\d{1,2})/(\d{4})"#, format: "MM/dd/yyyy", isDeadline: true),
+        DatePattern(regex: #"(?:deadline|due)\s+(?:date\s+)?(\d{1,2})/(\d{1,2})/(\d{4})"#, format: "MM/dd/yyyy", isDeadline: true),
         DatePattern(regex: #"\b(\d{1,2})/(\d{1,2})/(\d{4})\b"#, format: "MM/dd/yyyy", isDeadline: false),
         DatePattern(regex: #"\b(\d{4})-(\d{2})-(\d{2})\b"#, format: "yyyy-MM-dd", isDeadline: false),
 
