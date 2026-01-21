@@ -198,22 +198,38 @@ final class TextEventParser: TextEventParserServiceProtocol {
         // Handle dates without year FIRST - default to current year
         // Do NOT try to parse these formats directly as DateFormatter defaults to year 2000
 
-        // German format without year (e.g., "02.12." -> "02.12.2025")
+        // German format without year (e.g., "02.12." -> "02.12.2026")
+        // If date would be in the past, assume next year
         if format == "dd.MM." {
             let components = text.components(separatedBy: ".")
             if components.count >= 2 {
-                let fullDateText = "\(components[0]).\(components[1]).\(currentYear)"
+                var yearToUse = currentYear
+                let fullDateText = "\(components[0]).\(components[1]).\(yearToUse)"
                 formatter.dateFormat = "dd.MM.yyyy"
+                if let date = formatter.date(from: fullDateText), date < Date() {
+                    // Date is in the past, use next year
+                    yearToUse = currentYear + 1
+                    let fullDateTextNextYear = "\(components[0]).\(components[1]).\(yearToUse)"
+                    return formatter.date(from: fullDateTextNextYear)
+                }
                 return formatter.date(from: fullDateText)
             }
         }
 
-        // English format without year (e.g., "12/25" -> "12/25/2025")
+        // English format without year (e.g., "12/25" -> "12/25/2026")
+        // If date would be in the past, assume next year
         if format == "MM/dd" {
             let components = text.components(separatedBy: "/")
             if components.count >= 2 {
-                let fullDateText = "\(components[0])/\(components[1])/\(currentYear)"
+                var yearToUse = currentYear
+                let fullDateText = "\(components[0])/\(components[1])/\(yearToUse)"
                 formatter.dateFormat = "MM/dd/yyyy"
+                if let date = formatter.date(from: fullDateText), date < Date() {
+                    // Date is in the past, use next year
+                    yearToUse = currentYear + 1
+                    let fullDateTextNextYear = "\(components[0])/\(components[1])/\(yearToUse)"
+                    return formatter.date(from: fullDateTextNextYear)
+                }
                 return formatter.date(from: fullDateText)
             }
         }
@@ -366,13 +382,22 @@ final class TextEventParser: TextEventParserServiceProtocol {
         let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
 
         for match in matches {
-            guard let date = match.date else { continue }
+            guard var date = match.date else { continue }
+
+            let calendar = Calendar.current
+
+            // If date is in the past, assume next year (for dates without explicit year)
+            // This matches the logic in parseDate() for regex patterns
+            if date < Date() {
+                if let nextYearDate = calendar.date(byAdding: .year, value: 1, to: date) {
+                    date = nextYearDate
+                }
+            }
 
             // Check if this date was already found by regex
             // If so, we might want to REPLACE it if NSDataDetector has better context
             var duplicateIndex: Int? = nil
 
-            let calendar = Calendar.current
             let nsDataDetectorComponents = calendar.dateComponents([.year, .month, .day], from: date)
 
             for (index, event) in allEvents.enumerated() {

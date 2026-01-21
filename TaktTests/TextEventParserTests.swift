@@ -91,9 +91,19 @@ struct TextEventParserTests {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.day, .month, .year], from: event.date)
 
-        #expect(components.day == 25)
+        // "Due date" is a deadline - reminder should be 1 day before
+        #expect(components.day == 24)
         #expect(components.month == 12)
         #expect(components.year == 2024)
+
+        // Deadline (actual due date) should be 25 December
+        #expect(event.deadline != nil)
+        if let deadline = event.deadline {
+            let deadlineComponents = calendar.dateComponents([.day, .month, .year], from: deadline)
+            #expect(deadlineComponents.day == 25)
+            #expect(deadlineComponents.month == 12)
+            #expect(deadlineComponents.year == 2024)
+        }
     }
 
     @Test("Parse ISO date format yyyy-MM-dd")
