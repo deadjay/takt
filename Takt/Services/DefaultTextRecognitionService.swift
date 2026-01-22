@@ -26,11 +26,102 @@ public final class DefaultTextRecognitionService: TextRecognitionServiceProtocol
             throw TextRecognitionError.invalidImageData
         }
 
-        // Simple strategy: Always use full image upscaling
-        // NOTE: Future improvement - detect if parser can extract dates,
-        // and only then try center crop as fallback
-        let processedImage = upscaleIfNeeded(cgImage)
-        return try await performOCR(on: processedImage, mode: .accurate)
+        // Smart retry strategy:
+        // 1. Try full image upscaling first
+        // 2. If parser can't find any dates, retry with center crop + zoom
+
+        let fullImage = upscaleIfNeeded(cgImage)
+        let fullImageText = try await performOCR(on: fullImage, mode: .accurate)
+
+        // Check if we found any date-like content (day+month or weekday)
+        if containsDateIndicators(fullImageText) {
+            return fullImageText
+        }
+
+        // No dates found - try center crop + zoom (mimics manual Preview workflow)
+        print("⚠️ No dates detected in full image OCR, retrying with center crop + zoom...")
+        if let croppedImage = centerCropAndZoom(cgImage, cropRatio: 0.6, zoomFactor: 3.0) {
+            let croppedImageText = try await performOCR(on: croppedImage, mode: .accurate)
+            print("📸 Center crop OCR result: \(croppedImageText.prefix(100))")
+            return croppedImageText
+        }
+
+        // If center crop fails, return original full image result
+        return fullImageText
+    }
+
+    /// Check if text contains any dates that NSDataDetector can parse
+    /// More strict than the parser - we validate the context around matches
+    private func containsDateIndicators(_ text: String) -> Bool {
+        // Use NSDataDetector to find potential dates
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) else {
+            return false
+        }
+
+        let matches = detector.matches(in: text, range: NSRange(text.startIndex..., in: text))
+
+        // Validate each match to avoid false positives from garbage OCR
+        for match in matches {
+            guard let range = Range(match.range, in: text) else { continue }
+            let matchedText = String(text[range])
+
+            // Check context: Look at the character BEFORE the match
+            // Reject if preceded by a digit (e.g., "92:09.2" where NSDataDetector matches "09.2")
+            let matchStartIndex = text.distance(from: text.startIndex, to: range.lowerBound)
+            if matchStartIndex > 0 {
+                let precedingIndex = text.index(text.startIndex, offsetBy: matchStartIndex - 1)
+                let precedingChar = text[precedingIndex]
+                // Reject if preceded by digit or colon (indicates OCR garbage like "92:09.2")
+                if precedingChar.isNumber || precedingChar == ":" {
+                    continue
+                }
+            }
+
+            // Quick validation: Check if matched text starts with reasonable date indicators
+            let lowercased = matchedText.lowercased()
+
+            // Valid weekday names
+            let weekdays = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag", "sonntag",
+                           "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+                           "mon", "tue", "wed", "thu", "fri", "sat", "sun",
+                           "mo", "di", "mi", "do", "fr", "sa", "so"]
+
+            for weekday in weekdays {
+                if lowercased.hasPrefix(weekday) || lowercased.contains(", \(weekday)") {
+                    return true
+                }
+            }
+
+            // Valid month names
+            let months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec",
+                         "januar", "februar", "märz", "april", "mai", "juni", "juli", "august", "september", "oktober", "november", "dezember"]
+
+            for month in months {
+                if lowercased.contains(month) {
+                    return true
+                }
+            }
+
+            // Check for valid numeric date patterns (dd.MM, dd/MM, etc.)
+            let numericDatePattern = #"^([0-9]{1,2})[./-]([0-9]{1,2})"#
+            if let regex = try? NSRegularExpression(pattern: numericDatePattern),
+               let numMatch = regex.firstMatch(in: matchedText, range: NSRange(matchedText.startIndex..., in: matchedText)) {
+
+                // Extract day and month
+                if let dayRange = Range(numMatch.range(at: 1), in: matchedText),
+                   let monthRange = Range(numMatch.range(at: 2), in: matchedText),
+                   let day = Int(matchedText[dayRange]),
+                   let month = Int(matchedText[monthRange]) {
+
+                    // Valid date: day 1-31, month 1-12
+                    if day >= 1 && day <= 31 && month >= 1 && month <= 12 {
+                        return true
+                    }
+                }
+            }
+        }
+
+        return false
     }
 
     // MARK: - Center Crop and Zoom
