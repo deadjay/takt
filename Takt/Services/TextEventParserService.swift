@@ -319,13 +319,24 @@ final class TextEventParser: TextEventParserServiceProtocol {
             nameText = nameText.replacingOccurrences(of: timeInfo.matchedText, with: "")
         }
 
+        // Remove weekday abbreviations (e.g., "Sa.", "Mo.", "Sun.", etc.)
+        let weekdayAbbreviations = ["mo.", "di.", "mi.", "do.", "fr.", "sa.", "so.",
+                                   "mon.", "tue.", "wed.", "thu.", "fri.", "sat.", "sun."]
+        for abbr in weekdayAbbreviations {
+            // Remove weekday abbreviation (case insensitive)
+            let pattern = "\\b" + NSRegularExpression.escapedPattern(for: abbr)
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+                nameText = regex.stringByReplacingMatches(in: nameText, range: NSRange(nameText.startIndex..., in: nameText), withTemplate: "")
+            }
+        }
+
         nameText = nameText.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?"))
         nameText = nameText.trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         if nameText.isEmpty || nameText.count < 3 {
             return ""
         }
-        
+
         return nameText.prefix(1).uppercased() + nameText.dropFirst()
     }
     
@@ -642,37 +653,27 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 dateWithTime = calendar.date(from: components) ?? date
             }
 
-            // Get the line containing this date for event name extraction
-            let lineRange = nsText.lineRange(for: matchRange)
-            let lineText = nsText.substring(with: lineRange)
-
-            // Extract event name from nearby lines (not just the date line)
-            var eventName = lineText.replacingOccurrences(of: matchedText, with: "")
-            eventName = eventName.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?"))
-            eventName = eventName.trimmingCharacters(in: .whitespacesAndNewlines)
-
-            // If the date line doesn't have a good name, look at surrounding lines
-            if eventName.isEmpty || eventName.count < 3 {
-                // Get all lines and find the first substantial one that isn't a date/time
-                let lines = text.components(separatedBy: .newlines)
-                for line in lines {
-                    let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                    // Skip if line contains the matched date or is too short
-                    if trimmed.contains(matchedText) || trimmed.count < 3 {
-                        continue
-                    }
-                    // Skip if line looks like a time
-                    if extractTime(from: trimmed) != nil {
-                        continue
-                    }
-                    // Skip if line contains another date
-                    if extractDate(from: trimmed) != nil {
-                        continue
-                    }
-                    // This line looks like a good event name
-                    eventName = trimmed
-                    break
+            // Extract event name from lines (use original text with newlines, not normalized)
+            // Find the first substantial line that isn't a date/time
+            var eventName = ""
+            let lines = text.components(separatedBy: .newlines)
+            for line in lines {
+                let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                // Skip if line contains the matched date or is too short
+                if trimmed.contains(matchedText) || trimmed.count < 3 {
+                    continue
                 }
+                // Skip if line looks like a time
+                if extractTime(from: trimmed) != nil {
+                    continue
+                }
+                // Skip if line contains another date
+                if extractDate(from: trimmed) != nil {
+                    continue
+                }
+                // This line looks like a good event name
+                eventName = trimmed
+                break
             }
 
             if eventName.isEmpty {
@@ -684,6 +685,8 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 dateInfo: DateInfo(date: dateWithTime, isDeadline: isDeadline, matchedText: matchedText),
                 timeInfo: nil  // Already applied time to date above
             )
+
+            print("DEBUG: NSDataDetector creating event with name: '\(eventName)'")
 
             let event = Event(
                 name: eventName,
