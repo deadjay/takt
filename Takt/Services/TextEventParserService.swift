@@ -210,7 +210,7 @@ final class TextEventParser: TextEventParserServiceProtocol {
         // Do NOT try to parse these formats directly as DateFormatter defaults to year 2000
 
         // German format without year (e.g., "02.12." -> "02.12.2026")
-        // If date would be in the past, assume next year
+        // If date is in the past, intelligently decide whether to use next year
         if format == "dd.MM." {
             let components = text.components(separatedBy: ".")
             if components.count >= 2 {
@@ -218,17 +218,22 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 let fullDateText = "\(components[0]).\(components[1]).\(yearToUse)"
                 formatter.dateFormat = "dd.MM.yyyy"
                 if let date = formatter.date(from: fullDateText), date < Date() {
-                    // Date is in the past, use next year
-                    yearToUse = currentYear + 1
-                    let fullDateTextNextYear = "\(components[0]).\(components[1]).\(yearToUse)"
-                    return formatter.date(from: fullDateTextNextYear)
+                    // Date is in the past - only bump to next year if it's >30 days ago
+                    // (dates within last 30 days are likely still this year)
+                    let daysSincePast = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
+                    if daysSincePast > 30 {
+                        // More than 30 days ago, probably should be next year
+                        yearToUse = currentYear + 1
+                        let fullDateTextNextYear = "\(components[0]).\(components[1]).\(yearToUse)"
+                        return formatter.date(from: fullDateTextNextYear)
+                    }
                 }
                 return formatter.date(from: fullDateText)
             }
         }
 
         // English format without year (e.g., "12/25" -> "12/25/2026")
-        // If date would be in the past, assume next year
+        // If date is in the past, intelligently decide whether to use next year
         if format == "MM/dd" {
             let components = text.components(separatedBy: "/")
             if components.count >= 2 {
@@ -236,10 +241,14 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 let fullDateText = "\(components[0])/\(components[1])/\(yearToUse)"
                 formatter.dateFormat = "MM/dd/yyyy"
                 if let date = formatter.date(from: fullDateText), date < Date() {
-                    // Date is in the past, use next year
-                    yearToUse = currentYear + 1
-                    let fullDateTextNextYear = "\(components[0])/\(components[1])/\(yearToUse)"
-                    return formatter.date(from: fullDateTextNextYear)
+                    // Date is in the past - only bump to next year if it's >30 days ago
+                    let daysSincePast = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
+                    if daysSincePast > 30 {
+                        // More than 30 days ago, probably should be next year
+                        yearToUse = currentYear + 1
+                        let fullDateTextNextYear = "\(components[0])/\(components[1])/\(yearToUse)"
+                        return formatter.date(from: fullDateTextNextYear)
+                    }
                 }
                 return formatter.date(from: fullDateText)
             }
@@ -255,12 +264,13 @@ final class TextEventParser: TextEventParserServiceProtocol {
             }
         }
 
-        // Handle 2-digit years (e.g., "25.12.24" -> "25.12.2024")
+        // Handle 2-digit years (e.g., "25.12.24" -> "25.12.2024" or "02/09/26" -> "02/09/2026")
         if format.contains("yy") && !format.contains("yyyy") {
+            let separator = format.contains("/") ? "/" : (format.contains("-") ? "-" : ".")
             let components = text.components(separatedBy: CharacterSet(charactersIn: "./- "))
             if components.count >= 3, let year = Int(components[2]), year < 100 {
                 let fullYear = 2000 + year
-                let fullDateText = "\(components[0]).\(components[1]).\(fullYear)"
+                let fullDateText = "\(components[0])\(separator)\(components[1])\(separator)\(fullYear)"
                 formatter.dateFormat = format.replacingOccurrences(of: "yy", with: "yyyy")
                 return formatter.date(from: fullDateText)
             }
@@ -389,8 +399,24 @@ final class TextEventParser: TextEventParserServiceProtocol {
             return allEvents
         }
 
-        let nsText = text as NSString
-        let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
+        // Normalize text for NSDataDetector: replace newlines with spaces
+        // This helps NSDataDetector parse dates like "May\n18" -> "May 18"
+        let normalizedText = text.replacingOccurrences(of: "\n", with: " ")
+
+        let nsText = normalizedText as NSString
+        let matches = detector.matches(in: normalizedText, options: [], range: NSRange(location: 0, length: nsText.length))
+
+        // Structure to hold match info with priority scoring
+        struct MatchCandidate {
+            let match: NSTextCheckingResult
+            var date: Date
+            let matchedText: String
+            let contextText: String
+            let isDeadline: Bool
+            var priority: Int  // Higher = better
+        }
+
+        var candidates: [MatchCandidate] = []
 
         for match in matches {
             guard var date = match.date else { continue }
@@ -399,15 +425,24 @@ final class TextEventParser: TextEventParserServiceProtocol {
             let matchRange = match.range
             let matchedText = nsText.substring(with: matchRange)
 
+            // DEBUG: Print what NSDataDetector found
+            print("NSDataDetector found: '\(matchedText)' -> date: \(date)")
+
             // Only adjust year if the matched text doesn't contain a year
             // Check for 4-digit years OR 2-digit years in date formats (dd.MM.yy, MM/dd/yy)
             let containsExplicitYear = matchedText.range(of: #"\b(19|20)\d{2}\b"#, options: .regularExpression) != nil ||
                                       matchedText.range(of: #"\d{1,2}[./]\d{1,2}[./]\d{2}\b"#, options: .regularExpression) != nil
 
             if !containsExplicitYear && date < Date() {
-                // Date has no explicit year and is in the past, assume next year
-                if let nextYearDate = calendar.date(byAdding: .year, value: 1, to: date) {
-                    date = nextYearDate
+                // Date has no explicit year and is in the past
+                // Only bump to next year if it's more than 30 days in the past
+                // (dates within last 30 days are likely still this year)
+                let daysSincePast = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
+                if daysSincePast > 30 {
+                    // More than 30 days ago, probably should be next year
+                    if let nextYearDate = calendar.date(byAdding: .year, value: 1, to: date) {
+                        date = nextYearDate
+                    }
                 }
             }
 
@@ -443,8 +478,34 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 }
             }
 
-            // Skip vague relative dates, app message dates, and time-only matches
-            let lowercasedMatch = matchedText.lowercased()
+            // Skip vague relative dates, app message dates, time-only matches, and weekday-only dates
+            let lowercasedMatch = matchedText.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Check if the match is ONLY a weekday (with optional time)
+            // Use simple string operations instead of complex regex
+            let weekdays = ["mon", "montag", "monday", "tue", "dienstag", "tuesday",
+                          "wed", "mittwoch", "wednesday", "thu", "donnerstag", "thursday",
+                          "fri", "freitag", "friday", "sat", "samstag", "saturday",
+                          "sun", "sonntag", "sunday"]
+
+            var isWeekdayOnly = false
+            for weekday in weekdays {
+                // Check if match is ONLY a weekday (e.g., "mon" or "monday")
+                if lowercasedMatch == weekday {
+                    isWeekdayOnly = true
+                    break
+                }
+                // Or weekday + time (e.g., "mon 20:00")
+                if lowercasedMatch.hasPrefix(weekday + " ") {
+                    // Remove weekday, check if remainder is only a time pattern
+                    let remainder = String(lowercasedMatch.dropFirst(weekday.count + 1))
+                    if remainder.range(of: #"^\d{1,2}:\d{2}$"#, options: .regularExpression) != nil {
+                        isWeekdayOnly = true
+                        break
+                    }
+                }
+            }
+
             if lowercasedMatch == "today" ||
                lowercasedMatch == "tomorrow" ||
                lowercasedMatch == "heute" ||
@@ -452,13 +513,8 @@ final class TextEventParser: TextEventParserServiceProtocol {
                lowercasedMatch.contains("starting today") ||
                lowercasedMatch.contains("ab heute") ||
                lowercasedMatch.range(of: "^\\d{1,2}:\\d{2}$", options: .regularExpression) != nil ||
-               (lowercasedMatch.contains("dienstag") || lowercasedMatch.contains("tuesday") ||
-                lowercasedMatch.contains("montag") || lowercasedMatch.contains("monday") ||
-                lowercasedMatch.contains("mittwoch") || lowercasedMatch.contains("wednesday") ||
-                lowercasedMatch.contains("donnerstag") || lowercasedMatch.contains("thursday") ||
-                lowercasedMatch.contains("freitag") || lowercasedMatch.contains("friday") ||
-                lowercasedMatch.contains("samstag") || lowercasedMatch.contains("saturday") ||
-                lowercasedMatch.contains("sonntag") || lowercasedMatch.contains("sunday")) {
+               isWeekdayOnly {
+                print("DEBUG: Skipping vague date: '\(matchedText)'")
                 continue
             }
 
@@ -480,11 +536,101 @@ final class TextEventParser: TextEventParserServiceProtocol {
                             lowercasedContext.contains("haltbar") ||
                             lowercasedContext.contains("mhd")
 
+            // Calculate priority score for this match
+            // Higher priority = more likely to be the relevant date
+            var priority = 0
+
+            // Subscription context keywords (high priority)
+            if lowercasedContext.contains("starting on") || lowercasedContext.contains("ab dem") {
+                priority += 10
+            }
+            if lowercasedContext.contains("subscription") || lowercasedContext.contains("renews") {
+                priority += 5
+            }
+
+            // Deadline context (medium priority)
+            if isDeadline {
+                priority += 3
+            }
+
+            // Penalize weekday-prefixed dates (lower priority)
+            // e.g., "Dienstag, 6. Januar" is less relevant than "Starting on 13 Jan"
+            let weekdayPrefixes = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag", "sonntag",
+                                 "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+            for weekdayPrefix in weekdayPrefixes {
+                if lowercasedMatch.hasPrefix(weekdayPrefix) {
+                    priority -= 5
+                    break
+                }
+            }
+
+            // Store candidate with priority
+            candidates.append(MatchCandidate(
+                match: match,
+                date: date,
+                matchedText: matchedText,
+                contextText: contextText,
+                isDeadline: isDeadline,
+                priority: priority
+            ))
+        }
+
+        // Sort candidates by priority (highest first), then process them
+        candidates.sort { $0.priority > $1.priority }
+
+        // Track which dates we've already added to avoid duplicates
+        var processedDateKeys: Set<String> = []
+
+        for candidate in candidates {
+            var date = candidate.date
+            let matchedText = candidate.matchedText
+            let contextText = candidate.contextText
+            let isDeadline = candidate.isDeadline
+            let matchRange = candidate.match.range
+            let calendar = Calendar.current
+
+            // Check if this date was already found by regex
+            // If so, skip it - regex patterns are more specific and should take precedence
+            let nsDataDetectorComponents = calendar.dateComponents([.year, .month, .day], from: date)
+            var duplicateIndex: Int? = nil
+
+            for (index, event) in allEvents.enumerated() {
+                // Compare dates by day/month/year, not by exact timestamp
+                let eventComponents = calendar.dateComponents([.year, .month, .day], from: event.date)
+                let isSameDay = eventComponents.year == nsDataDetectorComponents.year &&
+                               eventComponents.month == nsDataDetectorComponents.month &&
+                               eventComponents.day == nsDataDetectorComponents.day
+
+                if isSameDay {
+                    duplicateIndex = index
+                    break
+                }
+
+                // Or if regex found this as a deadline
+                if let deadline = event.deadline {
+                    let deadlineComponents = calendar.dateComponents([.year, .month, .day], from: deadline)
+                    let isSameDeadlineDay = deadlineComponents.year == nsDataDetectorComponents.year &&
+                                           deadlineComponents.month == nsDataDetectorComponents.month &&
+                                           deadlineComponents.day == nsDataDetectorComponents.day
+                    if isSameDeadlineDay {
+                        duplicateIndex = index
+                        break
+                    }
+                }
+            }
+
             // If we found a duplicate from regex, skip it
-            // Regex patterns are more specific and should take precedence
             if duplicateIndex != nil {
                 continue
             }
+
+            // Check if we've already processed this date (from a higher-priority match)
+            let dateKey = "\(nsDataDetectorComponents.year ?? 0)-\(nsDataDetectorComponents.month ?? 0)-\(nsDataDetectorComponents.day ?? 0)"
+            if processedDateKeys.contains(dateKey) {
+                print("DEBUG: Skipping lower-priority duplicate date: '\(matchedText)'")
+                continue
+            }
+            processedDateKeys.insert(dateKey)
 
             // Extract time from the full text (not just this line)
             // This handles cases where time is on a different line (e.g., "20 Juni 2026\nSa. 16:00")
@@ -617,7 +763,11 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
         // English formats (with year)
         DatePattern(regex: #"(?:deadline|due)\s+(?:date\s+)?(\d{1,2})/(\d{1,2})/(\d{4})"#, format: "MM/dd/yyyy", isDeadline: true),
-        DatePattern(regex: #"\b(\d{1,2})/(\d{1,2})/(\d{4})\b"#, format: "MM/dd/yyyy", isDeadline: false),
+
+        // European slash format with 2-digit year (dd/MM/yy) - must come before MM/dd to prioritize European format
+        DatePattern(regex: #"\b(\d{1,2})/(\d{1,2})/(\d{2})\b"#, format: "dd/MM/yy", isDeadline: false),
+
+        DatePattern(regex: #"\b(\d{1,2})/(\d{1,2})/(\d{4})\b"#, format: "dd/MM/yyyy", isDeadline: false),
         DatePattern(regex: #"\b(\d{4})-(\d{2})-(\d{2})\b"#, format: "yyyy-MM-dd", isDeadline: false),
 
         // English formats (no year - defaults to current year)

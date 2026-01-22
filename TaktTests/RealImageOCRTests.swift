@@ -11,24 +11,27 @@ struct RealImageOCRTests {
 
     private func loadImageData(named filename: String) throws -> Data {
         // For Swift Testing framework, find the test bundle
-        let bundles = Bundle.allBundles
+        // Filter bundles to only check relevant ones (test bundle)
+        let relevantBundles = Bundle.allBundles.filter { bundle in
+            bundle.bundlePath.contains("TaktTests") ||
+            bundle.bundlePath.contains("Tests.xctest")
+        }
 
         print("Looking for image: \(filename)")
-        print("Searching in \(bundles.count) bundles")
+        print("Searching in \(relevantBundles.count) relevant bundles (filtered from \(Bundle.allBundles.count) total)")
 
         // Try to find the test bundle and look for the image
-        for bundle in bundles {
-            print("Checking bundle: \(bundle.bundlePath)")
+        for bundle in relevantBundles {
             if let url = bundle.url(forResource: filename, withExtension: nil, subdirectory: "TestImages") {
-                print("Found in TestImages subdirectory!")
+                print("Found in TestImages subdirectory: \(bundle.bundlePath)")
                 return try Data(contentsOf: url)
             }
         }
 
         // If not found in subdirectory, try without subdirectory
-        for bundle in bundles {
+        for bundle in relevantBundles {
             if let url = bundle.url(forResource: filename, withExtension: nil) {
-                print("Found without subdirectory!")
+                print("Found without subdirectory: \(bundle.bundlePath)")
                 return try Data(contentsOf: url)
             }
         }
@@ -197,7 +200,7 @@ struct RealImageOCRTests {
 
     @Test("Real OCR: Multiple subscriptions")
     func testSubscriptions() async throws {
-        let imageData = try loadImageData(named: "subsriptions.jpeg")
+        let imageData = try loadImageData(named: "subscriptions.jpeg")
         let ocrService = makeTextRecognitionService()
         let recognizedText = try await ocrService.recognizeText(fromImageData: imageData)
 

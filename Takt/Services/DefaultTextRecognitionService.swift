@@ -26,12 +26,58 @@ public final class DefaultTextRecognitionService: TextRecognitionServiceProtocol
             throw TextRecognitionError.invalidImageData
         }
 
-        // Upscale the image if it's relatively small (helps with small text detection)
-        // This mimics the "zoom" effect that helped with the eggs image
+        // Simple strategy: Always use full image upscaling
+        // NOTE: Future improvement - detect if parser can extract dates,
+        // and only then try center crop as fallback
         let processedImage = upscaleIfNeeded(cgImage)
-
-        // Perform OCR on the upscaled image
         return try await performOCR(on: processedImage, mode: .accurate)
+    }
+
+    // MARK: - Center Crop and Zoom
+    /// Crop to center region and zoom in (mimics "zoom 3x on center" in Preview)
+    /// - Parameters:
+    ///   - cgImage: Source image
+    ///   - cropRatio: Ratio of image to keep (0.6 = keep center 60%)
+    ///   - zoomFactor: How much to scale up the cropped region (3.0 = 3x zoom)
+    /// - Returns: Cropped and zoomed image, or nil if operation fails
+    private func centerCropAndZoom(_ cgImage: CGImage, cropRatio: Double, zoomFactor: Double) -> CGImage? {
+        let width = cgImage.width
+        let height = cgImage.height
+
+        // Calculate crop dimensions (center region)
+        let cropWidth = Int(Double(width) * cropRatio)
+        let cropHeight = Int(Double(height) * cropRatio)
+        let cropX = (width - cropWidth) / 2
+        let cropY = (height - cropHeight) / 2
+
+        // Crop to center region
+        guard let croppedImage = cgImage.cropping(to: CGRect(x: cropX, y: cropY, width: cropWidth, height: cropHeight)) else {
+            return nil
+        }
+
+        // Zoom (scale up) the cropped region
+        let zoomedWidth = Int(Double(cropWidth) * zoomFactor)
+        let zoomedHeight = Int(Double(cropHeight) * zoomFactor)
+
+        let colorSpace = cgImage.colorSpace ?? CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = cgImage.bitmapInfo.rawValue
+
+        guard let context = CGContext(
+            data: nil,
+            width: zoomedWidth,
+            height: zoomedHeight,
+            bitsPerComponent: croppedImage.bitsPerComponent,
+            bytesPerRow: 0,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo
+        ) else {
+            return nil
+        }
+
+        context.interpolationQuality = .high
+        context.draw(croppedImage, in: CGRect(x: 0, y: 0, width: zoomedWidth, height: zoomedHeight))
+
+        return context.makeImage()
     }
 
     // MARK: - Image Upscaling
