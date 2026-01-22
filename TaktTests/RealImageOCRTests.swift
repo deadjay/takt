@@ -210,11 +210,12 @@ struct RealImageOCRTests {
         let events = try parser.parseEvents(from: recognizedText)
 
         // Expected: Multiple subscriptions with various dates
-        // - Amazon Prime: 21.01.2026
-        // - YouTube Premium: 20.02.2026
-        // - ChatGPT Plus: 05.01.2026
-        // - one sec pro: 06.04.2026
-        #expect(events.count >= 4, "Should find at least 4 subscription dates")
+        // - one sec pro: 06.04.2026 (Continues 6 April)
+        // - Athlytic: 08.10.2025 (Expired 8 October 2025)
+        // - Sleep Cycle: 16.11.2025 (Expired 16 November 2025)
+        // - stats.fm: 10.09.2025 (Expired 10 September 2025)
+        // - Awesome Habits: 27.02.2025 (Expired 27 February 2025)
+        #expect(events.count >= 5, "Should find at least 5 subscription dates")
 
         // Verify we found the expected dates
         let calendar = Calendar.current
@@ -224,7 +225,7 @@ struct RealImageOCRTests {
         }
 
         // Check that we have the expected dates (order may vary)
-        let expectedDates = ["21.1.2026", "20.2.2026", "5.1.2026", "6.4.2026"]
+        let expectedDates = ["6.4.2026", "8.10.2025", "16.11.2025", "10.9.2025", "27.2.2025"]
         for expected in expectedDates {
             #expect(dateStrings.contains(expected), "Should find date \(expected)")
         }
