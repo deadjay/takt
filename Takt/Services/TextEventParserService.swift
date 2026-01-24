@@ -396,6 +396,40 @@ final class TextEventParser: TextEventParserServiceProtocol {
         let nsText = normalizedText as NSString
         let matches = detector.matches(in: normalizedText, options: [], range: NSRange(location: 0, length: nsText.length))
 
+        // First pass: identify time-only matches and full date matches
+        var hasFullDateMatch = false
+        var timeOnlyMatches: Set<Int> = []
+
+        for (index, match) in matches.enumerated() {
+            guard let date = match.date else { continue }
+            let matchRange = match.range
+            let matchedText = nsText.substring(with: matchRange)
+
+            // Check if this is a time-only match (e.g., "20:00", "20:00 Uhr", "3pm")
+            let isTimeOnly = matchedText.range(of: #"^\d{1,2}:\d{2}(\s*(Uhr|uhr|pm|am|PM|AM))?$"#, options: .regularExpression) != nil
+
+            if isTimeOnly {
+                timeOnlyMatches.insert(index)
+            } else {
+                // Check if this has month/day information (not just time)
+                let calendar = Calendar.current
+                let components = calendar.dateComponents([.month, .day], from: date)
+                if components.month != nil && components.day != nil {
+                    // This is a real date (has month and day info)
+                    let containsExplicitYear = matchedText.range(of: #"\b(19|20)\d{2}\b"#, options: .regularExpression) != nil ||
+                                              matchedText.range(of: #"\d{1,2}[./]\d{1,2}[./]\d{2}\b"#, options: .regularExpression) != nil
+
+                    // Also check if the matched text contains month names or date separators
+                    let hasDateContent = matchedText.range(of: #"\d{1,2}[./]\d{1,2}"#, options: .regularExpression) != nil ||
+                                        matchedText.range(of: #"jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|januar|februar|märz|april|mai|juni|juli|august|september|oktober|november|dezember"#, options: [.regularExpression, .caseInsensitive]) != nil
+
+                    if hasDateContent || containsExplicitYear {
+                        hasFullDateMatch = true
+                    }
+                }
+            }
+        }
+
         // Structure to hold match info with priority scoring
         struct MatchCandidate {
             let match: NSTextCheckingResult
@@ -408,7 +442,14 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
         var candidates: [MatchCandidate] = []
 
-        for match in matches {
+        for (index, match) in matches.enumerated() {
+            // Skip time-only matches if we found any full date matches
+            if hasFullDateMatch && timeOnlyMatches.contains(index) {
+                let matchRange = match.range
+                let matchedText = nsText.substring(with: matchRange)
+                print("DEBUG: Skipping time-only match '\(matchedText)' because full dates were found")
+                continue
+            }
             guard var date = match.date else { continue }
 
             let calendar = Calendar.current
