@@ -695,13 +695,27 @@ final class TextEventParser: TextEventParserServiceProtocol {
             }
 
             // Extract event name from lines (use original text with newlines, not normalized)
-            // Find the first substantial line that isn't a date/time
-            var eventName = ""
+            // Strategy: Capture up to 3 valid lines near the date
+            // This gives user context (venue + title) to edit in confirmation UI
             let lines = text.components(separatedBy: .newlines)
-            for line in lines {
+
+            // Find which line contains the date
+            var dateLineIndex = -1
+            for (index, line) in lines.enumerated() {
+                if line.contains(matchedText) {
+                    dateLineIndex = index
+                    break
+                }
+            }
+
+            // Collect valid lines with their distance from date
+            var validLines: [(index: Int, distance: Int, line: String)] = []
+
+            for (index, line) in lines.enumerated() {
                 let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                // Skip if line contains the matched date or is too short
-                if trimmed.contains(matchedText) || trimmed.count < 3 {
+
+                // Skip if too short or contains the date
+                if trimmed.count < 3 || trimmed.contains(matchedText) {
                     continue
                 }
                 // Skip if line looks like a time
@@ -712,10 +726,23 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 if extractDate(from: trimmed) != nil {
                     continue
                 }
-                // This line looks like a good event name
-                eventName = trimmed
-                break
+                // Skip label-style metadata lines (e.g., "Datum:", "Uhrzeit:")
+                let lowerTrimmed = trimmed.lowercased()
+                if lowerTrimmed.range(of: #"^[a-zäöü]+:\s*"#, options: .regularExpression) != nil {
+                    continue
+                }
+
+                // Calculate distance from date line
+                let distance = dateLineIndex >= 0 ? abs(index - dateLineIndex) : 999
+                validLines.append((index, distance, trimmed))
             }
+
+            // Sort by distance (closest first), take up to 3 lines, restore original order
+            validLines.sort(by: { $0.distance < $1.distance })
+            let selectedLines = validLines.prefix(3).sorted(by: { $0.index < $1.index }).map { $0.line }
+
+            // Join with newlines to preserve multi-line context
+            var eventName = selectedLines.joined(separator: "\n")
 
             if eventName.isEmpty {
                 eventName = "Reminder"
