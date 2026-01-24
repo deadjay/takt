@@ -35,39 +35,26 @@ Takt is a SwiftUI-based iOS app that automatically extracts event information fr
 
 ### 🎯 Smart Event Extraction (Multi-Stage Detection)
 - **Stage 1 - Regex Patterns**: Fast detection of simple dates (25.12.2024, 12/25/2024)
-- **Stage 2 - Natural Language** (Coming): Natural dates ("Wed 31 Aug"), entity recognition (venues, prices)
+- **Stage 2 - Natural Language** (NSDataDetector): Natural dates ("Wed 31 Aug"), context-aware deadline detection
 - **Stage 3 - Apple Intelligence** (Future): Semantic understanding, category detection (Concerts, Meetings)
 - **Deadline Detection**: Automatically identifies and sets deadlines
 - **Event Naming**: Intelligently extracts event names from text content
 - **Offline-First**: All processing happens on-device, no backend required
 
-## Technical Architecture
+## Technical Stack
 
-### Core Components
-
-1. **Models**
-   - `Event`: Data model for calendar events with properties for name, date, deadline, notes, and completion status
-
-2. **Services**
-   - `TextRecognitionService`: Handles OCR using Vision framework and parses extracted text
-   - `EventStorageService`: Manages local data persistence and provides event filtering/searching
-
-3. **Views**
-   - `ContentView`: Main tab-based interface
-   - `ImagePickerView`: Image selection and processing interface
-   - `CalendarView`: Monthly calendar with event display
-   - `EventsListView`: List view with search and management capabilities
-   - `EventDetailView`: Detailed event information and actions
-   - `EditEventView`: Event editing interface
-   - `AddEventView`: Manual event creation
-
-### Key Technologies
-
+### Core Technologies
 - **SwiftUI**: Modern declarative UI framework
 - **Vision Framework**: iOS text recognition and analysis
 - **PhotosUI**: Modern photo picker integration
 - **UserDefaults**: Local data persistence
 - **iOS 18.0+**: Latest iOS features and APIs
+
+### Architecture
+- **MVVM + Clean Architecture**: Separation of concerns with clear layer boundaries
+- **Protocol-Based DI**: Dependency injection for testability
+- **@Observable Pattern**: Modern Swift observation (iOS 17+)
+- **Async/Await**: Modern concurrency throughout
 
 ## Installation & Setup
 
@@ -121,6 +108,8 @@ The app recognizes various date formats:
 - `YYYY-MM-DD` (e.g., 2024-12-25)
 - `MMM DD` (e.g., Dec 25)
 - `MM/DD/YYYY h:mm a` (e.g., 12/25/2024 2:30 PM)
+- Natural language: "13 Jan 2026", "Starting on 6 Apr 2026"
+- German formats: "dd.MM.yyyy", "dd.MM.yy"
 
 ## Data Structure
 
@@ -141,7 +130,6 @@ struct Event: Identifiable, Codable {
 
 ### Planned Features
 - **Share Sheet Extension**: Receive images from Photos, Safari, and other apps (HIGH PRIORITY)
-- **Natural Language Detection**: Support for "Wed 31 Aug" style dates and entity recognition
 - **Apple Intelligence Integration**: Semantic understanding for complex event posters
 - **Category Auto-Detection**: Concerts, Meetings, Deadlines, etc.
 - **Cloud Sync**: iCloud integration for cross-device synchronization (backups only)
@@ -149,7 +137,6 @@ struct Event: Identifiable, Codable {
 - **Export Options**: Share events via email, messages, or calendar apps
 - **Batch Processing**: Import multiple images at once
 - **Event Templates**: Predefined event types and templates
-- **Voice Dictation**: Quick event capture while on-the-go
 
 ### Technical Improvements
 - **Core Data**: Replace UserDefaults with Core Data for better performance
