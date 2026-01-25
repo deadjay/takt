@@ -10,6 +10,7 @@ import SwiftUI
 struct ScanView: View {
     @State private var viewModel: ScanViewModel
     @State private var showError: Bool = false
+    @State private var showSuccessCheckmark = false
 
     init(viewModel: ScanViewModel) {
         _viewModel = State(wrappedValue: viewModel)
@@ -23,11 +24,38 @@ struct ScanView: View {
             } else if viewModel.hasExtractedEvents {
                 EventConfirmationView(viewModel: viewModel)
             } else {
-                IdleStateView(viewModel: viewModel)
+                IdleStateView(viewModel: viewModel, showSuccessCheckmark: $showSuccessCheckmark)
+            }
+        }
+        .overlay(alignment: .center) {
+            if showSuccessCheckmark {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(.green)
+                    .padding(20)
+                    .background (
+                        Material.thin
+                    )
+                    .cornerRadius(16)
+                    .transition(.scale.combined(with: .opacity))
             }
         }
         .onChange(of: viewModel.hasError) { _, hasError in
             showError = hasError
+        }
+        .onChange(of: viewModel.selectedImageData) { oldValue, newValue in
+            guard newValue != nil else { return }
+            
+            withAnimation(.spring(response: 0.3)) {
+                showSuccessCheckmark = true
+            }
+
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                withAnimation(.spring(response: 0.3)) {
+                    showSuccessCheckmark = false
+                }
+            }
         }
         .alert("Error", isPresented: $showError) {
             Button("OK") {
@@ -43,6 +71,7 @@ struct ScanView: View {
 
 private struct IdleStateView: View {
     @Bindable var viewModel: ScanViewModel
+    @Binding var showSuccessCheckmark: Bool
 
     var body: some View {
         ScrollView {
@@ -215,4 +244,12 @@ private struct TextInputField: View {
             addEventUseCase: DIContainer.shared.addEventUseCase
         )
     )
+}
+
+#Preview {
+    IdleStateView(viewModel: ScanViewModel(
+        textRecognitionService: DIContainer.shared.textRecognitionService,
+        textEventParserService: DIContainer.shared.textEventParserService,
+        addEventUseCase: DIContainer.shared.addEventUseCase
+    ), showSuccessCheckmark: .constant(true))
 }
