@@ -29,11 +29,7 @@ struct EventsListView: View {
         }
         .sheet(isPresented: $showingEventDetail) {
             if let event = selectedEvent {
-                // Temporary: Pass events as binding until EventDetailView gets its ViewModel
-                NavigationView {
-                    Text("Event Detail for: \(event.name)")
-                        .navigationTitle("Event Details")
-                }
+                EventDetailView(event: event, events: $viewModel.events)
             }
         }
     }

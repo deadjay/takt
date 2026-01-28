@@ -73,7 +73,7 @@ struct EventDetailView: View {
                         )
                     }
                     .padding()
-                    .background(Color.white)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
                     .cornerRadius(12)
                     .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                     

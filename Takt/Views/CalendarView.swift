@@ -14,8 +14,7 @@ struct CalendarView: View {
     }()
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 // Month header
                 HStack {
                     Button(action: previousMonth) {
@@ -115,13 +114,11 @@ struct CalendarView: View {
                 
                 Spacer()
             }
-            .navigationTitle("Calendar")
             .sheet(isPresented: $showingEventDetail) {
                 if let event = selectedEvent {
                     EventDetailView(event: event, events: $events)
                 }
             }
-        }
     }
     
     private func previousMonth() {
@@ -244,7 +241,7 @@ struct EventRow: View {
                 .foregroundColor(.secondary)
         }
         .padding()
-        .background(Color.white)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
         .cornerRadius(8)
         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
     }
