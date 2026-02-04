@@ -26,6 +26,9 @@ final class ScanViewModel {
     // Extracted events
     var extractedEvents: [Event] = []
     var currentEventIndex: Int = 0
+    
+    // Draft for editing
+    var currentDraft: Event?
 
     // UI state
     var showSuccessToast: Bool = false
@@ -40,6 +43,10 @@ final class ScanViewModel {
     var currentEvent: Event? {
         guard currentEventIndex < extractedEvents.count else { return nil }
         return extractedEvents[currentEventIndex]
+    }
+    
+    var displayEvent: Event? {
+        currentDraft ?? currentEvent
     }
 
     var eventCounter: String {
@@ -163,16 +170,23 @@ final class ScanViewModel {
             errorMessage = "Failed to process text: \(error.localizedDescription)"
         }
     }
+    
+    func ensureDraft() {
+        if currentDraft == nil {
+            currentDraft = currentEvent
+        }
+    }
 
     /// Save current event and move to next (or finish)
     func saveCurrentEvent() async {
-        guard let event = currentEvent else { return }
+        guard let event = currentDraft ?? currentEvent else { return }
 
         do {
             try await addEventUseCase.execute(event)
 
             // Show success feedback
             showSuccessToast = true
+            currentDraft = nil
 
             // Move to next event or finish
             if currentEventIndex < extractedEvents.count - 1 {
@@ -192,6 +206,8 @@ final class ScanViewModel {
 
     /// Skip current event without saving
     func skipCurrentEvent() {
+        currentDraft = nil
+        
         if currentEventIndex < extractedEvents.count - 1 {
             currentEventIndex += 1
         } else {
@@ -211,6 +227,7 @@ final class ScanViewModel {
         inputText = ""
         extractedEvents = []
         currentEventIndex = 0
+        currentDraft = nil
         errorMessage = nil
         showSuccessToast = false
         isProcessing = false

@@ -9,8 +9,13 @@ import SwiftUI
 
 /// Displays a single event for confirmation with Save/Skip/Cancel options
 struct EventConfirmationView: View {
+    
+    // MARK: - Public Properties
+    
     @Bindable var viewModel: ScanViewModel
-
+    
+    // MARK: - Private Properties
+    
     var body: some View {
         VStack(spacing: 24) {
             // Counter (1/3, 2/3, etc.)
@@ -26,7 +31,7 @@ struct EventConfirmationView: View {
             }
 
             // Event Preview Card
-            if let event = viewModel.currentEvent {
+            if let event = viewModel.displayEvent {
                 VStack(alignment: .leading, spacing: 16) {
                     // Header
                     HStack {
@@ -47,35 +52,114 @@ struct EventConfirmationView: View {
 
                     Divider()
 
-                    // Event Details
+                    // Event Details (Editable)
                     VStack(alignment: .leading, spacing: 12) {
-                        EventDetailRowView(
-                            icon: "text.alignleft",
-                            label: "Name",
-                            value: event.name
-                        )
-
-                        EventDetailRowView(
-                            icon: "calendar",
-                            label: "Reminder Date",
-                            value: event.formattedDate
-                        )
-
-                        if let deadline = event.deadline {
-                            EventDetailRowView(
-                                icon: "clock.badge.exclamationmark",
-                                label: "Deadline",
-                                value: event.formattedDeadline ?? "",
-                                isDeadline: true
-                            )
+                        
+                        HStack(spacing: 12) {
+                            
+                            Image(systemName: "text.alignleft")
+                                .font(.body)
+                                .foregroundColor(.blue)
+                                .frame(width: 24)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Name")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                TextField("Event name", text: Binding(
+                                    get: { viewModel.displayEvent?.name ?? "" },
+                                    set: {
+                                        viewModel.ensureDraft()
+                                        viewModel.currentDraft?.name = $0
+                                    }
+                                ))
+                                .font(.body)
+                            }
                         }
-
-                        if let notes = event.notes, !notes.isEmpty {
-                            EventDetailRowView(
-                                icon: "note.text",
-                                label: "Notes",
-                                value: notes
-                            )
+                        
+                        Divider()
+                        
+                        //Date
+                        
+                        HStack(spacing: 12) {
+                            Image(systemName: "calendar")
+                                .font(.body)
+                                .foregroundColor(.blue)
+                                .frame(width: 24)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Reminder Date")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                DatePicker("", selection: Binding(
+                                    get: { viewModel.displayEvent?.date ?? Date() },
+                                    set: {
+                                        viewModel.ensureDraft()
+                                        viewModel.currentDraft?.date = $0
+                                    }
+                                ), displayedComponents: [.date, .hourAndMinute])
+                                .datePickerStyle(.compact)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        // Deadline Toggle + Picker
+                        
+                        HStack(spacing: 12) {
+                            Image(systemName: "clock.badge.exclamationmark")
+                                .font(.body)
+                                .foregroundColor(.red)
+                                .frame(width: 24)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Toggle("Set Deadline", isOn: Binding(
+                                    get: { viewModel.displayEvent?.deadline != nil },
+                                    set: { hasDeadline in
+                                        viewModel.ensureDraft()
+                                        viewModel.currentDraft?.deadline = hasDeadline ? Date() : nil
+                                    }))
+                                .font(.body)
+                                .tint(.red)
+                                
+                                if viewModel.displayEvent?.deadline != nil {
+                                    DatePicker("", selection: Binding(
+                                        get: { viewModel.displayEvent?.deadline ?? Date() },
+                                        set: {
+                                            viewModel.ensureDraft()
+                                            viewModel.currentDraft?.deadline = $0
+                                        })
+                                               , displayedComponents: [.date, .hourAndMinute])
+                                    .datePickerStyle(.compact)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        // Notes
+                        
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "note.text")
+                                .font(.body)
+                                .foregroundColor(.blue)
+                                .frame(width: 24)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Notes")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                TextField("Add notes...", text: Binding(
+                                    get: { viewModel.displayEvent?.notes ?? "" },
+                                    set: {
+                                        viewModel.ensureDraft()
+                                        viewModel.currentDraft?.notes = $0.isEmpty ? nil : $0 }
+                                ), axis: .vertical)
+                                .font(.body)
+                                .lineLimit(3...)
+                            }
                         }
                     }
                 }
@@ -94,6 +178,7 @@ struct EventConfirmationView: View {
                 // Save Button
                 Button {
                     Task {
+                        viewModel.ensureDraft()
                         await viewModel.saveCurrentEvent()
                     }
                 } label: {
