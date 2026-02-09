@@ -105,8 +105,8 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 // Extract time (if present)
                 let timeInfo = extractTime(from: trimmedLine)
 
-                // Extract event name
-                let eventName = extractEventName(from: trimmedLine, dateInfo: updatedDateInfo, timeInfo: timeInfo)
+                // Extract event name (look at surrounding lines too)
+                let eventName = extractEventName(from: lines, currentIndex: index, dateInfo: updatedDateInfo, timeInfo: timeInfo)
 
                 // Look for additional context
                 let notes = extractNotes(from: lines, currentIndex: index)
@@ -311,26 +311,87 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return nil
     }
 
-    private func extractEventName(from text: String, dateInfo: DateInfo, timeInfo: TimeInfo?) -> String {
-        var nameText = text.replacingOccurrences(of: dateInfo.matchedText, with: "")
+    private func extractEventName(from lines: [String], currentIndex: Int, dateInfo: DateInfo, timeInfo: TimeInfo?) -> String {
+        let dateLine = lines[currentIndex]
 
-        // Remove time string if present
+        // First, extract name from the date line itself (strip date + time)
+        var dateLineName = dateLine.replacingOccurrences(of: dateInfo.matchedText, with: "")
         if let timeInfo = timeInfo {
-            nameText = nameText.replacingOccurrences(of: timeInfo.matchedText, with: "")
+            dateLineName = dateLineName.replacingOccurrences(of: timeInfo.matchedText, with: "")
         }
+        dateLineName = cleanNameText(dateLineName)
+
+        // Collect valid surrounding lines (up to 3 lines before, 2 after)
+        var contextLines: [(index: Int, text: String)] = []
+
+        let searchStart = max(0, currentIndex - 3)
+        let searchEnd = min(lines.count - 1, currentIndex + 2)
+
+        for i in searchStart...searchEnd {
+            if i == currentIndex { continue }
+
+            let trimmed = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Skip empty/short lines
+            if trimmed.count < 3 { continue }
+            // Skip lines that contain dates
+            if extractDate(from: trimmed) != nil { continue }
+            // Skip lines that are just times
+            if extractTime(from: trimmed) != nil && trimmed.range(of: #"^\d{1,2}[.:]\d{2}\s*(Uhr|uhr|[ap]m)?$"#, options: .regularExpression) != nil { continue }
+            // Skip label-style metadata (e.g., "Datum:", "Preis:")
+            if trimmed.lowercased().range(of: #"^[a-zäöü]+:\s*$"#, options: .regularExpression) != nil { continue }
+            // Skip lines that look like prices, weights, codes
+            if trimmed.range(of: #"^[\d.,€$£%]+\s*(€|kg|g|ml|l)?$"#, options: .regularExpression) != nil { continue }
+            // Skip batch/lot codes (e.g., "L04", "PN DE-1201")
+            if trimmed.range(of: #"^[A-Z]{1,2}[\s-]?\d{2,}"#, options: .regularExpression) != nil && trimmed.count < 15 { continue }
+
+            contextLines.append((index: i, text: trimmed))
+        }
+
+        // If date line has a good name already, use it (possibly enriched with one context line)
+        if dateLineName.count >= 3 {
+            // Add one preceding context line if it looks like a title
+            if let preceding = contextLines.first(where: { $0.index < currentIndex }) {
+                let combined = preceding.text + " - " + dateLineName
+                if combined.count <= 80 {
+                    return combined
+                }
+            }
+            return dateLineName
+        }
+
+        // Date line had no name — use surrounding lines
+        // Prefer lines before the date (titles are usually above)
+        let beforeLines = contextLines.filter { $0.index < currentIndex }
+        let afterLines = contextLines.filter { $0.index > currentIndex }
+
+        var selectedLines = Array(beforeLines.prefix(2)) + Array(afterLines.prefix(1))
+        selectedLines.sort { $0.index < $1.index }
+
+        let result = selectedLines.map { $0.text }.joined(separator: "\n")
+
+        if result.isEmpty || result.count < 3 {
+            return ""
+        }
+
+        return result
+    }
+
+    /// Clean up extracted name text by removing weekday abbreviations and trimming
+    private func cleanNameText(_ text: String) -> String {
+        var nameText = text
 
         // Remove weekday abbreviations (e.g., "Sa.", "Mo.", "Sun.", etc.)
         let weekdayAbbreviations = ["mo.", "di.", "mi.", "do.", "fr.", "sa.", "so.",
                                    "mon.", "tue.", "wed.", "thu.", "fri.", "sat.", "sun."]
         for abbr in weekdayAbbreviations {
-            // Remove weekday abbreviation (case insensitive)
             let pattern = "\\b" + NSRegularExpression.escapedPattern(for: abbr)
             if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
                 nameText = regex.stringByReplacingMatches(in: nameText, range: NSRange(nameText.startIndex..., in: nameText), withTemplate: "")
             }
         }
 
-        nameText = nameText.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?"))
+        nameText = nameText.trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?•"))
         nameText = nameText.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if nameText.isEmpty || nameText.count < 3 {

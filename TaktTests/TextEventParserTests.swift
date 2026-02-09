@@ -851,4 +851,50 @@ struct TextEventParserTests {
         #expect(components.month == 8)
         #expect(components.year == 2026)
     }
+
+    // MARK: - Multi-line Event Name Extraction Tests
+
+    @Test("Cinema ticket: Event name on line before date")
+    func testCinemaTicketNameBeforeDate() throws {
+        let text = """
+        The Batman
+        18.05.2026 19:00
+        Cinestar Berlin
+        """
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+
+        // Name should include "The Batman" from the line above the date
+        #expect(event.name.contains("The Batman"), "Event name should contain 'The Batman' from line before date, got: '\(event.name)'")
+    }
+
+    @Test("Concert poster: Title above date")
+    func testConcertPosterTitleAboveDate() throws {
+        let text = """
+        Radiohead
+        Live in Concert
+        25.07.2026 20:00
+        Waldbühne Berlin
+        """
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+
+        // Name should capture text from lines before the date
+        #expect(event.name.contains("Radiohead") || event.name.contains("Live in Concert"),
+                "Event name should contain title from lines above date, got: '\(event.name)'")
+    }
+
+    @Test("Same-line name still works")
+    func testSameLineNameStillWorks() throws {
+        let text = "Amazon Prime payment 25.12.2026"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+        let event = try #require(events.first)
+        #expect(event.name.contains("Amazon"), "Same-line name extraction should still work, got: '\(event.name)'")
+    }
 }
