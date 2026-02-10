@@ -450,9 +450,24 @@ final class TextEventParser: TextEventParserServiceProtocol {
             return allEvents
         }
 
-        // Normalize text for NSDataDetector: replace newlines with spaces
-        // This helps NSDataDetector parse dates like "May\n18" -> "May 18"
-        let normalizedText = text.replacingOccurrences(of: "\n", with: " ")
+        // Normalize text for NSDataDetector:
+        // 1. Replace newlines with spaces (helps parse "May\n18" -> "May 18")
+        // 2. Capitalize month names so NSDataDetector recognizes "26 may" -> "26 May"
+        let monthNames = ["january", "february", "march", "april", "may", "june",
+                          "july", "august", "september", "october", "november", "december",
+                          "jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+        var normalizedText = text.replacingOccurrences(of: "\n", with: " ")
+        for month in monthNames {
+            // Replace lowercase/mixed-case month names with capitalized versions
+            if let regex = try? NSRegularExpression(pattern: "\\b\(month)\\b", options: .caseInsensitive) {
+                let capitalized = month.prefix(1).uppercased() + month.dropFirst()
+                normalizedText = regex.stringByReplacingMatches(
+                    in: normalizedText,
+                    range: NSRange(normalizedText.startIndex..., in: normalizedText),
+                    withTemplate: capitalized
+                )
+            }
+        }
 
         let nsText = normalizedText as NSString
         let matches = detector.matches(in: normalizedText, options: [], range: NSRange(location: 0, length: nsText.length))
