@@ -90,22 +90,30 @@ struct EventsListView: View {
     // MARK: - Events List
 
     private var eventsList: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                ForEach(viewModel.filteredEvents) { event in
-                    EventRow(event: event)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedEvent = event
+        List {
+            ForEach(viewModel.filteredEvents) { event in
+                EventRow(event: event)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedEvent = event
+                    }
+                    .listRowInsets(EdgeInsets(top: 0, leading: TaktTheme.contentPadding, bottom: 0, trailing: TaktTheme.contentPadding))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparatorTint(TaktTheme.cardBorder)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            Task {
+                                await viewModel.deleteEvents(withIds: [event.id])
+                            }
+                        } label: {
+                            Label("Delete", systemImage: "trash")
                         }
-
-                    Divider()
-                        .background(TaktTheme.cardBorder)
-                }
+                    }
             }
-            .padding(.horizontal, TaktTheme.contentPadding)
-            .padding(.bottom, 80)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .padding(.bottom, 60)
         .onChange(of: viewModel.searchText) { _, newValue in
             Task {
                 await viewModel.searchEvents(query: newValue)
