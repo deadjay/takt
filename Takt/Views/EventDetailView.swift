@@ -4,140 +4,178 @@ struct EventDetailView: View {
     let event: Event
     @Binding var events: [Event]
     @Environment(\.presentationMode) var presentationMode
-    @State private var showingEditSheet = false
     @State private var showingDeleteAlert = false
-    
+
+    // Editable fields
+    @State private var name: String
+    @State private var date: Date
+    @State private var deadline: Date?
+    @State private var notes: String
+    @State private var hasDeadline: Bool
+
+    init(event: Event, events: Binding<[Event]>) {
+        self.event = event
+        self._events = events
+        self._name = State(initialValue: event.name)
+        self._date = State(initialValue: event.date)
+        self._deadline = State(initialValue: event.deadline)
+        self._notes = State(initialValue: event.notes ?? "")
+        self._hasDeadline = State(initialValue: event.deadline != nil)
+    }
+
+    // TODO: 🎨 STYLE THIS SHEET (refer to EditEventReference.html)
+    //
+    // Optional enhancements you can add:
+    //   - Drag handle (36×5px, silver, centered, rounded) at the top
+    //   - Orange accent gradient line at top (6px, 0.3 opacity)
+    //   - Orange focus ring on text fields (2px border + 4px glow when editing)
+    //   - Sheet corner radius: .presentationCornerRadius(42) if you want
+
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    // Event header
+                    // Title input
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(event.name)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .lineLimit(nil)
-                        
-                        HStack {
-                            Label(event.formattedDate, systemImage: "calendar")
-                                .font(.headline)
-                                .foregroundColor(TaktTheme.accent)
-                            
-                            Spacer()
-                            
-                            if event.isOverdue {
-                                Label("Overdue", systemImage: "exclamationmark.triangle.fill")
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.red.opacity(0.1))
-                                    .cornerRadius(8)
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(TaktTheme.cardBackground)
-                    .cornerRadius(12)
-                    
-                    // Event details
-                    VStack(alignment: .leading, spacing: 16) {
-                        if let deadline = event.deadline {
-                            DetailRow(
-                                icon: "clock",
-                                title: "Deadline",
-                                value: formatDate(deadline),
-                                color: event.isOverdue ? .red : .orange
+                        Text("EVENT TITLE")
+                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                            .foregroundColor(TaktTheme.textMuted)
+                            .tracking(1)
+
+                        TextField("What is the event?", text: $name)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(TaktTheme.textPrimary)
+                            .padding(16)
+                            .background(TaktTheme.cardBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
                             )
-                        }
-                        
-                        DetailRow(
-                            icon: "note.text",
-                            title: "Notes",
-                            value: event.notes ?? "No notes",
-                            color: .secondary
-                        )
-                        
-                        DetailRow(
-                            icon: "calendar.badge.plus",
-                            title: "Created",
-                            value: formatDate(event.createdAt),
-                            color: .secondary
-                        )
-                        
-                        DetailRow(
-                            icon: "checkmark.circle",
-                            title: "Status",
-                            value: event.isCompleted ? "Completed" : "Pending",
-                            color: event.isCompleted ? .green : .blue
-                        )
                     }
-                    .padding()
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                    
+
+                    // Event date
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("EVENT DATE")
+                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                            .foregroundColor(TaktTheme.textMuted)
+                            .tracking(1)
+
+                        DatePicker("", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                            .labelsHidden()
+                            .tint(TaktTheme.accent)
+                    }
+
+                    // Deadline toggle + picker
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("DEADLINE")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(TaktTheme.textMuted)
+                                .tracking(1)
+
+                            Spacer()
+
+                            Toggle("", isOn: $hasDeadline)
+                                .labelsHidden()
+                                .tint(TaktTheme.accent)
+                        }
+
+                        if hasDeadline {
+                            DatePicker("", selection: Binding(
+                                get: { deadline ?? Date() },
+                                set: { deadline = $0 }
+                            ), displayedComponents: [.date, .hourAndMinute])
+                            .labelsHidden()
+                            .tint(TaktTheme.accent)
+                        }
+                    }
+
+                    // Deadline badge (read-only indicator)
+                    if hasDeadline, let daysLeft = computeDaysLeft() {
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(daysLeft == "Overdue" ? Color.red : TaktTheme.accent)
+                                .frame(width: 8, height: 8)
+
+                            Text(daysLeft.uppercased())
+                                .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                                .foregroundColor(daysLeft == "Overdue" ? .red : TaktTheme.accent)
+                        }
+                    }
+
+                    // Notes
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("NOTES")
+                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                            .foregroundColor(TaktTheme.textMuted)
+                            .tracking(1)
+
+                        TextEditor(text: $notes)
+                            .font(.system(size: 16))
+                            .foregroundColor(TaktTheme.textPrimary)
+                            .scrollContentBackground(.hidden)
+                            .frame(minHeight: 120)
+                            .padding(16)
+                            .background(TaktTheme.cardBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
+                            )
+                    }
+
+                    Spacer(minLength: 20)
+
                     // Action buttons
                     VStack(spacing: 12) {
-                        Button(action: {
-                            toggleEventCompletion()
-                        }) {
-                            HStack {
-                                Image(systemName: event.isCompleted ? "xmark.circle" : "checkmark.circle")
-                                Text(event.isCompleted ? "Mark as Pending" : "Mark as Completed")
-                            }
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(event.isCompleted ? Color.orange : Color.green)
-                            .cornerRadius(12)
+                        // Save button
+                        Button {
+                            saveChanges()
+                        } label: {
+                            Text("SAVE EVENT")
+                                .font(.system(size: 16, weight: .bold))
+                                .tracking(0.5)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 20)
+                                .background(TaktTheme.accent)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .shadow(color: TaktTheme.accent.opacity(0.3), radius: 10, y: 5)
                         }
-                        
-                        Button(action: {
-                            showingEditSheet = true
-                        }) {
-                            HStack {
-                                Image(systemName: "pencil")
-                                Text("Edit Event")
-                            }
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(TaktTheme.accent)
-                            .cornerRadius(12)
-                        }
-                        
-                        Button(action: {
+                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .opacity(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)
+
+                        // Delete button
+                        Button {
                             showingDeleteAlert = true
-                        }) {
-                            HStack {
-                                Image(systemName: "trash")
-                                Text("Delete Event")
-                            }
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(12)
+                        } label: {
+                            Text("DELETE PERMANENTLY")
+                                .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                                .tracking(0.5)
+                                .foregroundColor(.red.opacity(0.8))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
                         }
                     }
-                    .padding()
                 }
-                .padding()
+                .padding(TaktTheme.contentPadding)
             }
-            .navigationTitle("Event Details")
+            .background(TaktTheme.appBackground)
+            .navigationTitle("Edit Event")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
-                trailing: Button("Done") {
+                leading: Button("Cancel") {
                     presentationMode.wrappedValue.dismiss()
                 }
+                .foregroundColor(TaktTheme.textMuted),
+                trailing: Button("Save") {
+                    saveChanges()
+                }
+                .foregroundColor(TaktTheme.accent)
+                .fontWeight(.semibold)
+                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             )
-            .sheet(isPresented: $showingEditSheet) {
-                EditEventView(event: event, events: $events)
-            }
             .alert("Delete Event", isPresented: $showingDeleteAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
@@ -148,52 +186,36 @@ struct EventDetailView: View {
             }
         }
     }
-    
-    private func toggleEventCompletion() {
-        if let index = events.firstIndex(where: { $0.id == event.id }) {
-            events[index].isCompleted.toggle()
-        }
+
+    // MARK: - Actions
+
+    private func saveChanges() {
+        guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
+
+        events[index].name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        events[index].date = date
+        events[index].deadline = hasDeadline ? deadline : nil
+        events[index].notes = notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        presentationMode.wrappedValue.dismiss()
     }
-    
+
     private func deleteEvent() {
         events.removeAll { $0.id == event.id }
         presentationMode.wrappedValue.dismiss()
     }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .full
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-}
 
-struct DetailRow: View {
-    let icon: String
-    let title: String
-    let value: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(color)
-                .frame(width: 24)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .textCase(.uppercase)
-                
-                Text(value)
-                    .font(.body)
-                    .foregroundColor(.primary)
-            }
-            
-            Spacer()
-        }
+    private func computeDaysLeft() -> String? {
+        guard let dl = hasDeadline ? (deadline ?? self.deadline) : nil else { return nil }
+        let calendar = Calendar.current
+        let now = calendar.startOfDay(for: Date())
+        let target = calendar.startOfDay(for: dl)
+        let days = calendar.dateComponents([.day], from: now, to: target).day ?? 0
+
+        if days < 0 { return "Overdue" }
+        if days == 0 { return "Today" }
+        if days == 1 { return "1 Day Left" }
+        return "\(days) Days Left"
     }
 }
 
@@ -208,5 +230,3 @@ struct DetailRow: View {
         events: .constant([])
     )
 }
-
-
