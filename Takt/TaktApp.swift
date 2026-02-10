@@ -12,6 +12,7 @@ struct TaktApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(viewModel: DIContainer.shared.makeContentViewModel())
+                .dismissKeyboardOnTap()
         }
     }
 }
