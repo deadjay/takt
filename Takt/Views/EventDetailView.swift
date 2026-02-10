@@ -21,7 +21,7 @@ struct EventDetailView: View {
                         HStack {
                             Label(event.formattedDate, systemImage: "calendar")
                                 .font(.headline)
-                                .foregroundColor(.blue)
+                                .foregroundColor(TaktTheme.accent)
                             
                             Spacer()
                             
@@ -37,7 +37,7 @@ struct EventDetailView: View {
                         }
                     }
                     .padding()
-                    .background(Color.blue.opacity(0.05))
+                    .background(TaktTheme.cardBackground)
                     .cornerRadius(12)
                     
                     // Event details
@@ -105,7 +105,7 @@ struct EventDetailView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.blue)
+                            .background(TaktTheme.accent)
                             .cornerRadius(12)
                         }
                         

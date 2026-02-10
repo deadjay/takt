@@ -20,7 +20,7 @@ struct CalendarView: View {
                     Button(action: previousMonth) {
                         Image(systemName: "chevron.left")
                             .font(.title2)
-                            .foregroundColor(.blue)
+                            .foregroundColor(TaktTheme.accent)
                     }
                     
                     Spacer()
@@ -34,7 +34,7 @@ struct CalendarView: View {
                     Button(action: nextMonth) {
                         Image(systemName: "chevron.right")
                             .font(.title2)
-                            .foregroundColor(.blue)
+                            .foregroundColor(TaktTheme.accent)
                     }
                 }
                 .padding()
@@ -110,7 +110,7 @@ struct CalendarView: View {
                         }
                     }
                 }
-                .background(Color.gray.opacity(0.05))
+                .background(TaktTheme.cardBackground)
                 
                 Spacer()
             }
@@ -185,18 +185,18 @@ struct DayCell: View {
         VStack(spacing: 2) {
             Text("\(calendar.component(.day, from: date))")
                 .font(.system(size: 16, weight: isToday ? .bold : .medium))
-                .foregroundColor(isToday ? .white : (isSelected ? .blue : .primary))
+                .foregroundColor(isToday ? .white : (isSelected ? TaktTheme.accent : .primary))
                 .frame(width: 32, height: 32)
                 .background(
                     Circle()
-                        .fill(isToday ? Color.blue : (isSelected ? Color.blue.opacity(0.2) : Color.clear))
+                        .fill(isToday ? TaktTheme.accent : (isSelected ? TaktTheme.accent.opacity(0.2) : Color.clear))
                 )
             
             // Event indicators
             HStack(spacing: 2) {
                 ForEach(Array(events.prefix(3)), id: \.id) { _ in
                     Circle()
-                        .fill(Color.blue)
+                        .fill(TaktTheme.accent)
                         .frame(width: 4, height: 4)
                 }
             }

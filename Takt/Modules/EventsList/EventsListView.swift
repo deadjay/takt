@@ -40,7 +40,7 @@ struct EventsListView: View {
         VStack(spacing: 16) {
             Image(systemName: "calendar.badge.plus")
                 .font(.system(size: 60))
-                .foregroundColor(.gray)
+                .foregroundColor(TaktTheme.textMuted)
 
             Text("No Events Yet")
                 .font(.title2)

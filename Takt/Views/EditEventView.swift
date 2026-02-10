@@ -49,7 +49,7 @@ struct EditEventView: View {
                         saveChanges()
                     }
                     .frame(maxWidth: .infinity)
-                    .foregroundColor(.blue)
+                    .foregroundColor(TaktTheme.accent)
                 }
             }
             .navigationTitle("Edit Event")
