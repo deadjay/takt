@@ -10,7 +10,8 @@ import UIKit
 
 struct ImageInputButton: View {
     let icon: String
-    let title: String
+    let label: String      // e.g. "01 / CAPTURE"
+    let title: String      // e.g. "Make Photo"
     @Binding var imageData: Data?
     let sourceType: SourceType
 
@@ -23,26 +24,41 @@ struct ImageInputButton: View {
     }
 
     var body: some View {
+        // TODO: You implement the card design here!
+        // Design spec:
+        // - Square card, fills available width (use .frame(maxWidth: .infinity))
+        // - Aspect ratio 1:1 (square)
+        // - Background: TaktTheme.cardBackground
+        // - Corner radius: TaktTheme.cardCornerRadius (26pt)
+        // - Border: 1px TaktTheme.cardBorder
+        // - Content aligned bottom-left:
+        //   - Label text (e.g. "01 / CAPTURE") in TaktTheme.cardLabelFont, TaktTheme.textMuted color
+        //   - Title text (e.g. "Make Photo") in TaktTheme.cardTitleFont, TaktTheme.textPrimary color
+        // - Padding: 24pt inside
+        //
+        // Wrap everything in a Button that sets showingPicker = true
+        // Keep the .sheet and .onChange modifiers below
+
         Button {
             showingPicker = true
         } label: {
-            HStack {
-                Image(systemName: icon)
-                    .font(.title3)
-                Text(title)
-                    .font(.headline)
+            VStack(alignment: .leading, spacing: 8) {
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text(label.uppercased())
+                    .font(TaktTheme.cardLabelFont)
+                    .foregroundColor(TaktTheme.textMuted)
+                Text(title)
+                    .font(TaktTheme.cardTitleFont)
+                    .foregroundColor(TaktTheme.textPrimary)
             }
-            .foregroundColor(.primary)
-            .padding()
-            .background(Color.blue.opacity(0.1))
-            .cornerRadius(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+            .aspectRatio(1, contentMode: .fit)
+            .background(TaktTheme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius)
+                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
             )
         }
         .sheet(isPresented: $showingPicker) {

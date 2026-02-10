@@ -74,85 +74,108 @@ private struct IdleStateView: View {
     @Binding var showSuccessCheckmark: Bool
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
+        ZStack {
+            // Background
+            TaktTheme.appBackground
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
                 // Header
-                VStack(spacing: 12) {
-                    Image(systemName: "doc.text.viewfinder")
-                        .font(.system(size: 48))
-                        .foregroundColor(.cyan)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Takt.")
+                        .font(.system(size: 30, weight: .heavy))
+                        .tracking(-1.6)
+                        .foregroundColor(TaktTheme.textPrimary)
+                        .textCase(.uppercase)
 
-                    Text("Scan Document")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-
-                    Text("Point your camera, upload an image, or paste text to extract deadlines")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+                    Text("Snap a photo, upload an image, or paste text — Takt extracts dates and creates reminders automatically.")
+                        .font(.system(size: 13))
+                        .foregroundColor(TaktTheme.textSecondary)
+                        .lineSpacing(2)
                 }
-                .padding(.top, 40)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.top, 16)
 
-                // Input Methods
-                VStack(spacing: 20) {
-                    // Camera Button
+                // Two square action cards in a row
+                HStack(spacing: 16) {
+                    // TODO: You implement ActionCard views here
+                    // Camera card (01 / CAPTURE - "Make Photo")
                     ImageInputButton(
                         icon: "camera.fill",
-                        title: "Scan with Camera",
+                        label: "01 / CAPTURE",
+                        title: "Make Photo",
                         imageData: $viewModel.selectedImageData,
                         sourceType: .camera
                     )
 
-                    OrSeparator()
-
-                    // Upload Button
+                    // Upload card (02 / IMPORT - "Attach Image")
                     ImageInputButton(
                         icon: "photo.fill",
-                        title: "Upload Image",
+                        label: "02 / IMPORT",
+                        title: "Attach Image",
                         imageData: $viewModel.selectedImageData,
                         sourceType: .photoLibrary
                     )
-
-                    OrSeparator()
-
-                    // Text Input Field with Paste Button
-                    TextInputField(
-                        text: $viewModel.inputText,
-                        onPaste: {
-                            viewModel.pasteFromClipboard()
-                        }
-                    )
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.top, 24)
 
-                // Process Button (only show if input exists)
-                if viewModel.selectedImageData != nil || !viewModel.inputText.isEmpty {
-                    Button {
-                        Task {
-                            if viewModel.selectedImageData != nil {
-                                await viewModel.processImage()
-                            } else {
-                                await viewModel.processText()
-                            }
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "sparkles")
-                            Text("Extract Events")
-                        }
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .cornerRadius(12)
+                // Text input card
+                TextInputField(
+                    text: $viewModel.inputText,
+                    onPaste: {
+                        viewModel.pasteFromClipboard()
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                }
+                )
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.top, 16)
 
-                Spacer(minLength: 40)
+                Spacer()
+
+                // Quick Tips
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("QUICK TIPS")
+                        .font(TaktTheme.cardLabelFont)
+                        .foregroundColor(TaktTheme.textMuted)
+                        .padding(.bottom, 2)
+
+                    TipRow(text: "Works with tickets, receipts, food labels, subscriptions")
+                    TipRow(text: "Detects dates, times, and deadlines automatically")
+                    TipRow(text: "Everything stays on your device — fully offline")
+                }
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.bottom, 20)
+
+                // Magic button - always visible at bottom
+                Button {
+                    Task {
+                        if viewModel.selectedImageData != nil {
+                            await viewModel.processImage()
+                        } else {
+                            await viewModel.processText()
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 12) {
+                        Text("DETECT EVENTS")
+                            .font(TaktTheme.magicButtonFont)
+                            .tracking(1.8)
+
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 18, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: TaktTheme.magicButtonHeight)
+                    .background(TaktTheme.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: TaktTheme.magicButtonCornerRadius))
+                    .shadow(color: TaktTheme.accent.opacity(0.30), radius: 15, y: 8)
+                }
+                .disabled(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty)
+                .opacity(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty ? 0.5 : 1.0)
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.bottom, 16)
             }
         }
     }
@@ -179,24 +202,17 @@ private struct ProcessingView: View {
 
 // MARK: - Supporting Components
 
-private struct OrSeparator: View {
+private struct TipRow: View {
+    let text: String
+
     var body: some View {
-        HStack {
-            Rectangle()
-                .fill(Color.gray.opacity(0.3))
-                .frame(height: 1)
-
-            Text("OR")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 8)
-
-            Rectangle()
-                .fill(Color.gray.opacity(0.3))
-                .frame(height: 1)
+        HStack(alignment: .top, spacing: 8) {
+            Text("•")
+                .foregroundColor(TaktTheme.textMuted)
+            Text(text)
+                .font(.system(size: 12))
+                .foregroundColor(TaktTheme.textMuted)
         }
-        .padding(.vertical, 4)
     }
 }
 
@@ -205,31 +221,43 @@ private struct TextInputField: View {
     let onPaste: () -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
-            TextField("Type or paste text here e.g. /Cancel Amazon latest 25.06.2026/", text: $text)
-                .textFieldStyle(.plain)
-                .padding(.leading, 16)
-                .padding(.vertical, 14)
+        // TODO: You can restyle this card to match the design!
+        // It should look like the action cards but wider (full width, not square)
+        // Label: "03 / INPUT", Title area is the text field
 
-            Button {
-                onPaste()
-            } label: {
-                Text("Paste")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.blue)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(6)
+        VStack(alignment: .leading, spacing: 8) {
+            Text("03 / INPUT")
+                .font(TaktTheme.cardLabelFont)
+                .foregroundColor(TaktTheme.textMuted)
+                .textCase(.uppercase)
+
+            HStack(spacing: 8) {
+                TextField("Paste or type text...", text: $text)
+                    .textFieldStyle(.plain)
+                    .font(TaktTheme.cardTitleFont)
+                    .foregroundColor(TaktTheme.textPrimary)
+
+                Button {
+                    onPaste()
+                } label: {
+                    Text("Paste")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(TaktTheme.accent)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(TaktTheme.accent.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
             }
-            .padding(.trailing, 8)
         }
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(12)
+        .padding(24)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(TaktTheme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius)
+                .stroke(TaktTheme.cardBorder, lineWidth: 1)
         )
     }
 }
