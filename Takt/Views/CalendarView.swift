@@ -2,10 +2,10 @@ import SwiftUI
 
 struct CalendarView: View {
     @Binding var events: [Event]
+    @Binding var showCalendar: Bool
     @State private var selectedDate = Date()
-    @State private var showingEventDetail = false
     @State private var selectedEvent: Event?
-    
+
     private let calendar = Calendar.current
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -15,7 +15,7 @@ struct CalendarView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-                // Month header
+                // Month header (with list button top-right)
                 HStack {
                     Button(action: previousMonth) {
                         Image(systemName: "chevron.left")
@@ -102,7 +102,6 @@ struct CalendarView: View {
                                     EventRow(event: event)
                                         .onTapGesture {
                                             selectedEvent = event
-                                            showingEventDetail = true
                                         }
                                 }
                             }
@@ -113,11 +112,31 @@ struct CalendarView: View {
                 .background(TaktTheme.cardBackground)
                 
                 Spacer()
-            }
-            .sheet(isPresented: $showingEventDetail) {
-                if let event = selectedEvent {
-                    EventDetailView(event: event, events: $events)
+
+                // Bottom bar with list-view toggle (same position as EventsListView's calendar button)
+                HStack {
+                    Spacer()
+
+                    Button {
+                        showCalendar = false
+                    } label: {
+                        Image(systemName: "list.bullet")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(TaktTheme.textPrimary)
+                            .frame(width: 52, height: 52)
+                            .background(TaktTheme.cardBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
+                            )
+                    }
                 }
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.vertical, 12)
+            }
+            .sheet(item: $selectedEvent) { event in
+                EventDetailView(event: event, events: $events)
             }
     }
     
@@ -208,42 +227,78 @@ struct DayCell: View {
 
 struct EventRow: View {
     let event: Event
-    
+
+    // TODO: 🎨 REDESIGN THIS ROW (refer to EventsListReference.html)
+    //
+    // Layout: HStack with two sides
+    //   LEFT (event-info):
+    //     - event.name  → bold, 18pt, single line
+    //     - event.notes → 14pt, secondary color, single line (or "No description")
+    //   RIGHT (event-meta):
+    //     - event.shortDateLabel → monospaced, bold, 14pt, silver background pill
+    //     - If deadline exists:
+    //       - Small orange dot (8pt circle, TaktTheme.accent)
+    //       - event.daysLeftLabel → orange badge, monospaced, 10pt, uppercase
+    //
+    // Style: No card/shadow. Just a bottom border (Divider or 1px line).
+    //        Padding: 24pt vertical, 0 horizontal.
+    //        No chevron arrow.
+    //
+    // Available data:
+    //   event.name            → "Design Review"
+    //   event.notes           → "Quarterly audit..." (optional)
+    //   event.shortDateLabel  → "OCT 24"
+    //   event.deadline        → non-nil means it's a deadline event
+    //   event.daysLeftLabel   → "4 Days Left" / "Today" / "Overdue" (optional)
+    //   event.isOverdue       → true if past deadline
+
     var body: some View {
-        HStack {
+        HStack(alignment: .top, spacing: 16) {
+            // Left: name + description
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.name)
-                    .font(.headline)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(TaktTheme.textPrimary)
                     .lineLimit(1)
-                
-                HStack(spacing: 8) {
-                    Label(event.formattedDate, systemImage: "calendar")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    if let deadline = event.formattedDeadline {
-                        Label(deadline, systemImage: "clock")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+
+                Text(event.notes ?? "No description")
+                    .font(.system(size: 14))
+                    .foregroundColor(TaktTheme.textSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            // Right: date badge + deadline
+            VStack(alignment: .trailing, spacing: 8) {
+                // TODO: Style this as a silver pill badge (monospaced, bold)
+                Text(event.shortDateLabel)
+                    .font(.system(size: 14, weight: .heavy, design: .monospaced))
+                    .foregroundColor(TaktTheme.textPrimary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(TaktTheme.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                // TODO: Style the deadline badge (orange dot + label)
+                if let daysLeft = event.daysLeftLabel {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(TaktTheme.accent)
+                            .frame(width: 8, height: 8)
+
+                        Text(daysLeft.uppercased())
+                            .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
+                            .background(TaktTheme.accent)
+                            .clipShape(RoundedRectangle(cornerRadius: 2))
                     }
                 }
             }
-            
-            Spacer()
-            
-            if event.isOverdue {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(.red)
-            }
-            
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.secondary)
         }
-        .padding()
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .cornerRadius(8)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+        .padding(.vertical, 20)
     }
 }
 
@@ -251,7 +306,7 @@ struct EventRow: View {
     CalendarView(events: .constant([
         Event(name: "Team Meeting", date: Date(), deadline: Date().addingTimeInterval(86400)),
         Event(name: "Project Deadline", date: Date().addingTimeInterval(86400), deadline: Date().addingTimeInterval(172800))
-    ]))
+    ]), showCalendar: .constant(true))
 }
 
 

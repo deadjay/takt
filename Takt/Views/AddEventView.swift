@@ -38,7 +38,7 @@ struct AddEventView: View {
                         addEvent()
                     }
                     .frame(maxWidth: .infinity)
-                    .foregroundColor(.blue)
+                    .foregroundColor(TaktTheme.accent)
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
