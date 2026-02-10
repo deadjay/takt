@@ -97,6 +97,22 @@ private struct IdleStateView: View {
                 .padding(.horizontal, TaktTheme.contentPadding)
                 .padding(.top, 16)
 
+                // Quick Tips (above buttons, closer to subtitle)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("QUICK TIPS")
+                        .font(TaktTheme.cardLabelFont)
+                        .foregroundColor(TaktTheme.textMuted)
+                        .padding(.bottom, 2)
+
+                    TipRow(text: "Works with tickets, receipts, food labels, subscriptions")
+                    TipRow(text: "Detects dates, times, and deadlines automatically")
+                    TipRow(text: "Everything stays on your device — fully offline")
+                }
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.top, 20)
+
+                Spacer()
+
                 // Two square action cards in a row
                 HStack(spacing: 16) {
                     // TODO: You implement ActionCard views here
@@ -119,7 +135,10 @@ private struct IdleStateView: View {
                     )
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 24)
+
+                // "or" separator
+                OrSeparator()
+                    .padding(.horizontal, TaktTheme.contentPadding)
 
                 // Text input card
                 TextInputField(
@@ -129,23 +148,6 @@ private struct IdleStateView: View {
                     }
                 )
                 .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 16)
-
-                Spacer()
-
-                // Quick Tips
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("QUICK TIPS")
-                        .font(TaktTheme.cardLabelFont)
-                        .foregroundColor(TaktTheme.textMuted)
-                        .padding(.bottom, 2)
-
-                    TipRow(text: "Works with tickets, receipts, food labels, subscriptions")
-                    TipRow(text: "Detects dates, times, and deadlines automatically")
-                    TipRow(text: "Everything stays on your device — fully offline")
-                }
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.bottom, 20)
 
                 // Magic button - always visible at bottom
                 Button {
@@ -175,9 +177,29 @@ private struct IdleStateView: View {
                 .disabled(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty)
                 .opacity(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty ? 0.5 : 1.0)
                 .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.top, 12)
                 .padding(.bottom, 16)
             }
         }
+    }
+}
+
+// MARK: - Or Separator
+
+private struct OrSeparator: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            Rectangle()
+                .fill(TaktTheme.cardBorder)
+                .frame(height: 1)
+            Text("or")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(TaktTheme.textMuted)
+            Rectangle()
+                .fill(TaktTheme.cardBorder)
+                .frame(height: 1)
+        }
+        .padding(.vertical, 8)
     }
 }
 
