@@ -51,6 +51,34 @@ struct EventConfirmationView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
 
+                        // Source image miniature
+                        if let imageData = viewModel.selectedImageData,
+                           let uiImage = UIImage(data: imageData) {
+                            HStack {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 64, height: 64)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(TaktTheme.cardBorder, lineWidth: 1)
+                                    )
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("SOURCE IMAGE")
+                                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                        .foregroundColor(TaktTheme.textMuted)
+                                        .tracking(1)
+                                    Text("Scanned input")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(TaktTheme.textSecondary)
+                                }
+
+                                Spacer()
+                            }
+                        }
+
                         // Event Title
                         VStack(alignment: .leading, spacing: 8) {
                             Text("EVENT TITLE")
