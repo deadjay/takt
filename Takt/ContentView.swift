@@ -21,25 +21,15 @@ struct ContentView: View {
                     Text("Scan")
                 }
 
-            // Events Tab (List/Calendar Toggle)
-            NavigationView {
-                Group {
-                    if showCalendarInEventsTab {
-                        CalendarView(events: $viewModel.events)
-                    } else {
-                        EventsListView(viewModel: DIContainer.shared.makeEventsListViewModel())
-                    }
-                }
-                .navigationTitle("Events")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            showCalendarInEventsTab.toggle()
-                        } label: {
-                            Image(systemName: showCalendarInEventsTab ? "list.bullet" : "calendar")
-                        }
-                    }
+            // Events Tab — ZStack keeps tab identity stable
+            ZStack {
+                if showCalendarInEventsTab {
+                    CalendarView(events: $viewModel.events, showCalendar: $showCalendarInEventsTab)
+                } else {
+                    EventsListView(
+                        viewModel: DIContainer.shared.makeEventsListViewModel(),
+                        showCalendar: $showCalendarInEventsTab
+                    )
                 }
             }
             .tabItem {
