@@ -94,6 +94,8 @@ final class TextEventParser: TextEventParserServiceProtocol {
                            lineToCheck.contains("best before") ||
                            lineToCheck.contains("use by") ||
                            lineToCheck.contains("mhd") ||
+                           lineToCheck.contains("bewerbungsschluss") ||
+                           lineToCheck.contains("fällig am") ||
                            lineToCheck.range(of: "bis\\s*[:.]?\\s*$", options: .regularExpression) != nil {  // "bis:" or "bis." at end
                             foundDeadlineKeyword = true
                             break
@@ -112,7 +114,9 @@ final class TextEventParser: TextEventParserServiceProtocol {
                            currentLower.contains("fällig seit") ||
                            currentLower.contains("abholung bis") ||
                            currentLower.contains("verw. bis") ||
-                           currentLower.contains("verwendbar bis") {
+                           currentLower.contains("verwendbar bis") ||
+                           currentLower.contains("bewerbungsschluss") ||
+                           currentLower.contains("fällig am") {
                             foundDeadlineKeyword = true
                         }
                     }
@@ -699,7 +703,9 @@ final class TextEventParser: TextEventParserServiceProtocol {
                             lowercasedContext.contains("fällig seit") ||
                             lowercasedContext.contains("abholung bis") ||
                             lowercasedContext.contains("verw. bis") ||
-                            lowercasedContext.contains("verwendbar bis")
+                            lowercasedContext.contains("verwendbar bis") ||
+                            lowercasedContext.contains("bewerbungsschluss") ||
+                            lowercasedContext.contains("fällig am")
 
             // Calculate priority score for this match
             // Higher priority = more likely to be the relevant date
@@ -936,7 +942,7 @@ final class TextEventParser: TextEventParserServiceProtocol {
         DatePattern(regex: #"(\d{1,2})\.(\d{1,2})\.(\d{4})\s+bis\s+\d{1,2}\.\d{1,2}\.\d{4}"#, format: "dd.MM.yyyy", isDeadline: false),
 
         // German with deadline keywords (with year - must come before no-year patterns)
-        DatePattern(regex: #"bis\s+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
+        DatePattern(regex: #"bis[:\s]+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
         DatePattern(regex: #"fällig\s+(?:am\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
         DatePattern(regex: #"(?:return|rücksendung)\s+(?:by|bis)\s+(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
         DatePattern(regex: #"(?:return|rücksendung)\s+(?:by|bis)\s+(\d{1,2})/(\d{1,2})/(\d{4})"#, format: "MM/dd/yyyy", isDeadline: true),
@@ -950,8 +956,8 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
         // Month/year-only formats (default to 1st of month) — food expiry, medications, inspections
         // German: "06.2027", "12.2026", "03.27"
-        DatePattern(regex: #"(?:MHD|mhd|mindestens\s+haltbar\s+bis(?:\s+Ende)?|haltbar\s+bis|verw\.\s*bis|best\s+before|prod)[:\s]+(\d{1,2})[./](\d{4})"#, format: "MM.yyyy", isDeadline: false),
-        DatePattern(regex: #"(?:MHD|mhd|mindestens\s+haltbar\s+bis(?:\s+Ende)?|haltbar\s+bis|verw\.\s*bis|best\s+before|prod)[:\s]+(\d{1,2})[./](\d{2})\b"#, format: "MM.yy", isDeadline: false),
+        DatePattern(regex: #"(?:MHD|mhd|mindestens\s+haltbar\s+bis(?:\s+Ende)?|haltbar\s+bis|verw\.\s*bis|best\s+before|prod)[:\s]+(\d{1,2})[./](\d{4})"#, format: "MM.yyyy", isDeadline: true),
+        DatePattern(regex: #"(?:MHD|mhd|mindestens\s+haltbar\s+bis(?:\s+Ende)?|haltbar\s+bis|verw\.\s*bis|best\s+before|prod)[:\s]+(\d{1,2})[./](\d{2})\b"#, format: "MM.yy", isDeadline: true),
         // Standalone month.year (common on food labels, inspections, etc.)
         DatePattern(regex: #"(?:^|[\s:])(\d{2})[./](\d{4})\b"#, format: "MM.yyyy", isDeadline: false),
 
@@ -962,7 +968,7 @@ final class TextEventParser: TextEventParserServiceProtocol {
         DatePattern(regex: #"(?:ZU\s+VERBRAUCHEN\s+BIS|zu\s+verbrauchen\s+bis)[:\s]*(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
 
         // German with deadline keywords (no year - defaults to current year)
-        DatePattern(regex: #"bis\s+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
+        DatePattern(regex: #"bis[:\s]+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
         DatePattern(regex: #"fällig\s+(?:am\s+)?(\d{1,2})\.(\d{1,2})\."#, format: "dd.MM.", isDeadline: true),
 
         // Standard German formats (with year)

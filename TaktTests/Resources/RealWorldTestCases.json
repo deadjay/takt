@@ -2024,6 +2024,1746 @@
         "year": 2026
       },
       "hasDeadline": false
+    },
+    {
+      "id": "app_sub_notion_annual",
+      "category": "app_subscriptions",
+      "text": "Notion Plus Plan\nBilled annually at $96.00\nNext payment: May 12, 2026\nWorkspace: Personal",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 12,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_figma_team",
+      "category": "app_subscriptions",
+      "text": "Figma Professional\nTeam: Design Studio\nRenews on 2026-08-01\n$15/editor/month",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 8,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_1password_de",
+      "category": "app_subscriptions",
+      "text": "1Password Families\n5 Mitglieder\n4,99 €/Monat\nVerlängerung am 17.06.2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 17,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_chatgpt_plus",
+      "category": "app_subscriptions",
+      "text": "ChatGPT Plus\n$20.00/month\nYour subscription renews on April 3, 2026\nPayment method: Apple Pay",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 3,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_adobe_cc",
+      "category": "app_subscriptions",
+      "text": "Adobe Creative Cloud\nAll Apps Plan\nRenewal date: 09/15/2026\nAnnual commitment, paid monthly\n$54.99/mo",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 9,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_trial_german",
+      "category": "app_subscriptions",
+      "text": "Kostenlose Testphase endet am 22.03.2026\nDanach 9,99 €/Monat\nJederzeit kündbar",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 22,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_strava_premium",
+      "category": "app_subscriptions",
+      "text": "Strava Summit\nAnnual subscription\nExpires: 30 Nov 2026\nAuto-renew: ON\n$79.99/year",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 30,
+        "month": 11,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_todoist_pro",
+      "category": "app_subscriptions",
+      "text": "Todoist Pro\nAbo verlängert sich am 14.07.26\nPreis: 48,00 €/Jahr\nZahlungsart: PayPal",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 14,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_grammarly",
+      "category": "app_subscriptions",
+      "text": "Grammarly Premium\nYour plan will renew on 2026-05-20\nBilled at $144.00 per year\nManage at grammarly.com/account",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 20,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_linkedin_premium",
+      "category": "app_subscriptions",
+      "text": "LinkedIn Premium Career\nBilling cycle: Monthly\nNext charge: $29.99 on 06/10/2026\nCancel anytime",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 10,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_apple_one",
+      "category": "app_subscriptions",
+      "text": "Apple One Premier\n31,95 €/Monat\nApple Music, TV+, Arcade, iCloud+ 2TB, News+, Fitness+\nNächste Abbuchung: 05.05.2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 5,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_slack_business",
+      "category": "app_subscriptions",
+      "text": "Slack Business+\nWorkspace: MyStartup\nBilling period ends: August 31, 2026\n12 active members\n$12.50/user/month",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 31,
+        "month": 8,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_medium_membership",
+      "category": "app_subscriptions",
+      "text": "Medium Membership\nYour membership expires on 19 October 2026\nRenew for $50/year or $5/month",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 19,
+        "month": 10,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_dropbox_plus",
+      "category": "app_subscriptions",
+      "text": "Dropbox Plus 2TB\nJährlich abgerechnet\nVertrag verlängert sich am 28.02.2027\n119,88 €/Jahr",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 28,
+        "month": 2,
+        "year": 2027
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "app_sub_canva_pro",
+      "category": "app_subscriptions",
+      "text": "Canva Pro\nFree trial expires 7 Apr 2026\nThen $12.99/month\nCancel before trial ends to avoid charges",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 7,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_apple_tv_plus",
+      "category": "streaming_services",
+      "text": "Apple TV+\n6,99 €/Monat\nIhr Abonnement wird am 23.03.2026 verlängert\nFamilienfreigabe: Aktiv",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 23,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_crunchyroll",
+      "category": "streaming_services",
+      "text": "Crunchyroll Premium\nMega Fan Plan\nNext billing date: 04/22/2026\nAmount: $9.99\nPayment: Visa ending 3847",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 22,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_paramount_plus",
+      "category": "streaming_services",
+      "text": "Paramount+ with SHOWTIME\nSubscription active\nRenews Sep 8, 2026\n$11.99/month\nStream on up to 3 devices",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 8,
+        "month": 9,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_dazn_de",
+      "category": "streaming_services",
+      "text": "DAZN Unlimited\nJahresabo\nNächste Zahlung: 15.11.2026\nBetrag: 29,99 €/Monat\nZahlungsart: Lastschrift",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 11,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_audible_de",
+      "category": "streaming_services",
+      "text": "Audible Abo\n\nIhr nächstes Guthaben: 01.04.2026\n1 Hörbuch/Monat\n9,95 €/Monat\nKonto: audible.de/konto",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_wow_sky",
+      "category": "streaming_services",
+      "text": "WOW (ehemals Sky Ticket)\nSerien & Filme\nMonatlich kündbar\nVerlängerung: 18.05.2026\n14,99 €/Monat",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 18,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_discovery_plus",
+      "category": "streaming_services",
+      "text": "discovery+\nAd-Free Annual Plan\nYour subscription renews on January 5, 2027\nCharged $69.99/year",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 5,
+        "month": 1,
+        "year": 2027
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_mubi",
+      "category": "streaming_services",
+      "text": "MUBI\nStreaming-Abo\nNächste Abrechnung am 09.07.2026\nMonatlich: 13,99 €\nKündigung jederzeit möglich",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 9,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "streaming_tidal",
+      "category": "streaming_services",
+      "text": "TIDAL HiFi Plus\nFamily Plan (6 members)\nRenewal: 2026-06-30\n$16.99/month",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 30,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "food_butter_mhd_short",
+      "category": "food_expiry",
+      "text": "Deutsche Markenbutter\n250g\nMHD 19.05.26",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 19,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": true
+    },
+    {
+      "id": "food_smoked_salmon",
+      "category": "food_expiry",
+      "text": "Räucherlachs Norwegisch\n200g\nzu verbrauchen bis: 18.03.2026\nbei +2°C bis +7°C lagern\nDE-SH-EV 114\nL-Nr: 2026/077",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 18,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": true
+    },
+    {
+      "id": "food_canned_tuna_en",
+      "category": "food_expiry",
+      "text": "Wild Caught Tuna\nIn Spring Water\n185g drained\nBest Before End: 08/2028\nLot: TF-4829A",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 8,
+        "year": 2028
+      },
+      "hasDeadline": false,
+      "note": "Month/year only, best before end format"
+    },
+    {
+      "id": "food_fresh_milk",
+      "category": "food_expiry",
+      "text": "Frische Vollmilch 3,5%\n1 Liter\nzu verbrauchen\nbis 25.03.\nbei max. +8°C",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 25,
+        "month": 3,
+        "year": "current"
+      },
+      "hasDeadline": true,
+      "note": "Split across lines, no year"
+    },
+    {
+      "id": "food_chocolate_bar",
+      "category": "food_expiry",
+      "text": "Lindt Excellence\n85% Cacao\n100g\nMindestens haltbar bis Ende 03.2027\nL2849",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 3,
+        "year": 2027
+      },
+      "hasDeadline": false,
+      "note": "Month/year with Ende keyword"
+    },
+    {
+      "id": "food_spice_jar",
+      "category": "food_expiry",
+      "text": "Paprika edelsüß\nFuchs Gewürze\n60g\nMHD: 11.2027\nArt.-Nr: 482917",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 11,
+        "year": 2027
+      },
+      "hasDeadline": true,
+      "note": "Month/year only spice"
+    },
+    {
+      "id": "food_medication_eye_drops",
+      "category": "food_expiry",
+      "text": "Augentropfen\nHylo-Comod 10ml\nPZN 04047553\nVerw. bis 08/2026\nNach Anbruch 6 Monate verwendbar",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 8,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Verw. bis is a deadline keyword"
+    },
+    {
+      "id": "food_organic_eggs",
+      "category": "food_expiry",
+      "text": "Bio Eier Freilandhaltung\n10 Stück Gew.kl. M\nMHD: 02.04.26\nDE-0-123456\nStempelcode: 0-DE-0812345",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 2,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": true
+    },
+    {
+      "id": "food_uk_sandwich",
+      "category": "food_expiry",
+      "text": "M&S Chicken & Bacon Sandwich\nUse By: 15 Mar 2026\nKeep refrigerated\n£3.80\nMade in UK",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": true
+    },
+    {
+      "id": "food_sunscreen_expiry",
+      "category": "food_expiry",
+      "text": "Ladival Sonnenmilch\nLSF 50+\n200ml\nVerwendbar bis: 06.2027\nPZN: 13229660",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 6,
+        "year": 2027
+      },
+      "hasDeadline": false,
+      "note": "Sunscreen with month/year expiry"
+    },
+    {
+      "id": "food_ocr_noisy_sausage",
+      "category": "food_expiry",
+      "text": "Thür|nger Rostbratwurst\n4 St / 400g\nzu verbrauchen b|s:\n28.03.26\nDE-TH-EV 2OO3",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 28,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "OCR noise: | for i, O for 0"
+    },
+    {
+      "id": "food_protein_bar",
+      "category": "food_expiry",
+      "text": "Barebells Protein Bar\nSalty Peanut 55g\nBest Before: 14 JUL 2026\nLot: BP2026A\n20g protein",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 14,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "food_pasta_dry",
+      "category": "food_expiry",
+      "text": "Barilla Spaghetti Nr. 5\n500g\nMindestens haltbar bis Ende:\n09.2027",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 9,
+        "year": 2027
+      },
+      "hasDeadline": false,
+      "note": "Dry pasta with month/year format"
+    },
+    {
+      "id": "food_cream_cheese",
+      "category": "food_expiry",
+      "text": "Philadelphia Original\n175g\nMHD 12.04.2026\nDE-NW-209 EG\nNach dem Öffnen innerhalb von 5 Tagen verbrauchen",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 12,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": true
+    },
+    {
+      "id": "concert_club_night",
+      "category": "live_concerts",
+      "text": "BERGHAIN\n\nSa 28.03.2026\n\nKlubhacht\nPanorama Bar ab 00:00\nBerghain ab 00:00\n\nNina Kraviz\nMarcel Dettmann\nBen Klock",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 28,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "concert_open_air_en",
+      "category": "live_concerts",
+      "text": "Lollapalooza Berlin 2026\nSeptember 12-13, 2026\nOlympiastadion & Olympiapark\n\nDay tickets from €89\nWeekend pass €149\nOn sale now!",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 12,
+        "month": 9,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Date range - should parse first date"
+    },
+    {
+      "id": "concert_small_venue_de",
+      "category": "live_concerts",
+      "text": "Privatclub Berlin\nSkalitzer Str. 85-86\n\nMittwoch 11.06.2026\nEinlass 20:00 | Beginn 21:00\n\nThe Notwist\nSupport: Mira Lu Kovacs\n\nVVK 22€ / AK 25€",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 11,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "concert_opera_ticket",
+      "category": "live_concerts",
+      "text": "Deutsche Oper Berlin\nBismarckstraße 35\n\nDie Zauberflöte - Mozart\nDonnerstag, 7. Mai 2026\nBeginn: 19:00 Uhr\nOrchesterrang Reihe 3 Platz 15\nPreis: 78,00 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 7,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "concert_comedy_show",
+      "category": "live_concerts",
+      "text": "QUATSCH Comedy Club\nFriedrichstraße 107\n\nFri, June 19, 2026 8:00 PM\n\nBest of Stand-Up\nfeaturing 5 comedians\n\nTickets: €24.90\nBooking: #QCC-48291",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 19,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "concert_outdoor_cinema",
+      "category": "live_concerts",
+      "text": "FREILUFTKINO KREUZBERG\nMariannenplatz\n\nThe Grand Budapest Hotel\n\n24.07.2026 Einlass 20:30\nFilmbeginn bei Dunkelheit (~21:15)\nEintritt: 8,50 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 24,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "concert_ballet_en",
+      "category": "live_concerts",
+      "text": "Staatsballett Berlin\n\nSwan Lake\nChoreography: Patrice Bart\n\nSat, 20 Jun 2026 at 19:30\nStaatsoper Unter den Linden\nStalls Row 8 Seat 22",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 20,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "concert_dj_set_ocr",
+      "category": "live_concerts",
+      "text": "W4TERGATE\nFa|ckensteinstr. 49a\n\nFr 17.04.26\n23:59 — open end\n\nF|oor 1: Dixon, &ME\nF|oor 2: Mano Le Tough\n\n15€ Abendkasse",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 17,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "OCR: 4 for A, | for l"
+    },
+    {
+      "id": "concert_festival_multiday",
+      "category": "live_concerts",
+      "text": "Fusion Festival 2026\n25.06. - 28.06.2026\nLärz, Mecklenburg\n\nTickets ausverkauft\nWeitere Infos: fusion-festival.de",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 25,
+        "month": 6,
+        "year": "current"
+      },
+      "hasDeadline": false,
+      "note": "Multi-day festival, first date has no year"
+    },
+    {
+      "id": "concert_choir_concert",
+      "category": "live_concerts",
+      "text": "Berliner Philharmoniker\nChor der Deutschen Oper\n\nBrahms: Ein deutsches Requiem\n\n15. November 2026, 20:00\nPhilharmonie Berlin\nKarten ab 35 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 11,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "flight_lufthansa_iso",
+      "category": "flight_tickets",
+      "text": "Lufthansa e-Ticket\nBooking: LH7K2M\n\nLH 2038 BER→VIE\n2026-09-14 Dep 11:25 Arr 13:00\n\nLH 2041 VIE→BER\n2026-09-18 Dep 19:10 Arr 20:45",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 14,
+        "month": 9,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "flight_turkish_airlines",
+      "category": "flight_tickets",
+      "text": "Turkish Airlines\nE-Ticket Receipt\n\nTK 1728 BER-IST\nDate: 05 Aug 2026 Dep: 15:40\n\nTK 1729 IST-BER\nDate: 12 Aug 2026 Dep: 08:20\n\nPassenger: ALEKSEEV/ARTEM MR",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 5,
+        "month": 8,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "flight_wizzair_short",
+      "category": "flight_tickets",
+      "text": "Wizz Air\nW6 4582\nBER → BUD\n22.05.2026 06:55\nConfirmation: R8HJ4N",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 22,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "flight_swiss_de",
+      "category": "flight_tickets",
+      "text": "SWISS Flugbestätigung\nBuchungscode: ABCD12\n\nLX 977 Berlin (BER) → Zürich (ZRH)\nAbflug: 10.04.2026 um 07:15\nAnkunft: 08:50\n\nKlasse: Economy Saver",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 10,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "flight_delta_us",
+      "category": "flight_tickets",
+      "text": "DELTA AIR LINES\nConfirmation #: G4HX7K\n\nDL 108 JFK → BER\nDeparture: 07/04/2026 at 5:30 PM\n\nDL 109 BER → JFK\nDeparture: 07/18/2026 at 10:00 AM",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 4,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "flight_ocr_boarding_noisy",
+      "category": "flight_tickets",
+      "text": "B0ARDING PASS\nALEKSEEV/ARTEM\nF|ight: EW 8734\nBER → PMI\n28.06.26 Dep: O9:15\nGate: A22 Seat: 24F",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 28,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "OCR: 0 for O, | for l"
+    },
+    {
+      "id": "flight_vueling_en",
+      "category": "flight_tickets",
+      "text": "Vueling\nYour trip to Barcelona\n\nVY 1839 BER-BCN\nSun, 3 May 2026 14:50\n\n1 adult passenger\nRef: VY8K2M",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 3,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "flight_emirates_long",
+      "category": "flight_tickets",
+      "text": "Emirates\nE-Ticket Itinerary\n\nEK 044 BER→DXB\n12 Dec 2026 Dep 21:15 Arr 06:30+1\n\nEK 045 DXB→BER\n26 Dec 2026 Dep 14:45 Arr 19:20\n\nClass: Economy Flex\nBaggage: 2x23kg",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 12,
+        "month": 12,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "hotel_hrs_de",
+      "category": "hotel_bookings",
+      "text": "HRS Buchungsbestätigung\n\nNH Hotel München City\nAnreise: 15.06.2026 ab 14:00\nAbreise: 18.06.2026 bis 12:00\n3 Nächte, Einzelzimmer\nGesamtpreis: 387,00 €\nBuchungsnr: HRS-948271",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 15,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "hotel_hostel_en",
+      "category": "hotel_bookings",
+      "text": "Generator Hostel Berlin Mitte\n\nReservation #: GH-2026-48291\nGuest: Artem Alekseev\nCheck-in: Apr 10, 2026 from 2pm\nCheck-out: Apr 13, 2026 by 10am\n4-bed dorm\nTotal: €87.00",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 10,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "hotel_vrbo_beach",
+      "category": "hotel_bookings",
+      "text": "VRBO\n\nBeachfront Villa, Mallorca\nCheck-in: July 5, 2026\nCheck-out: July 12, 2026\n7 nights · 4 guests\nTotal: €2,100.00\nProperty ID: VB-482917",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 5,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "hotel_ski_resort_de",
+      "category": "hotel_bookings",
+      "text": "Sporthotel Alpina\nSt. Anton am Arlberg\n\nBuchung Nr: SA-4829\nAnreise: 28.12.2026\nAbreise: 04.01.2027\nHalbpension inkl.\nPreis: 1.890,00 €",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 28,
+        "month": 12,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "hotel_cancellation_en",
+      "category": "hotel_bookings",
+      "text": "Booking.com\n\nFree cancellation before May 20, 2026\nNon-refundable after this date\n\nHotel Negresco, Nice\nStay: May 25 - May 30, 2026\nTotal: €1,450.00",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 20,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "hotel_business_iso",
+      "category": "hotel_bookings",
+      "text": "Marriott Bonvoy\nCourtyard by Marriott Frankfurt\n\nConfirmation: 84291738\nArrival: 2026-10-05\nDeparture: 2026-10-07\nRoom: King, Business\nRate: €169/night",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 5,
+        "month": 10,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "hotel_wellness_weekend",
+      "category": "hotel_bookings",
+      "text": "Spa & Wellness Wochenende\nSeehotel am Scharmützelsee\n\n05.-07.06.2026\n2 ÜN inkl. Frühstück & Spa\nDoppelzimmer Seeblick\n398,00 € p.P.",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 5,
+        "month": 6,
+        "year": "current"
+      },
+      "hasDeadline": false,
+      "note": "Abbreviated date range dd.-dd.MM.yyyy"
+    },
+    {
+      "id": "medical_physiotherapy",
+      "category": "medical_appointments",
+      "text": "Physiotherapie Praxis Bewegung\nSchönhauser Allee 167\n\nTermin: 03.04.2026 09:00\nBehandlung: Krankengymnastik\nRezept mitbringen!\nTel: 030/442 89 10",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 3,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "medical_dermatologist_en",
+      "category": "medical_appointments",
+      "text": "Appointment Confirmation\n\nDermatology Associates\nDr. Sarah Mitchell\n\nDate: June 8, 2026 at 11:15 AM\nReason: Annual skin check\n\nBring photo ID and insurance card.",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 8,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "medical_blood_test_de",
+      "category": "medical_appointments",
+      "text": "Labor Berlin\nBlutentnahme\n\nPatient: Alekseev, Artem\nTermin: 22.05.2026 07:30 Uhr\n\nBitte nüchtern erscheinen!\nBefund in 3-5 Werktagen",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 22,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "medical_mri_scan",
+      "category": "medical_appointments",
+      "text": "Radiologisches Zentrum\nKurfürstendamm 195\n\nMRT Termin\nDatum: 14.08.2026\nUhrzeit: 16:45\nUntersuchung: Knie links\n\nBitte 15 Min. früher erscheinen\nKeine metallischen Gegenstände",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 14,
+        "month": 8,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "medical_therapy_session",
+      "category": "medical_appointments",
+      "text": "Psychotherapeutische Praxis\nDr. phil. Anna Berger\n\nNächster Termin:\nMontag, 30.03.2026 um 14:00\nSitzung Nr. 12\n\nAbsage bitte 24h vorher",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 30,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "medical_optician_pickup",
+      "category": "medical_appointments",
+      "text": "Fielmann\n\nIhre neue Brille ist fertig!\nAbholung ab: 25.03.2026\n\nFiliale: Alexanderplatz 2\nAuftragsnr: FM-2026-48291\n\nÖffnungszeiten: Mo-Sa 10-20 Uhr",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 25,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "medical_dentist_followup",
+      "category": "medical_appointments",
+      "text": "Reminder: Follow-up appointment\nDr. Weber Dental Practice\n04/17/2026 at 9:00 AM\nCrown fitting - please allow 45 minutes\nRef: DW-48291",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 17,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "medical_specialist_referral",
+      "category": "medical_appointments",
+      "text": "Überweisungsschein\nFacharzt für Orthopädie\n\nPatient: Alekseev, Artem\nAusstellungsdatum: 10.03.2026\nGültig bis: 30.06.2026\n\nDiagnose: M54.5 Kreuzschmerz",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 10,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "medical_covid_test_en",
+      "category": "medical_appointments",
+      "text": "COVID-19 PCR Test Appointment\nCentogene Test Center\nBER Airport Terminal 1\n\nDate: March 28, 2026 at 6:30 AM\nResult within 24 hours\nBooking: CT-482917",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 28,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "insurance_liability_de",
+      "category": "insurance_documents",
+      "text": "Allianz Privathaftpflicht\n\nVertragsnr: HP-29384756\nVersicherungsbeginn: 01.03.2026\nJährl. Beitrag: 68,40 €\nFällig am: 01.03.2026\nSelbstbeteiligung: 150 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "insurance_renewal_en",
+      "category": "insurance_documents",
+      "text": "INSURANCE RENEWAL NOTICE\n\nPolicy: Renter's Insurance\nPolicy #: RI-2026-48291\nCurrent term expires: June 30, 2026\nRenewal premium: $185.00\nPayment due by June 15, 2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 30,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "insurance_dental_de",
+      "category": "insurance_documents",
+      "text": "Zahnzusatzversicherung\nDFV Deutsche Familienversicherung\n\nPolice: ZZ-482917\nWartzeit endet: 01.09.2026\nMonatsbeitrag: 24,90 €\nAbgebucht am: 1. jeden Monats",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 9,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "insurance_life_en",
+      "category": "insurance_documents",
+      "text": "Term Life Insurance\nPolicy effective: Jan 1, 2024\nTerm: 20 years\nExpires: December 31, 2043\nAnnual premium due: March 1, 2026\nAmount: $1,200.00",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 1,
+        "year": 2024
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "insurance_bicycle",
+      "category": "insurance_documents",
+      "text": "ADFC Fahrradversicherung\n\nRad: Canyon Ultimate CF SL\nVersichert bis: 31.12.2026\nDeckung: Diebstahl, Vandalismus\nJahresbeitrag fällig: 01.01.2026\nBetrag: 96,00 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 31,
+        "month": 12,
+        "year": 2026
+      },
+      "hasDeadline": true,
+      "note": "Has bis keyword in Versichert bis"
+    },
+    {
+      "id": "insurance_electronics",
+      "category": "insurance_documents",
+      "text": "Wertgarantie\nGeräteschutz\n\nGerät: MacBook Pro 16\"\nVertragsbeginn: 15.01.2026\nVertragslaufzeit: 36 Monate\nLäuft bis: 14.01.2029\nMonatl. Prämie: 14,99 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 1,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "insurance_car_kfz_deadline",
+      "category": "insurance_documents",
+      "text": "Wechselfrist Kfz-Versicherung\n\nKündigungsfrist: bis 30.11.2026\nNeuer Vertrag ab: 01.01.2027\nVergleichen Sie jetzt!",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 30,
+        "month": 11,
+        "year": 2026
+      },
+      "hasDeadline": true,
+      "note": "bis keyword for cancellation deadline"
+    },
+    {
+      "id": "bill_gez_rundfunk",
+      "category": "bills_invoices",
+      "text": "ARD ZDF Deutschlandradio\nBeitragsservice\n\nBeitragsnummer: 429 183 746 5\nZeitraum: 01.04.2026 - 30.06.2026\nBetrag: 55,08 €\nFällig: 15.04.2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "bill_freelance_invoice_en",
+      "category": "bills_invoices",
+      "text": "INVOICE #2026-042\n\nFrom: Artem Alekseev\nTo: Startup GmbH\n\nDate: April 1, 2026\nDue: April 30, 2026\n\nApp Development (March) - €5,000.00\nTotal: €5,000.00",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "bill_heating_nachzahlung",
+      "category": "bills_invoices",
+      "text": "Heizkostenabrechnung 2025\n\nAbrechnungszeitraum: 01.01.2025 - 31.12.2025\nNachzahlung: 312,47 €\nZahlung fällig bis: 30.04.2026\n\nHausverwaltung Müller GmbH",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 1,
+        "year": 2025
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "bill_internet_en",
+      "category": "bills_invoices",
+      "text": "Comcast Xfinity\nMonthly Bill\n\nBill Date: May 5, 2026\nPayment Due: May 25, 2026\nAmount: $89.99\nAccount: ***-9182",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 5,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "bill_hausgeld",
+      "category": "bills_invoices",
+      "text": "Hausgeldabrechnung 2025\nWEG Kastanienallee 42\n\nAbrechnungszeitraum: 01.01.2025 - 31.12.2025\nNachzahlung: 487,23 €\nFällig bis 15.03.2026\n\nVerwalter: Immobilia GmbH",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 1,
+        "year": 2025
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "bill_medical_en",
+      "category": "bills_invoices",
+      "text": "Medical Bill\nCharité Hospital\n\nInvoice #: CH-2026-48291\nDate of Service: 03/15/2026\nAmount Due: €245.80\nPayment deadline: 04/15/2026\nPatient: Alekseev, Artem",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "bill_penalty_fine",
+      "category": "bills_invoices",
+      "text": "BVG Fahrpreisnacherhebung\n\nDatum: 22.03.2026\nLinie: U2 Richtung Pankow\nErhöhtes Beförderungsentgelt: 60,00 €\nZahlungsfrist bis: 05.04.2026\nAktenzeichen: BVG-2026/48291",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 22,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "bill_electricity_deadline_en",
+      "category": "bills_invoices",
+      "text": "Electricity Bill\n\nAccount: ELEC-48291\nBilling Period: Feb 1 - Feb 28, 2026\nAmount Due: $124.50\nDue Date: March 20, 2026\n\nPay online at utility.com/pay",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 2,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "gov_id_card_de",
+      "category": "government_documents",
+      "text": "PERSONALAUSWEIS\nBUNDESREPUBLIK DEUTSCHLAND\n\nAlekseev, Artem\nGeb.: 15.08.1992\nAusgestellt: 05.02.2024\nGültig bis: 04.02.2034\nBehörde: Bürgeramt Pankow",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 8,
+        "year": 1992
+      },
+      "hasDeadline": false,
+      "note": "Multiple dates - DOB, issue, expiry"
+    },
+    {
+      "id": "gov_appointment_auslaenderbehoerde",
+      "category": "government_documents",
+      "text": "Landesamt für Einwanderung\nFriedrich-Krause-Ufer 24\n\nTerminbestätigung\nDatum: 18.04.2026 um 10:00\nVorgang: Verlängerung Aufenthaltstitel\nVorgangsnr: LEA-2026/48291",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 18,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "gov_marriage_certificate",
+      "category": "government_documents",
+      "text": "HEIRATSURKUNDE\nStandesamt Berlin-Mitte\n\nEheschließung am: 22.06.2026\nEhepartner: Alekseev, Artem\nEhepartner: Müller, Maria\nRegister-Nr: 482/2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 22,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "gov_dog_license",
+      "category": "government_documents",
+      "text": "Hundesteuerbescheid 2026\nBezirksamt Pankow\n\nHalter: Alekseev, Artem\nHund: Luna (Labrador)\nSteuer: 120,00 € jährlich\nFällig am: 15.01.2026\nSteuer-Nr: HS-2026/4829",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 1,
+        "year": 2026
+      },
+      "hasDeadline": true,
+      "note": "Fällig is a deadline keyword"
+    },
+    {
+      "id": "gov_jury_duty_en",
+      "category": "government_documents",
+      "text": "JURY SUMMONS\n\nYou are summoned to appear for jury duty on:\nMay 11, 2026 at 8:30 AM\n\nCourthouse: Berlin District Court\nRoom 302\n\nFailure to appear may result in penalties.",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 11,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "gov_waste_calendar",
+      "category": "government_documents",
+      "text": "BSR Abfuhrkalender\n\nRestmüll: 19.03.2026\nBiotonne: 20.03.2026\nWertstoffe: 26.03.2026\nAltpapier: 02.04.2026\n\nStandort: Kastanienallee 42",
+      "expectedEvents": 4,
+      "expectedDate": {
+        "day": 19,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "gov_vehicle_inspection_en",
+      "category": "government_documents",
+      "text": "Vehicle Inspection Certificate\n\nVehicle: VW Golf VII\nPlate: B-AA 1234\nInspection Date: March 5, 2026\nNext inspection due: March 2028\nResult: PASSED",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 5,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "gov_tax_prepayment",
+      "category": "government_documents",
+      "text": "Finanzamt Berlin-Mitte\n\nVorauszahlungsbescheid\nEinkommensteuer 2026\n\nFällig am 10.06.2026: 1.500,00 €\nFällig am 10.09.2026: 1.500,00 €\nFällig am 10.12.2026: 1.500,00 €",
+      "expectedEvents": 3,
+      "expectedDate": {
+        "day": 10,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": true,
+      "note": "Multiple due dates with Fällig keyword"
+    },
+    {
+      "id": "academic_enrollment_deadline",
+      "category": "academic",
+      "text": "Einschreibung WiSe 2026/27\n\nOnline-Bewerbung bis: 15.07.2026\nImmatrikulation bis: 30.09.2026\n\nStudiengang: Informatik (M.Sc.)\nTU Berlin",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": true,
+      "note": "bis keyword for application deadline"
+    },
+    {
+      "id": "academic_online_course",
+      "category": "academic",
+      "text": "Coursera\n\nMachine Learning Specialization\nEnrollment ends: 2026-04-30\nStart date: May 5, 2026\nDuration: 3 months\nInstructor: Prof. Andrew Ng",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 30,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "academic_scholarship_deadline",
+      "category": "academic",
+      "text": "DAAD Stipendium\n\nBewerbungsschluss: 15.10.2026\nFörderzeitraum: 01.04.2027 - 31.03.2028\nBewerbung online unter daad.de\n\nAbgabe bis 15.10.2026 23:59 MEZ",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 10,
+        "year": 2026
+      },
+      "hasDeadline": true,
+      "note": "Abgabe bis is a deadline keyword"
+    },
+    {
+      "id": "academic_exam_retake",
+      "category": "academic",
+      "text": "Nachklausur Analysis I\n\nDatum: 09.10.2026 14:00\nRaum: H-0105\nDauer: 120 Minuten\nAnmeldung bis: 01.10.2026\n\nHilfsmittel: Taschenrechner",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 9,
+        "month": 10,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "academic_graduation_ceremony",
+      "category": "academic",
+      "text": "Graduation Ceremony\nClass of 2026\n\nDate: Saturday, July 4, 2026 at 2:00 PM\nVenue: Audimax, TU Berlin\n\nGuests: max 2 per graduate\nRSVP by June 20, 2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 4,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "academic_hackathon",
+      "category": "academic",
+      "text": "HackBerlin 2026\n\n48h Hackathon\n17.-19. April 2026\nFactory Berlin\n\nRegistration deadline: April 5, 2026\nFree for students\nPrizes worth €10,000",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 17,
+        "month": 4,
+        "year": "current"
+      },
+      "hasDeadline": false,
+      "note": "Abbreviated date range, first date no year"
+    },
+    {
+      "id": "academic_workshop_de",
+      "category": "academic",
+      "text": "LaTeX Workshop für Anfänger\n\nDatum: 25.03.2026 10:00-16:00\nOrt: PC-Pool MA 041\nAnmeldung erforderlich\nMax. 20 Teilnehmer\nKostenlos für Studierende",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 25,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "sports_bundesliga_tv",
+      "category": "sports_events",
+      "text": "BUNDESLIGA SPIELTAG 28\n\nBayern München vs. Borussia Dortmund\nSa. 18.04.2026 18:30\nAllianz Arena\n\nLive auf Sky Sport Bundesliga",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 18,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "sports_triathlon_registration",
+      "category": "sports_events",
+      "text": "IRONMAN 70.3 Berlin\nRegistration Confirmed\n\nAthlete: Artem Alekseev\nBib #: 1847\nRace Date: June 14, 2026\nStart: 07:00\nCheck-in: June 13, 2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 14,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "sports_climbing_booking",
+      "category": "sports_events",
+      "text": "BoulderKlub Berlin\n\nKursreservierung\nBoulder-Grundkurs\nDatum: 11.04.2026 18:00-20:00\nTrainer: Max\nPreis: 35,00 €\nMietschuhe inkl.",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 11,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "sports_run_event_en",
+      "category": "sports_events",
+      "text": "Berliner Halbmarathon 2026\n\nDate: April 5, 2026\nStart: 10:30 AM\nStart/Finish: Karl-Marx-Allee\n\nRunner: A. Alekseev\nCategory: M30\nBib pickup: Apr 3-4 at EXPO",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 5,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "sports_football_champions_league",
+      "category": "sports_events",
+      "text": "UEFA Champions League\nQuarterfinal 1st Leg\n\nReal Madrid vs. Bayern München\nTue, 8 Apr 2026 21:00 CET\nSantiago Bernabéu\n\nTV: DAZN",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 8,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "sports_swimming_competition",
+      "category": "sports_events",
+      "text": "Berliner Schwimmverband\nLandesmeisterschaften 2026\n\n23.-24.05.2026\nSchwimm- und Sprunghalle im Europasportpark\n\nMeldeschluss: 10.05.2026\nAusschreibung: bsv-berlin.de",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 23,
+        "month": 5,
+        "year": "current"
+      },
+      "hasDeadline": false,
+      "note": "Abbreviated date range"
+    },
+    {
+      "id": "sports_ice_hockey",
+      "category": "sports_events",
+      "text": "Eisbären Berlin\nDEL Hauptrunde\n\nEisbären Berlin vs. Adler Mannheim\nFr. 13.02.2026 19:30\nMercedes-Benz Arena\nBlock 108 Reihe 12 Platz 5",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 13,
+        "month": 2,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "shipping_dpd_de",
+      "category": "shipping_delivery",
+      "text": "DPD Paketankündigung\n\nPaketnr: 01234567890123\nVoraussichtliche Zustellung:\nDienstag, 24.03.2026\n\nZustellung an Paketshop möglich\nAbsender: Zalando SE",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 24,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "shipping_fedex_en",
+      "category": "shipping_delivery",
+      "text": "FedEx Tracking Update\n\nTracking #: 794644790132\nEstimated Delivery: Friday, April 3, 2026\nService: FedEx International Priority\nShipped from: San Francisco, CA",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 3,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "shipping_return_de",
+      "category": "shipping_delivery",
+      "text": "Rücksendung\n\nBestellnr: 302-8291746-4829\nRückgabe bis: 15.04.2026\n\nArtikel: Nike Air Max 90\nGrund: Falsche Größe\n\nRetourenlabel ausdrucken unter amazon.de/returns",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": true,
+      "note": "Rückgabe bis is a deadline keyword"
+    },
+    {
+      "id": "shipping_gls_delivery",
+      "category": "shipping_delivery",
+      "text": "GLS Paketzustellung\n\nIhr Paket wird am 02.04.2026 zugestellt\nZeitfenster: 12:00 - 16:00\n\nPaketnr: 2026-48291-7384\nAbsender: MediaMarkt",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 2,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "shipping_post_brief",
+      "category": "shipping_delivery",
+      "text": "Deutsche Post\nEinschreiben Rückschein\n\nAufgabetag: 18.03.2026\nSendungsnr: RR 2948 1738 4DE\nEmpfänger: Finanzamt Berlin-Mitte",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 18,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "shipping_pickup_locker",
+      "category": "shipping_delivery",
+      "text": "Amazon Locker\n\nYour package is ready for pickup!\nLocker: Alexanderplatz Station\nPickup by: 03/28/2026\nCode: 48291\n\nOrder #302-9182-4829",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 28,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Pickup deadline"
+    },
+    {
+      "id": "shipping_delayed",
+      "category": "shipping_delivery",
+      "text": "Lieferverzögerung\n\nIhre Bestellung 402-8291-4738\nUrsprüngl. Liefertermin: 20.03.2026\nNeuer Liefertermin: 27.03.2026\n\nWir entschuldigen uns für die Verzögerung.",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 20,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Two dates - original and new delivery"
+    },
+    {
+      "id": "contract_gym_cancellation",
+      "category": "contracts_legal",
+      "text": "Kündigung Fitnessstudio\n\nMitglied: Alekseev, Artem\nMitglieds-Nr: FX-48291\nKündigungsdatum: 30.06.2026\nLetzer Trainingstag: 30.09.2026\n3 Monate Kündigungsfrist",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 30,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "contract_nda_en",
+      "category": "contracts_legal",
+      "text": "NON-DISCLOSURE AGREEMENT\n\nEffective Date: March 1, 2026\nTerm: 2 years\nExpires: February 28, 2028\n\nParties:\n1. Startup GmbH\n2. Artem Alekseev",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "contract_internet_kuendigung",
+      "category": "contracts_legal",
+      "text": "Telekom\nVertragsinformation\n\nIhr DSL-Vertrag\nKündigungsfrist: Bis 15.05.2026\nVertrag endet: 14.08.2026\nTarif: MagentaZuhause L",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": true,
+      "note": "Bis keyword for cancellation deadline"
+    },
+    {
+      "id": "contract_sublease_de",
+      "category": "contracts_legal",
+      "text": "Untermietvertrag\n\nVermieter: Alekseev, Artem\nUntermieter: Schmidt, Julia\nZimmer: 14m² möbliert\nMietdauer: 01.07.2026 bis 30.09.2026\nMiete: 450 € warm",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 7,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "contract_warranty_extension",
+      "category": "contracts_legal",
+      "text": "Extended Warranty\n\nProduct: Samsung Galaxy S25\nIMEI: 352948172639401\nWarranty ends: 2026-11-15\nCoverage: Accidental damage\nProvider: Samsung Care+",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 11,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "contract_probation_period",
+      "category": "contracts_legal",
+      "text": "Probezeit-Erinnerung\n\nMitarbeiter: Alekseev, Artem\nProbezeitbeginn: 01.01.2026\nProbezeitende: 30.06.2026\n\nGespräch am 15.06.2026 geplant",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 1,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "contract_storage_unit",
+      "category": "contracts_legal",
+      "text": "MyPlace SelfStorage\nMietvertrag Lagerraum\n\nEinheit: B-042 (6m²)\nMietbeginn: 15.03.2026\nMonatliche Miete: 89,00 €\nKündigung: 14 Tage zum Monatsende\nKaution: 89,00 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_hairdresser_appt",
+      "category": "miscellaneous",
+      "text": "Friseur Termin\n\nSalon: Haarscharf\nDatum: 28.03.2026\nUhrzeit: 11:00\nDienstleistung: Herrenschnitt\nFriseur: Marco\nPreis: ca. 32 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 28,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_pet_grooming",
+      "category": "miscellaneous",
+      "text": "Dog Grooming Appointment\n\nPet: Luna (Labrador)\nDate: April 14, 2026 at 10:00 AM\nService: Bath & Trim\nPaws & Claws, Prenzlauer Berg\nPrice: €55",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 14,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_language_exam",
+      "category": "miscellaneous",
+      "text": "Goethe-Institut Berlin\n\nTestDaF Prüfung\nDatum: 16.05.2026\nZeit: 09:00 - 16:30\n\nAnmeldebestätigung Nr: TDF-48291\nTeilnehmer: Alekseev, Artem",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 16,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_flea_market",
+      "category": "miscellaneous",
+      "text": "Flohmarkt im Mauerpark\n\nJeden Sonntag 10-18 Uhr\n\nSonderevent: Nachtflohmarkt\n25.04.2026 18:00 - 23:00\nStandgebühr: 15 €",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 25,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_drivers_test",
+      "category": "miscellaneous",
+      "text": "Fahrschule Berlin\n\nPraktische Prüfung\nTermin: 12.05.2026 08:30\nTreffpunkt: Fahrschule, Danziger Str. 49\nFahrlehrer: Herr König\nBitte Personalausweis + Führerscheinantrag mitbringen",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 12,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_charity_run",
+      "category": "miscellaneous",
+      "text": "Charity Run for Ukraine\n\n5K / 10K Options\nSunday, May 3, 2026\nStart: 10:00 AM\nTiergarten, Berlin\n\nEntry: €20 (all proceeds donated)\nRegister at charityruns.de",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 3,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_housewarming",
+      "category": "miscellaneous",
+      "text": "Einweihungsparty! 🏠\n\nWann: Sa. 09.05.2026 ab 19 Uhr\nWo: Prenzlauer Allee 89, 4. OG links\n\nBringt gute Laune mit!\nArtem & Maria",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 9,
+        "month": 5,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_car_service",
+      "category": "miscellaneous",
+      "text": "KFZ-Werkstatt Müller\nInspektion\n\nTermin: 15.04.2026 08:00\nFahrzeug: VW Golf VII\nKennz: B-AA 1234\nKm-Stand: 87.432\n\nAbholung ab ca. 16:00",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 4,
+        "year": 2026
+      },
+      "hasDeadline": false
+    },
+    {
+      "id": "misc_no_date_wifi_password",
+      "category": "miscellaneous",
+      "text": "WLAN-Zugang\nNetzwerk: GaesteBerlin\nPasswort: WB#2026!secure\nMax. 50 Mbit/s\nGültig für Ihren Aufenthalt",
+      "expectedEvents": 0,
+      "hasDeadline": false,
+      "note": "No date - 2026 is part of password, not a date"
+    },
+    {
+      "id": "misc_no_date_product_label",
+      "category": "miscellaneous",
+      "text": "Dr. Bronner's\n18-in-1 Hemp Peppermint\nPure Castile Soap\n473ml / 16 fl.oz\nCertified Fair Trade\nMade in USA",
+      "expectedEvents": 0,
+      "hasDeadline": false,
+      "note": "Product label with no date"
+    },
+    {
+      "id": "edge_date_at_very_start",
+      "category": "edge_cases",
+      "text": "15.03.2026 Zahnarzt Dr. Weber",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Date at very start of text"
+    },
+    {
+      "id": "edge_date_at_very_end",
+      "category": "edge_cases",
+      "text": "Nächster Termin beim Zahnarzt 15.03.2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Date at very end of text"
+    },
+    {
+      "id": "edge_date_only",
+      "category": "edge_cases",
+      "text": "22.06.2026",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 22,
+        "month": 6,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Just a date, nothing else"
+    },
+    {
+      "id": "edge_version_number_trap",
+      "category": "edge_cases",
+      "text": "Software Update v3.14.2\nBuild 2026.03.15\nChangelog:\n- Fixed crash on startup\n- Improved performance",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 15,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Build number looks like date, v3.14.2 doesn't"
+    },
+    {
+      "id": "edge_phone_number_trap",
+      "category": "edge_cases",
+      "text": "Rufen Sie an: 030/12 34 56 78\nMobil: 0171/482 91 73\nFax: 030/12 34 56 79",
+      "expectedEvents": 0,
+      "hasDeadline": false,
+      "note": "Phone numbers that could be confused with dates"
+    },
+    {
+      "id": "edge_price_trap",
+      "category": "edge_cases",
+      "text": "Sonderangebot!\n3 Artikel für 10,99 €\nStatt 15,99 €\nSie sparen 5,00 €",
+      "expectedEvents": 0,
+      "hasDeadline": false,
+      "note": "Prices that should not be parsed as dates"
+    },
+    {
+      "id": "edge_isbn_trap",
+      "category": "edge_cases",
+      "text": "Clean Code\nISBN: 978-0-13-235088-4\nAuthor: Robert C. Martin\nPublisher: Prentice Hall\nPages: 464",
+      "expectedEvents": 0,
+      "hasDeadline": false,
+      "note": "ISBN numbers that should not be parsed as dates"
+    },
+    {
+      "id": "edge_double_date_same_line",
+      "category": "edge_cases",
+      "text": "Umbuchung: alter Termin 15.03.2026 → neuer Termin 22.03.2026",
+      "expectedEvents": 2,
+      "expectedDate": {
+        "day": 15,
+        "month": 3,
+        "year": 2026
+      },
+      "hasDeadline": false,
+      "note": "Two dates on same line"
+    },
+    {
+      "id": "edge_ocr_date_letter_o",
+      "category": "edge_cases",
+      "text": "Termin: O3.O4.2O26 um 14:OO Uhr",
+      "expectedEvents": 0,
+      "hasDeadline": false,
+      "note": "OCR replaced all 0 with O - may not parse correctly"
+    },
+    {
+      "id": "edge_month_year_credit_card",
+      "category": "edge_cases",
+      "text": "VISA\n**** **** **** 4821\nExpires 08/28\nCardholder: A ALEKSEEV",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 1,
+        "month": 8,
+        "year": 2028
+      },
+      "hasDeadline": true,
+      "note": "Credit card expiry MM/YY format"
+    },
+    {
+      "id": "edge_time_only_no_date",
+      "category": "edge_cases",
+      "text": "Öffnungszeiten:\nMo-Fr 09:00 - 18:00\nSa 10:00 - 14:00\nSo geschlossen",
+      "expectedEvents": 0,
+      "hasDeadline": false,
+      "note": "Times without dates"
+    },
+    {
+      "id": "edge_address_with_numbers",
+      "category": "edge_cases",
+      "text": "Praxis Dr. Müller\nKastanienallee 12\n10435 Berlin\n4. OG rechts\nTel: 030 48 29 17 38",
+      "expectedEvents": 0,
+      "hasDeadline": false,
+      "note": "Address with numbers that should not be dates"
     }
   ]
 }

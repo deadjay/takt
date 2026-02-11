@@ -950,7 +950,7 @@ struct TextEventParserTests {
         let testCases: [DatasetTestCase]
     }
 
-    @Test("Real-world dataset analysis — 160 cases")
+    @Test("Real-world dataset analysis — 305 cases")
     func testRealWorldDatasetAnalysis() throws {
         let url = Bundle(for: BundleToken.self).url(forResource: "RealWorldTestCases", withExtension: "json")!
         let data = try Data(contentsOf: url)
@@ -1152,8 +1152,7 @@ struct TextEventParserTests {
         }
 
         r += "\n"
-        let outputPath = "/tmp/takt_dataset_analysis.txt"
-        try r.write(toFile: outputPath, atomically: true, encoding: .utf8)
+        try? r.write(toFile: "/tmp/takt_dataset_analysis.txt", atomically: true, encoding: .utf8)
         print(r)
     }
 }
