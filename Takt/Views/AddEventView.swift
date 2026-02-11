@@ -19,10 +19,15 @@ struct AddEventView: View {
                     DatePicker("Event Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
                     
                     Toggle("Set Deadline", isOn: $hasDeadline)
-                    
+                        .onChange(of: hasDeadline) { _, isOn in
+                            if isOn && deadline == nil {
+                                deadline = date
+                            }
+                        }
+
                     if hasDeadline {
                         DatePicker("Deadline", selection: Binding(
-                            get: { deadline ?? Date() },
+                            get: { deadline ?? date },
                             set: { deadline = $0 }
                         ), displayedComponents: [.date, .hourAndMinute])
                     }
