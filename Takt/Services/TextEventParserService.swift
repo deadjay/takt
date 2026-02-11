@@ -39,17 +39,20 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
     /// Parse text and extract all events with dates
     func parseEvents(from text: String) -> [Event] {
+        // Pre-process: strip URLs to avoid false positives (e.g., /2026/03/15/ in URL paths)
+        let cleanedText = stripURLs(from: text)
+
         // Stage 1: Regex-based extraction (current implementation)
-        var events = parseEventsWithRegex(from: text)
+        var events = parseEventsWithRegex(from: cleanedText)
 
         // Stage 2: Natural Language enhancement (stub for future)
         if detectionStage == .withNaturalLanguage || detectionStage == .withAppleAI {
-            events = enhanceWithNaturalLanguage(events, text: text)
+            events = enhanceWithNaturalLanguage(events, text: cleanedText)
         }
 
         // Stage 3: Apple Intelligence enhancement (stub for future)
         if detectionStage == .withAppleAI {
-            events = enhanceWithAppleIntelligence(events, text: text)
+            events = enhanceWithAppleIntelligence(events, text: cleanedText)
         }
 
         return events
@@ -79,10 +82,10 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
                 // Check previous lines (up to 3 lines back) for food expiry keywords if date wasn't marked as deadline
                 var updatedDateInfo = dateInfo
-                if !dateInfo.isDeadline && index > 0 {
+                if !dateInfo.isDeadline {
                     // Check up to 3 previous lines for deadline keywords
-                    let linesToCheck = max(0, index - 3)..<index
                     var foundDeadlineKeyword = false
+                    let linesToCheck = index > 0 ? max(0, index - 3)..<index : 0..<0
 
                     for i in linesToCheck {
                         let lineToCheck = lines[i].lowercased()
@@ -94,6 +97,23 @@ final class TextEventParser: TextEventParserServiceProtocol {
                            lineToCheck.range(of: "bis\\s*[:.]?\\s*$", options: .regularExpression) != nil {  // "bis:" or "bis." at end
                             foundDeadlineKeyword = true
                             break
+                        }
+                    }
+
+                    // Also check the current line for deadline keywords
+                    if !foundDeadlineKeyword {
+                        let currentLower = trimmedLine.lowercased()
+                        if currentLower.contains("use by") ||
+                           currentLower.contains("abgabe bis") ||
+                           currentLower.contains("abgabefrist") ||
+                           currentLower.contains("return by") ||
+                           currentLower.contains("rückgabe bis") ||
+                           currentLower.contains("abholbar bis") ||
+                           currentLower.contains("fällig seit") ||
+                           currentLower.contains("abholung bis") ||
+                           currentLower.contains("verw. bis") ||
+                           currentLower.contains("verwendbar bis") {
+                            foundDeadlineKeyword = true
                         }
                     }
 
@@ -205,6 +225,26 @@ final class TextEventParser: TextEventParserServiceProtocol {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "de_DE")
         let currentYear = Calendar.current.component(.year, from: Date())
+
+        // Handle month/year-only formats (default to 1st of month)
+        if format == "MM.yyyy" {
+            let components = text.components(separatedBy: CharacterSet(charactersIn: "./"))
+            if components.count >= 2, let month = Int(components[0]), let year = Int(components[1]),
+               month >= 1 && month <= 12 {
+                formatter.dateFormat = "dd.MM.yyyy"
+                return formatter.date(from: "01.\(String(format: "%02d", month)).\(year)")
+            }
+        }
+
+        if format == "MM.yy" {
+            let components = text.components(separatedBy: CharacterSet(charactersIn: "./"))
+            if components.count >= 2, let month = Int(components[0]), let year = Int(components[1]),
+               month >= 1 && month <= 12, year < 100 {
+                let fullYear = 2000 + year
+                formatter.dateFormat = "dd.MM.yyyy"
+                return formatter.date(from: "01.\(String(format: "%02d", month)).\(fullYear)")
+            }
+        }
 
         // Handle dates without year FIRST - default to current year
         // Do NOT try to parse these formats directly as DateFormatter defaults to year 2000
@@ -437,6 +477,12 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return calendar.date(from: components) ?? date
     }
     
+    /// Strip URLs from text to prevent false positive date extraction from URL paths
+    private func stripURLs(from text: String) -> String {
+        guard let regex = try? NSRegularExpression(pattern: #"https?://\S+"#, options: []) else { return text }
+        return regex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: "")
+    }
+
     // MARK: - Stage 2: Natural Language Enhancement
 
     /// Enhance events using Natural Language framework
@@ -643,7 +689,17 @@ final class TextEventParser: TextEventParserServiceProtocol {
                             lowercasedContext.contains("due") ||
                             lowercasedContext.contains("verbrauchen") ||
                             lowercasedContext.contains("haltbar") ||
-                            lowercasedContext.contains("mhd")
+                            lowercasedContext.contains("mhd") ||
+                            lowercasedContext.contains("use by") ||
+                            lowercasedContext.contains("abgabe bis") ||
+                            lowercasedContext.contains("abgabefrist") ||
+                            lowercasedContext.contains("return by") ||
+                            lowercasedContext.contains("rückgabe bis") ||
+                            lowercasedContext.contains("abholbar bis") ||
+                            lowercasedContext.contains("fällig seit") ||
+                            lowercasedContext.contains("abholung bis") ||
+                            lowercasedContext.contains("verw. bis") ||
+                            lowercasedContext.contains("verwendbar bis")
 
             // Calculate priority score for this match
             // Higher priority = more likely to be the relevant date
@@ -876,14 +932,28 @@ final class TextEventParser: TextEventParserServiceProtocol {
     // MARK: - Date Patterns
 
     private let datePatterns: [DatePattern] = [
+        // Date ranges: "X bis Y" — prefer the start date X (must come before "bis" deadline pattern)
+        DatePattern(regex: #"(\d{1,2})\.(\d{1,2})\.(\d{4})\s+bis\s+\d{1,2}\.\d{1,2}\.\d{4}"#, format: "dd.MM.yyyy", isDeadline: false),
+
         // German with deadline keywords (with year - must come before no-year patterns)
         DatePattern(regex: #"bis\s+(?:zum\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
         DatePattern(regex: #"fällig\s+(?:am\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
         DatePattern(regex: #"(?:return|rücksendung)\s+(?:by|bis)\s+(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
+        DatePattern(regex: #"(?:return|rücksendung)\s+(?:by|bis)\s+(\d{1,2})/(\d{1,2})/(\d{4})"#, format: "MM/dd/yyyy", isDeadline: true),
         DatePattern(regex: #"(?:pay|zahlen)\s+(?:until|bis)\s+(\d{1,2})\.(\d{1,2})\.(\d{4})"#, format: "dd.MM.yyyy", isDeadline: true),
+
+        // Credit card / expiry with "Expires MM/YY" format
+        DatePattern(regex: #"[Ee]xpires?\s+(\d{1,2})/(\d{2})\b"#, format: "MM.yy", isDeadline: true),
 
         // Food expiry (must come before standard formats to match MHD: prefix)
         DatePattern(regex: #"(?:MHD|mhd):?\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
+
+        // Month/year-only formats (default to 1st of month) — food expiry, medications, inspections
+        // German: "06.2027", "12.2026", "03.27"
+        DatePattern(regex: #"(?:MHD|mhd|mindestens\s+haltbar\s+bis(?:\s+Ende)?|haltbar\s+bis|verw\.\s*bis|best\s+before|prod)[:\s]+(\d{1,2})[./](\d{4})"#, format: "MM.yyyy", isDeadline: false),
+        DatePattern(regex: #"(?:MHD|mhd|mindestens\s+haltbar\s+bis(?:\s+Ende)?|haltbar\s+bis|verw\.\s*bis|best\s+before|prod)[:\s]+(\d{1,2})[./](\d{2})\b"#, format: "MM.yy", isDeadline: false),
+        // Standalone month.year (common on food labels, inspections, etc.)
+        DatePattern(regex: #"(?:^|[\s:])(\d{2})[./](\d{4})\b"#, format: "MM.yyyy", isDeadline: false),
 
         // Food expiry with full German text (multiline, so date might be on next line)
         DatePattern(regex: #"(?:MINDESTENS\s+HALTBAR\s+BIS|mindestens\s+haltbar\s+bis)[:\s]*(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, format: "dd.MM.yy", isDeadline: true),
