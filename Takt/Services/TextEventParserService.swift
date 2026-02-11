@@ -420,8 +420,7 @@ final class TextEventParser: TextEventParserServiceProtocol {
         let dateWithTime = applyTime(to: dateInfo.date, timeInfo: timeInfo)
 
         if dateInfo.isDeadline {
-            let reminderDate = Calendar.current.date(byAdding: .day, value: -1, to: dateWithTime) ?? dateWithTime
-            return (reminderDate, dateWithTime)
+            return (dateWithTime, dateWithTime)
         }
         return (dateWithTime, nil)
     }

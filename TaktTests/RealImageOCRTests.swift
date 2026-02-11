@@ -402,11 +402,11 @@ struct RealImageOCRTests {
         #expect(events.count >= 1, "Should find expiry date")
 
         // Expected: zu verbrauchen bis: 30.12.25
-        // Should create reminder on Dec 29, 2025 (1 day before deadline)
+        // Event date should be the actual expiry date
         if let event = events.first {
             let calendar = Calendar.current
             let components = calendar.dateComponents([.day, .month, .year], from: event.date)
-            #expect(components.day == 29, "Expected reminder day 29 (1 day before deadline)")
+            #expect(components.day == 30, "Expected day 30 (actual expiry date)")
             #expect(components.month == 12, "Expected month December (12)")
             #expect(components.year == 2025, "Expected year 2025")
 
