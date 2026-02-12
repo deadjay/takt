@@ -79,107 +79,108 @@ private struct IdleStateView: View {
             TaktTheme.appBackground
                 .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // Header
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Takt.")
-                        .font(.system(size: 30, weight: .heavy))
-                        .tracking(-1.6)
-                        .foregroundColor(TaktTheme.textPrimary)
-                        .textCase(.uppercase)
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Takt.")
+                            .font(.system(size: 30, weight: .heavy))
+                            .tracking(-1.6)
+                            .foregroundColor(TaktTheme.textPrimary)
+                            .textCase(.uppercase)
 
-                    Text("Snap a photo, upload an image, or paste text — Takt extracts dates and creates reminders automatically.")
-                        .font(.system(size: 13))
-                        .foregroundColor(TaktTheme.textSecondary)
-                        .lineSpacing(2)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 16)
+                        Text("Snap a photo, upload an image, or paste text — Takt extracts dates and creates reminders automatically.")
+                            .font(.system(size: 13))
+                            .foregroundColor(TaktTheme.textSecondary)
+                            .lineSpacing(2)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, TaktTheme.contentPadding)
+                    .padding(.top, 16)
+                    .padding(.bottom, 24)
 
-                Spacer()
+                    // Two square action cards in a row
+                    HStack(spacing: 16) {
+                        // Camera card (01 / CAPTURE - "Make Photo")
+                        ImageInputButton(
+                            icon: "camera.fill",
+                            label: "01 / CAPTURE",
+                            title: "Make Photo",
+                            imageData: $viewModel.selectedImageData,
+                            sourceType: .camera
+                        )
 
-                // Two square action cards in a row
-                HStack(spacing: 16) {
-                    // TODO: You implement ActionCard views here
-                    // Camera card (01 / CAPTURE - "Make Photo")
-                    ImageInputButton(
-                        icon: "camera.fill",
-                        label: "01 / CAPTURE",
-                        title: "Make Photo",
-                        imageData: $viewModel.selectedImageData,
-                        sourceType: .camera
-                    )
-
-                    // Upload card (02 / IMPORT - "Attach Image")
-                    ImageInputButton(
-                        icon: "photo.fill",
-                        label: "02 / IMPORT",
-                        title: "Attach Image",
-                        imageData: $viewModel.selectedImageData,
-                        sourceType: .photoLibrary
-                    )
-                }
-                .padding(.horizontal, TaktTheme.contentPadding)
-
-                // "or" separator
-                OrSeparator()
+                        // Upload card (02 / IMPORT - "Attach Image")
+                        ImageInputButton(
+                            icon: "photo.fill",
+                            label: "02 / IMPORT",
+                            title: "Attach Image",
+                            imageData: $viewModel.selectedImageData,
+                            sourceType: .photoLibrary
+                        )
+                    }
                     .padding(.horizontal, TaktTheme.contentPadding)
 
-                // Text input card
-                TextInputField(
-                    text: $viewModel.inputText,
-                    onPaste: {
-                        viewModel.pasteFromClipboard()
-                    }
-                )
-                .padding(.horizontal, TaktTheme.contentPadding)
-                
-                // Quick Tips (above buttons, closer to subtitle)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("QUICK TIPS")
-                        .font(TaktTheme.cardLabelFont)
-                        .foregroundColor(TaktTheme.textMuted)
-                        .padding(.bottom, 4)
+                    // "or" separator
+                    OrSeparator()
+                        .padding(.horizontal, TaktTheme.contentPadding)
 
-                    TipRow(text: "Works with tickets, receipts, food labels, subscriptions")
-                    TipRow(text: "Detects dates, times, and deadlines automatically")
-                    TipRow(text: "Everything stays on your device — fully offline")
-                }
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 20)
-                
-                // Magic button - always visible at bottom
-                Button {
-                    Task {
-                        if viewModel.selectedImageData != nil {
-                            await viewModel.processImage()
-                        } else {
-                            await viewModel.processText()
+                    // Text input card
+                    TextInputField(
+                        text: $viewModel.inputText,
+                        onPaste: {
+                            viewModel.pasteFromClipboard()
                         }
-                    }
-                } label: {
-                    HStack(spacing: 12) {
-                        Text("DETECT EVENTS")
-                            .font(TaktTheme.magicButtonFont)
-                            .tracking(1.8)
+                    )
+                    .padding(.horizontal, TaktTheme.contentPadding)
 
-                        Image(systemName: "bolt.fill")
-                            .font(.system(size: 18, weight: .bold))
+                    // Quick Tips
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("QUICK TIPS")
+                            .font(TaktTheme.cardLabelFont)
+                            .foregroundColor(TaktTheme.textMuted)
+                            .padding(.bottom, 4)
+
+                        TipRow(text: "Works with tickets, receipts, food labels, subscriptions")
+                        TipRow(text: "Detects dates, times, and deadlines automatically")
+                        TipRow(text: "Everything stays on your device — fully offline")
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: TaktTheme.magicButtonHeight)
-                    .background(TaktTheme.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: TaktTheme.magicButtonCornerRadius))
-                    .shadow(color: TaktTheme.accent.opacity(0.30), radius: 15, y: 8)
+                    .padding(.horizontal, TaktTheme.contentPadding)
+                    .padding(.top, 20)
+
+                    // Magic button
+                    Button {
+                        Task {
+                            if viewModel.selectedImageData != nil {
+                                await viewModel.processImage()
+                            } else {
+                                await viewModel.processText()
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("DETECT EVENTS")
+                                .font(TaktTheme.magicButtonFont)
+                                .tracking(1.8)
+
+                            Image(systemName: "bolt.fill")
+                                .font(.system(size: 18, weight: .bold))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: TaktTheme.magicButtonHeight)
+                        .background(TaktTheme.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: TaktTheme.magicButtonCornerRadius))
+                        .shadow(color: TaktTheme.accent.opacity(0.30), radius: 15, y: 8)
+                    }
+                    .disabled(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty)
+                    .opacity(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty ? 0.5 : 1.0)
+                    .padding(.horizontal, TaktTheme.contentPadding)
+                    .padding(.top, 12)
+                    .padding(.bottom, 16)
                 }
-                .disabled(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty)
-                .opacity(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty ? 0.5 : 1.0)
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 12)
-                .padding(.bottom, 16)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
     }
 }
