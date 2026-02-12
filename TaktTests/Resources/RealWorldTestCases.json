@@ -3764,6 +3764,23 @@
       "expectedEvents": 0,
       "hasDeadline": false,
       "note": "Address with numbers that should not be dates"
+    },
+    {
+      "id": "edge_multiline_title_poster",
+      "category": "edge_cases",
+      "text": "Sa, 10.01. 24:00 Stummfilm um Mitternacht:\nDas Ende von St.\nPetersburg\n[Omel]\nTHE END OF ST.\nPETERSBURG",
+      "expectedEvents": 1,
+      "expectedDate": {
+        "day": 10,
+        "month": 1,
+        "year": "current"
+      },
+      "expectedTime": {
+        "hour": 24,
+        "minute": 0
+      },
+      "hasDeadline": false,
+      "note": "Multiline title with colon continuation - should capture 'Stummfilm um Mitternacht:\\nDas Ende von St.\\nPetersburg'"
     }
   ]
 }

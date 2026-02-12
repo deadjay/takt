@@ -126,14 +126,30 @@ final class TextEventParser: TextEventParserServiceProtocol {
                     }
                 }
 
-                // Extract time (if present)
-                let timeInfo = extractTime(from: trimmedLine)
+                // Extract time (if present) — check date line first, then adjacent lines
+                var timeInfo = extractTime(from: trimmedLine)
+                if timeInfo == nil {
+                    // Check the line immediately before and after for standalone time
+                    for adjacentIndex in [index - 1, index + 1] {
+                        guard adjacentIndex >= 0 && adjacentIndex < lines.count else { continue }
+                        let adjacentLine = lines[adjacentIndex].trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !adjacentLine.isEmpty else { continue }
+                        if let adjacentTime = extractTime(from: adjacentLine) {
+                            timeInfo = adjacentTime
+                            break
+                        }
+                    }
+                }
 
                 // Extract event name (look at surrounding lines too)
                 let eventName = extractEventName(from: lines, currentIndex: index, dateInfo: updatedDateInfo, timeInfo: timeInfo)
 
-                // Look for additional context
-                let notes = extractNotes(from: lines, currentIndex: index)
+                // Notes = full OCR text minus the extracted date/time
+                var notes = text.replacingOccurrences(of: updatedDateInfo.matchedText, with: "")
+                if let timeInfo = timeInfo {
+                    notes = notes.replacingOccurrences(of: timeInfo.matchedText, with: "")
+                }
+                notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
 
                 // Determine dates (with time if available)
                 let (eventDate, deadline) = determineEventAndDeadline(dateInfo: updatedDateInfo, timeInfo: timeInfo)
@@ -346,6 +362,11 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 hour = 0
             }
 
+            // Handle 24:00 as midnight (00:00)
+            if hour == 24 && minute == 0 {
+                hour = 0
+            }
+
             // Validate time
             guard hour >= 0 && hour < 24 && minute >= 0 && minute < 60 else { continue }
 
@@ -365,11 +386,12 @@ final class TextEventParser: TextEventParserServiceProtocol {
         }
         dateLineName = cleanNameText(dateLineName)
 
-        // Collect valid surrounding lines (up to 3 lines before, 2 after)
+        // Collect valid surrounding lines (up to 3 lines before, 5 after)
+        // OCR often splits poster text across many short lines, so we need a wider window
         var contextLines: [(index: Int, text: String)] = []
 
         let searchStart = max(0, currentIndex - 3)
-        let searchEnd = min(lines.count - 1, currentIndex + 2)
+        let searchEnd = min(lines.count - 1, currentIndex + 5)
 
         for i in searchStart...searchEnd {
             if i == currentIndex { continue }
@@ -382,8 +404,9 @@ final class TextEventParser: TextEventParserServiceProtocol {
             if extractDate(from: trimmed) != nil { continue }
             // Skip lines that are just times
             if extractTime(from: trimmed) != nil && trimmed.range(of: #"^\d{1,2}[.:]\d{2}\s*(Uhr|uhr|[ap]m)?$"#, options: .regularExpression) != nil { continue }
-            // Skip label-style metadata (e.g., "Datum:", "Preis:")
-            if trimmed.lowercased().range(of: #"^[a-zäöü]+:\s*$"#, options: .regularExpression) != nil { continue }
+            // Skip label-style metadata (e.g., "Datum:", "Preis:") — short labels only (≤12 chars)
+            let lowerTrimmed = trimmed.lowercased()
+            if trimmed.count <= 12 && lowerTrimmed.range(of: #"^[a-zäöü]+:\s*$"#, options: .regularExpression) != nil { continue }
             // Skip lines that look like prices, weights, codes
             if trimmed.range(of: #"^[\d.,€$£%]+\s*(€|kg|g|ml|l)?$"#, options: .regularExpression) != nil { continue }
             // Skip batch/lot codes (e.g., "L04", "PN DE-1201")
@@ -406,13 +429,29 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
         // Date line had no name — use surrounding lines
         // Prefer lines before the date (titles are usually above)
+        // For poster-style OCR, lines after the date may be fragmented title text
         let beforeLines = contextLines.filter { $0.index < currentIndex }
         let afterLines = contextLines.filter { $0.index > currentIndex }
 
-        var selectedLines = Array(beforeLines.prefix(2)) + Array(afterLines.prefix(1))
+        // Take up to 2 before lines and up to 3 after lines (OCR fragments)
+        // Join consecutive after-lines with spaces (they're likely one sentence split by OCR)
+        var selectedLines = Array(beforeLines.prefix(2)) + Array(afterLines.prefix(3))
         selectedLines.sort { $0.index < $1.index }
 
-        let result = selectedLines.map { $0.text }.joined(separator: "\n")
+        // Join after-lines with space (OCR fragments), before-lines with newline (separate context)
+        var parts: [String] = []
+        var afterParts: [String] = []
+        for line in selectedLines {
+            if line.index < currentIndex {
+                parts.append(line.text)
+            } else {
+                afterParts.append(line.text)
+            }
+        }
+        if !afterParts.isEmpty {
+            parts.append(afterParts.joined(separator: " "))
+        }
+        let result = parts.joined(separator: "\n")
 
         if result.isEmpty || result.count < 3 {
             return ""
@@ -425,11 +464,11 @@ final class TextEventParser: TextEventParserServiceProtocol {
     private func cleanNameText(_ text: String) -> String {
         var nameText = text
 
-        // Remove weekday abbreviations (e.g., "Sa.", "Mo.", "Sun.", etc.)
-        let weekdayAbbreviations = ["mo.", "di.", "mi.", "do.", "fr.", "sa.", "so.",
-                                   "mon.", "tue.", "wed.", "thu.", "fri.", "sat.", "sun."]
-        for abbr in weekdayAbbreviations {
-            let pattern = "\\b" + NSRegularExpression.escapedPattern(for: abbr)
+        // Remove weekday abbreviations (e.g., "Sa.", "Sa,", "Mo.", "Sun.", etc.)
+        let weekdays = ["mo", "di", "mi", "do", "fr", "sa", "so",
+                       "mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+        for day in weekdays {
+            let pattern = "\\b" + NSRegularExpression.escapedPattern(for: day) + "[.,]?"
             if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
                 nameText = regex.stringByReplacingMatches(in: nameText, range: NSRange(nameText.startIndex..., in: nameText), withTemplate: "")
             }
@@ -443,20 +482,6 @@ final class TextEventParser: TextEventParserServiceProtocol {
         }
 
         return nameText.prefix(1).uppercased() + nameText.dropFirst()
-    }
-    
-    private func extractNotes(from lines: [String], currentIndex: Int) -> String {
-        var notes: [String] = []
-        let checkRange = max(0, currentIndex - 1)...min(lines.count - 1, currentIndex + 1)
-        
-        for i in checkRange where i != currentIndex {
-            let line = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
-            if extractDate(from: line) == nil && line.count >= 5 {
-                notes.append(line)
-            }
-        }
-        
-        return notes.joined(separator: " ")
     }
     
     private func determineEventAndDeadline(dateInfo: DateInfo, timeInfo: TimeInfo?) -> (eventDate: Date, deadline: Date?) {
@@ -893,11 +918,15 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
             print("DEBUG: NSDataDetector creating event with name: '\(eventName)'")
 
+            // Notes = full OCR text minus the extracted date
+            let notesText = text.replacingOccurrences(of: matchedText, with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+
             let event = Event(
                 name: eventName,
                 date: eventDate,
                 deadline: deadline,
-                notes: nil
+                notes: notesText.isEmpty ? nil : notesText
             )
 
             allEvents.append(event)
