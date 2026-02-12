@@ -47,7 +47,7 @@ struct ImagePickerView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.blue)
+                .background(Color.accentColor)
                 .cornerRadius(12)
             }
         }

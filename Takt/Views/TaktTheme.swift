@@ -63,8 +63,8 @@ enum TaktTheme {
 
     // MARK: - Dimensions
     static let cardCornerRadius: CGFloat = 26
-    static let magicButtonHeight: CGFloat = 78
-    static let magicButtonCornerRadius: CGFloat = 20
+    static let magicButtonHeight: CGFloat = 68
+    static let magicButtonCornerRadius: CGFloat = 12
     static let contentPadding: CGFloat = 24
 
     // MARK: - Fonts
@@ -73,6 +73,9 @@ enum TaktTheme {
 
     /// Card title: 20pt, semibold (e.g. "Make Photo")
     static let cardTitleFont = Font.system(size: 20, weight: .semibold)
+    
+    /// TextField placeholder: 10pt, semibold (e.g. "Make Photo")
+    static let textFieldFont = Font.system(size: 15, weight: .semibold)
 
     /// Magic button: heavy, uppercase
     static let magicButtonFont = Font.system(size: 16, weight: .heavy)

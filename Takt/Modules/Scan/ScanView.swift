@@ -97,20 +97,6 @@ private struct IdleStateView: View {
                 .padding(.horizontal, TaktTheme.contentPadding)
                 .padding(.top, 16)
 
-                // Quick Tips (above buttons, closer to subtitle)
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("QUICK TIPS")
-                        .font(TaktTheme.cardLabelFont)
-                        .foregroundColor(TaktTheme.textMuted)
-                        .padding(.bottom, 2)
-
-                    TipRow(text: "Works with tickets, receipts, food labels, subscriptions")
-                    TipRow(text: "Detects dates, times, and deadlines automatically")
-                    TipRow(text: "Everything stays on your device — fully offline")
-                }
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 20)
-
                 Spacer()
 
                 // Two square action cards in a row
@@ -148,7 +134,21 @@ private struct IdleStateView: View {
                     }
                 )
                 .padding(.horizontal, TaktTheme.contentPadding)
+                
+                // Quick Tips (above buttons, closer to subtitle)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("QUICK TIPS")
+                        .font(TaktTheme.cardLabelFont)
+                        .foregroundColor(TaktTheme.textMuted)
+                        .padding(.bottom, 4)
 
+                    TipRow(text: "Works with tickets, receipts, food labels, subscriptions")
+                    TipRow(text: "Detects dates, times, and deadlines automatically")
+                    TipRow(text: "Everything stays on your device — fully offline")
+                }
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.top, 20)
+                
                 // Magic button - always visible at bottom
                 Button {
                     Task {
@@ -228,7 +228,7 @@ private struct TipRow: View {
     let text: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .top, spacing: 13) {
             Text("•")
                 .foregroundColor(TaktTheme.textMuted)
             Text(text)
@@ -256,7 +256,7 @@ private struct TextInputField: View {
             HStack(spacing: 8) {
                 TextField("Paste or type text...", text: $text)
                     .textFieldStyle(.plain)
-                    .font(TaktTheme.cardTitleFont)
+                    .font(TaktTheme.textFieldFont)
                     .foregroundColor(TaktTheme.textPrimary)
 
                 Button {
@@ -273,7 +273,7 @@ private struct TextInputField: View {
                 }
             }
         }
-        .padding(24)
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(TaktTheme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius))
