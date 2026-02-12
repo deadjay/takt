@@ -118,6 +118,7 @@ struct EventConfirmationView: View {
                                     viewModel.currentDraft?.date = $0
                                 }
                             ), displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(.compact)
                             .labelsHidden()
                             .tint(TaktTheme.accent)
                             .padding(.vertical, 8)
@@ -142,31 +143,35 @@ struct EventConfirmationView: View {
                                 Toggle("", isOn: Binding(
                                     get: { viewModel.displayEvent?.deadline != nil },
                                     set: { hasDeadline in
+                                        let eventDate = viewModel.displayEvent?.date ?? Date()
                                         viewModel.ensureDraft()
-                                        viewModel.currentDraft?.deadline = hasDeadline ? Date() : nil
+                                        viewModel.currentDraft?.deadline = hasDeadline ? eventDate : nil
                                     }))
                                 .labelsHidden()
                                 .tint(TaktTheme.accent)
                             }
 
-                            if viewModel.displayEvent?.deadline != nil {
-                                DatePicker("", selection: Binding(
-                                    get: { viewModel.displayEvent?.deadline ?? Date() },
-                                    set: {
-                                        viewModel.ensureDraft()
-                                        viewModel.currentDraft?.deadline = $0
-                                    })
-                                , displayedComponents: [.date, .hourAndMinute])
-                                .labelsHidden()
-                                .tint(TaktTheme.accent)
-                                .padding(.vertical, 8)
-                                .overlay(
-                                    Rectangle()
-                                        .fill(TaktTheme.cardBorder)
-                                        .frame(height: 1),
-                                    alignment: .bottom
-                                )
-                            }
+                            // Always render DatePicker to avoid format flicker on appear
+                            DatePicker("", selection: Binding(
+                                get: { viewModel.displayEvent?.deadline ?? viewModel.displayEvent?.date ?? Date() },
+                                set: {
+                                    viewModel.ensureDraft()
+                                    viewModel.currentDraft?.deadline = $0
+                                })
+                            , displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(.compact)
+                            .labelsHidden()
+                            .tint(TaktTheme.accent)
+                            .padding(.vertical, 8)
+                            .overlay(
+                                Rectangle()
+                                    .fill(TaktTheme.cardBorder)
+                                    .frame(height: 1),
+                                alignment: .bottom
+                            )
+                            .frame(height: viewModel.displayEvent?.deadline != nil ? nil : 0)
+                            .opacity(viewModel.displayEvent?.deadline != nil ? 1 : 0)
+                            .clipped()
                         }
 
                         // Notes

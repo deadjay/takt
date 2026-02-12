@@ -33,6 +33,7 @@ struct EventDraftEditView: View {
                     TextField("Event Name", text: $name)
                     
                     DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.compact)
                     
                     Toggle("Set Deadline", isOn: $hasDeadline)
                         .onChange(of: hasDeadline) { _, isOn in
@@ -46,6 +47,7 @@ struct EventDraftEditView: View {
                             get: { deadline ?? date },
                             set: { deadline = $0 }
                         ), displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.compact)
                     }
                 }
                 

@@ -67,6 +67,7 @@ struct EditEventView: View {
                                 .tracking(1)
 
                             DatePicker("", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                                .datePickerStyle(.compact)
                                 .labelsHidden()
                                 .tint(TaktTheme.accent)
                         }
@@ -81,15 +82,22 @@ struct EditEventView: View {
                             Toggle("", isOn: $hasDeadline)
                                 .labelsHidden()
                                 .tint(TaktTheme.accent)
+                                .onChange(of: hasDeadline) { _, isOn in
+                                    if isOn && deadline == nil {
+                                        deadline = date
+                                    }
+                                }
 
-                            if hasDeadline {
-                                DatePicker("", selection: Binding(
-                                    get: { deadline ?? Date() },
-                                    set: { deadline = $0 }
-                                ), displayedComponents: [.date, .hourAndMinute])
-                                .labelsHidden()
-                                .tint(TaktTheme.accent)
-                            }
+                            DatePicker("", selection: Binding(
+                                get: { deadline ?? date },
+                                set: { deadline = $0 }
+                            ), displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(.compact)
+                            .labelsHidden()
+                            .tint(TaktTheme.accent)
+                            .frame(height: hasDeadline ? nil : 0)
+                            .opacity(hasDeadline ? 1 : 0)
+                            .clipped()
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
