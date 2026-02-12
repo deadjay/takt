@@ -63,6 +63,7 @@ fastlane/test_output
 
 # Claude Code internal files
 .claude/
+AGENTS.md
 
 # Design files
 
