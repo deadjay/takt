@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		94815BC02F3BA3BB00965FDC /* TaktShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94815BB62F3BA3BB00965FDC /* TaktShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		944E69142DFA27A8006271D8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,16 +25,45 @@
 			remoteGlobalIDString = 944E69012DFA27A6006271D8;
 			remoteInfo = Takt;
 		};
+		94815BBE2F3BA3BB00965FDC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 944E68FA2DFA27A6006271D8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 94815BB52F3BA3BB00965FDC;
+			remoteInfo = TaktShare;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		94815BC12F3BA3BB00965FDC /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				94815BC02F3BA3BB00965FDC /* TaktShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		944E69022DFA27A6006271D8 /* Takt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Takt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		944E69132DFA27A8006271D8 /* TaktTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TaktTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		944E691D2DFA27A8006271D8 /* TaktUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TaktUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		94815BB62F3BA3BB00965FDC /* TaktShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TaktShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		94A4A5FE2F0060CD004B683E /* Takt.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Takt.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		94815BC52F3BA3BB00965FDC /* Exceptions for "TaktShare" folder in "TaktShare" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 94815BB52F3BA3BB00965FDC /* TaktShare */;
+		};
 		94A090A32E8967360012D3E5 /* Exceptions for "Takt" folder in "Takt" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -59,6 +92,14 @@
 			path = TaktUITests;
 			sourceTree = "<group>";
 		};
+		94815BB72F3BA3BB00965FDC /* TaktShare */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				94815BC52F3BA3BB00965FDC /* Exceptions for "TaktShare" folder in "TaktShare" target */,
+			);
+			path = TaktShare;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +124,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		94815BB32F3BA3BB00965FDC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -93,6 +141,7 @@
 				944E69042DFA27A6006271D8 /* Takt */,
 				944E69162DFA27A8006271D8 /* TaktTests */,
 				944E69202DFA27A8006271D8 /* TaktUITests */,
+				94815BB72F3BA3BB00965FDC /* TaktShare */,
 				944E69032DFA27A6006271D8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -103,6 +152,7 @@
 				944E69022DFA27A6006271D8 /* Takt.app */,
 				944E69132DFA27A8006271D8 /* TaktTests.xctest */,
 				944E691D2DFA27A8006271D8 /* TaktUITests.xctest */,
+				94815BB62F3BA3BB00965FDC /* TaktShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -117,10 +167,12 @@
 				944E68FE2DFA27A6006271D8 /* Sources */,
 				944E68FF2DFA27A6006271D8 /* Frameworks */,
 				944E69002DFA27A6006271D8 /* Resources */,
+				94815BC12F3BA3BB00965FDC /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				94815BBF2F3BA3BB00965FDC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				944E69042DFA27A6006271D8 /* Takt */,
@@ -178,6 +230,28 @@
 			productReference = 944E691D2DFA27A8006271D8 /* TaktUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		94815BB52F3BA3BB00965FDC /* TaktShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 94815BC42F3BA3BB00965FDC /* Build configuration list for PBXNativeTarget "TaktShare" */;
+			buildPhases = (
+				94815BB22F3BA3BB00965FDC /* Sources */,
+				94815BB32F3BA3BB00965FDC /* Frameworks */,
+				94815BB42F3BA3BB00965FDC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				94815BB72F3BA3BB00965FDC /* TaktShare */,
+			);
+			name = TaktShare;
+			packageProductDependencies = (
+			);
+			productName = TaktShare;
+			productReference = 94815BB62F3BA3BB00965FDC /* TaktShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -188,7 +262,7 @@
 				KnownAssetTags = (
 					New,
 				);
-				LastSwiftUpdateCheck = 1600;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					944E69012DFA27A6006271D8 = {
@@ -201,6 +275,9 @@
 					944E691C2DFA27A8006271D8 = {
 						CreatedOnToolsVersion = 16.0;
 						TestTargetID = 944E69012DFA27A6006271D8;
+					};
+					94815BB52F3BA3BB00965FDC = {
+						CreatedOnToolsVersion = 26.2;
 					};
 				};
 			};
@@ -221,6 +298,7 @@
 				944E69012DFA27A6006271D8 /* Takt */,
 				944E69122DFA27A8006271D8 /* TaktTests */,
 				944E691C2DFA27A8006271D8 /* TaktUITests */,
+				94815BB52F3BA3BB00965FDC /* TaktShare */,
 			);
 		};
 /* End PBXProject section */
@@ -241,6 +319,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		944E691B2DFA27A8006271D8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94815BB42F3BA3BB00965FDC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -271,6 +356,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		94815BB22F3BA3BB00965FDC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -283,6 +375,11 @@
 			isa = PBXTargetDependency;
 			target = 944E69012DFA27A6006271D8 /* Takt */;
 			targetProxy = 944E691E2DFA27A8006271D8 /* PBXContainerItemProxy */;
+		};
+		94815BBF2F3BA3BB00965FDC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 94815BB52F3BA3BB00965FDC /* TaktShare */;
+			targetProxy = 94815BBE2F3BA3BB00965FDC /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -406,6 +503,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Takt/Resources/Takt.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -433,6 +531,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Takt/Resources/Takt.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -502,7 +601,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SS3GWX6HQG;
+				DEVELOPMENT_TEAM = 9K93F66NC9;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
@@ -522,7 +621,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SS3GWX6HQG;
+				DEVELOPMENT_TEAM = 9K93F66NC9;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
@@ -534,6 +633,67 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Takt;
+			};
+			name = Release;
+		};
+		94815BC22F3BA3BB00965FDC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9K93F66NC9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TaktShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TaktShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktLLC.Takt.TaktShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		94815BC32F3BA3BB00965FDC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9K93F66NC9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TaktShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TaktShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktLLC.Takt.TaktShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -572,6 +732,15 @@
 			buildConfigurations = (
 				944E692E2DFA27A8006271D8 /* Debug */,
 				944E692F2DFA27A8006271D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		94815BC42F3BA3BB00965FDC /* Build configuration list for PBXNativeTarget "TaktShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				94815BC22F3BA3BB00965FDC /* Debug */,
+				94815BC32F3BA3BB00965FDC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
