@@ -1,6 +1,6 @@
 import Foundation
 
-struct Event: Identifiable, Codable {
+struct Event: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
     var name: String
     var date: Date
@@ -9,13 +9,15 @@ struct Event: Identifiable, Codable {
     var isCompleted: Bool = false
     var createdAt: Date = Date()
     var sourceImageData: Data?
+    var titleCandidates: [String]?
 
-    public init(name: String, date: Date, deadline: Date? = nil, notes: String? = nil, sourceImageData: Data? = nil) {
+    public init(name: String, date: Date, deadline: Date? = nil, notes: String? = nil, sourceImageData: Data? = nil, titleCandidates: [String]? = nil) {
         self.name = name
         self.date = date
         self.deadline = deadline
         self.notes = notes
         self.sourceImageData = sourceImageData
+        self.titleCandidates = titleCandidates
     }
 }
 

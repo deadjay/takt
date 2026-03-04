@@ -142,25 +142,23 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 }
 
                 // Extract event name (look at surrounding lines too)
-                let eventName = extractEventName(from: lines, currentIndex: index, dateInfo: updatedDateInfo, timeInfo: timeInfo)
+                let nameResult = extractEventName(from: lines, currentIndex: index, dateInfo: updatedDateInfo, timeInfo: timeInfo)
 
-                // Notes = full OCR text minus the extracted date/time
-                var notes = text.replacingOccurrences(of: updatedDateInfo.matchedText, with: "")
-                if let timeInfo = timeInfo {
-                    notes = notes.replacingOccurrences(of: timeInfo.matchedText, with: "")
-                }
-                notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+                // Notes = full OCR text (unmodified)
+                let notes = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
                 // Determine dates (with time if available)
                 let (eventDate, deadline) = determineEventAndDeadline(dateInfo: updatedDateInfo, timeInfo: timeInfo)
-                
+
+                let candidates = nameResult.candidates.count > 1 ? nameResult.candidates : nil
                 let event = Event(
-                    name: eventName.isEmpty ? "Reminder" : eventName,
+                    name: nameResult.name.isEmpty ? "Reminder" : nameResult.name,
                     date: eventDate,
                     deadline: deadline,
-                    notes: notes.isEmpty ? nil : notes
+                    notes: notes.isEmpty ? nil : notes,
+                    titleCandidates: candidates
                 )
-                
+
                 events.append(event)
             }
         }
@@ -376,7 +374,12 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return nil
     }
 
-    private func extractEventName(from lines: [String], currentIndex: Int, dateInfo: DateInfo, timeInfo: TimeInfo?) -> String {
+    private struct EventNameResult {
+        let name: String
+        let candidates: [String]
+    }
+
+    private func extractEventName(from lines: [String], currentIndex: Int, dateInfo: DateInfo, timeInfo: TimeInfo?) -> EventNameResult {
         let dateLine = lines[currentIndex]
 
         // First, extract name from the date line itself (strip date + time)
@@ -415,16 +418,25 @@ final class TextEventParser: TextEventParserServiceProtocol {
             contextLines.append((index: i, text: trimmed))
         }
 
+        // Build candidates list: all valid lines the user can pick from
+        var allCandidates: [String] = []
+        if dateLineName.count >= 3 {
+            allCandidates.append(dateLineName)
+        }
+        for line in contextLines.sorted(by: { $0.index < $1.index }) {
+            allCandidates.append(line.text)
+        }
+
         // If date line has a good name already, use it (possibly enriched with one context line)
         if dateLineName.count >= 3 {
             // Add one preceding context line if it looks like a title
             if let preceding = contextLines.first(where: { $0.index < currentIndex }) {
                 let combined = preceding.text + " - " + dateLineName
                 if combined.count <= 80 {
-                    return combined
+                    return EventNameResult(name: combined, candidates: allCandidates)
                 }
             }
-            return dateLineName
+            return EventNameResult(name: dateLineName, candidates: allCandidates)
         }
 
         // Date line had no name — use surrounding lines
@@ -454,10 +466,10 @@ final class TextEventParser: TextEventParserServiceProtocol {
         let result = parts.joined(separator: "\n")
 
         if result.isEmpty || result.count < 3 {
-            return ""
+            return EventNameResult(name: "", candidates: allCandidates)
         }
 
-        return result
+        return EventNameResult(name: result, candidates: allCandidates)
     }
 
     /// Clean up extracted name text by removing weekday abbreviations and trimming
@@ -903,6 +915,9 @@ final class TextEventParser: TextEventParserServiceProtocol {
             validLines.sort(by: { $0.distance < $1.distance })
             let selectedLines = validLines.prefix(3).sorted(by: { $0.index < $1.index }).map { $0.line }
 
+            // All candidate lines for tappable title editing
+            let nsCandidates = validLines.sorted(by: { $0.index < $1.index }).map { $0.line }
+
             // Join with newlines to preserve multi-line context
             var eventName = selectedLines.joined(separator: "\n")
 
@@ -918,15 +933,15 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
             print("DEBUG: NSDataDetector creating event with name: '\(eventName)'")
 
-            // Notes = full OCR text minus the extracted date
-            let notesText = text.replacingOccurrences(of: matchedText, with: "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            // Notes = full OCR text (unmodified)
+            let notesText = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
             let event = Event(
                 name: eventName,
                 date: eventDate,
                 deadline: deadline,
-                notes: notesText.isEmpty ? nil : notesText
+                notes: notesText.isEmpty ? nil : notesText,
+                titleCandidates: nsCandidates.count > 1 ? nsCandidates : nil
             )
 
             allEvents.append(event)

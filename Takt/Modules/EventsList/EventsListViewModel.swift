@@ -38,6 +38,20 @@ final class EventsListViewModel {
         events.sorted { $0.date < $1.date }
     }
 
+    /// "TODAY, MAR 03" label for the today divider row
+    var todayLabel: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM dd"
+        return "TODAY, \(formatter.string(from: Date()).uppercased())"
+    }
+
+    /// Index in filteredEvents where the Today divider should be inserted
+    /// (before the first event that is today or later)
+    var todayInsertIndex: Int {
+        let startOfToday = Calendar.current.startOfDay(for: Date())
+        return filteredEvents.firstIndex { $0.date >= startOfToday } ?? filteredEvents.count
+    }
+
     // MARK: - Actions
     @MainActor
     func loadEvents() async {

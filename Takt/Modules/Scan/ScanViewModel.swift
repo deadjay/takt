@@ -30,6 +30,9 @@ final class ScanViewModel {
     // Draft for editing
     var currentDraft: Event?
 
+    // Title candidate selection (indexes of selected candidates)
+    var selectedCandidateIndexes: Set<Int> = []
+
     // UI state
     var showSuccessToast: Bool = false
     var errorMessage: String?
@@ -122,6 +125,7 @@ final class ScanViewModel {
 
             extractedEvents = events
             currentEventIndex = 0
+            initCandidateSelection()
 
         } catch {
             errorMessage = "Failed to process image: \(error.localizedDescription)"
@@ -165,6 +169,7 @@ final class ScanViewModel {
 
             extractedEvents = events
             currentEventIndex = 0
+            initCandidateSelection()
 
         } catch {
             errorMessage = "Failed to process text: \(error.localizedDescription)"
@@ -175,6 +180,32 @@ final class ScanViewModel {
         if currentDraft == nil {
             currentDraft = currentEvent
         }
+    }
+
+    /// Toggle a title candidate line on/off and update the draft name
+    func toggleCandidate(at index: Int) {
+        ensureDraft()
+        if selectedCandidateIndexes.contains(index) {
+            selectedCandidateIndexes.remove(index)
+        } else {
+            selectedCandidateIndexes.insert(index)
+        }
+        // Rebuild name from selected candidates in order
+        guard let candidates = displayEvent?.titleCandidates else { return }
+        let selected = selectedCandidateIndexes.sorted().compactMap { i in
+            i < candidates.count ? candidates[i] : nil
+        }
+        currentDraft?.name = selected.joined(separator: " - ")
+    }
+
+    /// Initialize selected candidates based on which lines match the current name
+    func initCandidateSelection() {
+        guard let event = currentEvent, let candidates = event.titleCandidates else {
+            selectedCandidateIndexes = []
+            return
+        }
+        let name = event.name
+        selectedCandidateIndexes = Set(candidates.indices.filter { name.contains(candidates[$0]) })
     }
 
     /// Generate a small thumbnail from the source image
@@ -204,10 +235,12 @@ final class ScanViewModel {
             // Show success feedback
             showSuccessToast = true
             currentDraft = nil
+            selectedCandidateIndexes = []
 
             // Move to next event or finish
             if currentEventIndex < extractedEvents.count - 1 {
                 currentEventIndex += 1
+                initCandidateSelection()
             } else {
                 // All events processed - reset after a delay for toast to show
                 Task {
@@ -224,9 +257,11 @@ final class ScanViewModel {
     /// Skip current event without saving
     func skipCurrentEvent() {
         currentDraft = nil
-        
+        selectedCandidateIndexes = []
+
         if currentEventIndex < extractedEvents.count - 1 {
             currentEventIndex += 1
+            initCandidateSelection()
         } else {
             // Last event - reset
             reset()
@@ -245,6 +280,7 @@ final class ScanViewModel {
         extractedEvents = []
         currentEventIndex = 0
         currentDraft = nil
+        selectedCandidateIndexes = []
         errorMessage = nil
         showSuccessToast = false
         isProcessing = false

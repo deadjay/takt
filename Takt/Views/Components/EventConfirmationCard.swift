@@ -14,6 +14,7 @@ struct EventConfirmationView: View {
     // MARK: - Public Properties
 
     @Bindable var viewModel: ScanViewModel
+    @State private var showInputText = false
 
     // MARK: - Body
 
@@ -86,6 +87,39 @@ struct EventConfirmationView: View {
                                 .foregroundColor(TaktTheme.textMuted)
                                 .tracking(2)
 
+                            // Tappable line selector when candidates exist
+                            if let candidates = viewModel.currentEvent?.titleCandidates, candidates.count > 1 {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    ForEach(Array(candidates.enumerated()), id: \.offset) { index, line in
+                                        let isSelected = viewModel.selectedCandidateIndexes.contains(index)
+                                        Button {
+                                            viewModel.toggleCandidate(at: index)
+                                        } label: {
+                                            HStack(spacing: 10) {
+                                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                                    .font(.system(size: 16))
+                                                    .foregroundColor(isSelected ? TaktTheme.accent : TaktTheme.textMuted)
+
+                                                Text(line)
+                                                    .font(.system(size: 16, weight: isSelected ? .semibold : .regular))
+                                                    .foregroundColor(isSelected ? TaktTheme.textPrimary : TaktTheme.textMuted)
+                                                    .strikethrough(!isSelected, color: TaktTheme.textMuted.opacity(0.5))
+                                                    .lineLimit(2)
+                                                    .multilineTextAlignment(.leading)
+                                            }
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 12)
+                                            .background(isSelected ? TaktTheme.accent.opacity(0.08) : Color.clear)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+
+                            // Editable result field
                             TextField("Untitled Event", text: Binding(
                                 get: { viewModel.displayEvent?.name ?? "" },
                                 set: {
@@ -174,31 +208,49 @@ struct EventConfirmationView: View {
                             .clipped()
                         }
 
-                        // Notes
+                        // Input Text (collapsed by default)
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("NOTES")
-                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                .foregroundColor(TaktTheme.textMuted)
-                                .tracking(2)
-
-                            TextField("Add notes from scan...", text: Binding(
-                                get: { viewModel.displayEvent?.notes ?? "" },
-                                set: {
-                                    viewModel.ensureDraft()
-                                    viewModel.currentDraft?.notes = $0.isEmpty ? nil : $0
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    showInputText.toggle()
                                 }
-                            ), axis: .vertical)
-                            .font(.system(size: 16))
-                            .foregroundColor(TaktTheme.textPrimary)
-                            .lineLimit(3...)
-                            .lineSpacing(4)
-                            .padding(.vertical, 8)
-                            .overlay(
-                                Rectangle()
-                                    .fill(TaktTheme.cardBorder)
-                                    .frame(height: 1),
-                                alignment: .bottom
-                            )
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Text("INPUT TEXT")
+                                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                        .foregroundColor(TaktTheme.textMuted)
+                                        .tracking(2)
+
+                                    Image(systemName: showInputText ? "chevron.up" : "chevron.down")
+                                        .font(.system(size: 10, weight: .semibold))
+                                        .foregroundColor(TaktTheme.textMuted)
+
+                                    Spacer()
+                                }
+                            }
+                            .buttonStyle(.plain)
+
+                            if showInputText {
+                                TextField("Add notes from scan...", text: Binding(
+                                    get: { viewModel.displayEvent?.notes ?? "" },
+                                    set: {
+                                        viewModel.ensureDraft()
+                                        viewModel.currentDraft?.notes = $0.isEmpty ? nil : $0
+                                    }
+                                ), axis: .vertical)
+                                .font(.system(size: 16))
+                                .foregroundColor(TaktTheme.textPrimary)
+                                .lineLimit(3...)
+                                .lineSpacing(4)
+                                .padding(.vertical, 8)
+                                .overlay(
+                                    Rectangle()
+                                        .fill(TaktTheme.cardBorder)
+                                        .frame(height: 1),
+                                    alignment: .bottom
+                                )
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                            }
                         }
                     }
                     .padding(.horizontal, TaktTheme.contentPadding)

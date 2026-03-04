@@ -11,6 +11,8 @@ struct EventsListView: View {
     @State private var viewModel: EventsListViewModel
     @State private var selectedEvent: Event?
     @State private var isSearching = false
+    @State private var scrollProxy: ScrollViewProxy?
+    @State private var didScrollToToday = false
     @FocusState private var searchFieldFocused: Bool
     @Binding var showCalendar: Bool
 
@@ -40,6 +42,10 @@ struct EventsListView: View {
         }
         .task {
             await viewModel.loadEvents()
+            if !didScrollToToday, let proxy = scrollProxy {
+                scrollToToday(proxy: proxy)
+                didScrollToToday = true
+            }
         }
         .sheet(item: $selectedEvent) { event in
             EventDetailView(event: event, events: $viewModel.events)
@@ -90,34 +96,100 @@ struct EventsListView: View {
     // MARK: - Events List
 
     private var eventsList: some View {
-        List {
-            ForEach(viewModel.filteredEvents) { event in
-                EventRow(event: event)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedEvent = event
-                    }
-                    .listRowInsets(EdgeInsets(top: 0, leading: TaktTheme.contentPadding, bottom: 0, trailing: TaktTheme.contentPadding))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparatorTint(TaktTheme.cardBorder)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            Task {
-                                await viewModel.deleteEvents(withIds: [event.id])
-                            }
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
+        ScrollViewReader { proxy in
+            List {
+                // Past events (oldest first)
+                ForEach(viewModel.filteredEvents.prefix(viewModel.todayInsertIndex)) { event in
+                    eventRow(for: event)
+                }
+
+                // Previous Events label (only if there are past events)
+                if viewModel.todayInsertIndex > 0 {
+                    sectionLabel("PREVIOUS EVENTS ↑")
+                }
+
+                // Today divider (always present)
+                todayDivider
+                    .id("today")
+
+                // Upcoming Events label (only if there are future events)
+                if viewModel.todayInsertIndex < viewModel.filteredEvents.count {
+                    sectionLabel("UPCOMING EVENTS ↓")
+                }
+
+                // Future events
+                ForEach(viewModel.filteredEvents.suffix(from: viewModel.todayInsertIndex)) { event in
+                    eventRow(for: event)
+                }
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .padding(.bottom, 60)
+            .onAppear { scrollProxy = proxy }
+            .onChange(of: viewModel.searchText) { _, newValue in
+                Task {
+                    await viewModel.searchEvents(query: newValue)
+                }
             }
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .padding(.bottom, 60)
-        .onChange(of: viewModel.searchText) { _, newValue in
-            Task {
-                await viewModel.searchEvents(query: newValue)
+    }
+
+    @ViewBuilder
+    private func eventRow(for event: Event) -> some View {
+        EventRow(event: event)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                selectedEvent = event
             }
+            .listRowInsets(EdgeInsets(top: 0, leading: TaktTheme.contentPadding, bottom: 0, trailing: TaktTheme.contentPadding))
+            .listRowBackground(Color.clear)
+            .listRowSeparatorTint(TaktTheme.cardBorder)
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    Task {
+                        await viewModel.deleteEvents(withIds: [event.id])
+                    }
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+    }
+
+    private var todayDivider: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(TaktTheme.accent)
+                .frame(width: 8, height: 8)
+
+            Text(viewModel.todayLabel)
+                .font(.system(size: 12, weight: .heavy, design: .monospaced))
+                .foregroundColor(TaktTheme.accent)
+                .tracking(1.5)
+
+            Spacer()
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, TaktTheme.contentPadding)
+        .listRowInsets(EdgeInsets())
+        .listRowBackground(TaktTheme.accent.opacity(0.08))
+        .listRowSeparator(.hidden)
+    }
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            .foregroundColor(TaktTheme.textMuted)
+            .tracking(1.5)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .listRowInsets(EdgeInsets(top: 0, leading: TaktTheme.contentPadding, bottom: 0, trailing: TaktTheme.contentPadding))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+    }
+
+    private func scrollToToday(proxy: ScrollViewProxy) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            proxy.scrollTo("today", anchor: .top)
         }
     }
 
