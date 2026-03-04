@@ -854,18 +854,29 @@ final class TextEventParser: TextEventParserServiceProtocol {
             // This handles cases where time is on a different line (e.g., "20 Juni 2026\nSa. 16:00")
             let timeInfo = extractTime(from: contextText)
 
-            // If no time found, default to 09:00 instead of noon
             let dateWithTime: Date
             if let timeInfo = timeInfo {
+                // Explicit time found via regex patterns (e.g., "14:30 Uhr", "3pm")
                 dateWithTime = applyTime(to: date, timeInfo: timeInfo)
             } else {
-                // Default to 09:00 for events without explicit time
+                // No regex time match — check if NSDataDetector already parsed a time
+                // (handles natural language like "at 12", "at noon", "at 3 o'clock")
                 let calendar = Calendar.current
-                var components = calendar.dateComponents([.year, .month, .day], from: date)
-                components.hour = 9
-                components.minute = 0
-                components.second = 0
-                dateWithTime = calendar.date(from: components) ?? date
+                let parsedComponents = calendar.dateComponents([.hour, .minute], from: date)
+                let parsedHour = parsedComponents.hour ?? 0
+                let parsedMinute = parsedComponents.minute ?? 0
+
+                if parsedHour != 0 || parsedMinute != 0 {
+                    // NSDataDetector already set a meaningful time, keep it
+                    dateWithTime = date
+                } else {
+                    // No time at all — default to 09:00
+                    var components = calendar.dateComponents([.year, .month, .day], from: date)
+                    components.hour = 9
+                    components.minute = 0
+                    components.second = 0
+                    dateWithTime = calendar.date(from: components) ?? date
+                }
             }
 
             // Extract event name from lines (use original text with newlines, not normalized)
@@ -886,11 +897,20 @@ final class TextEventParser: TextEventParserServiceProtocol {
             var validLines: [(index: Int, distance: Int, line: String)] = []
 
             for (index, line) in lines.enumerated() {
-                let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                var trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
 
-                // Skip if too short or contains the date
-                if trimmed.count < 3 || trimmed.contains(matchedText) {
+                // Skip if too short
+                if trimmed.count < 3 {
                     continue
+                }
+
+                // If line contains the matched date text, strip it and keep the rest
+                if trimmed.contains(matchedText) {
+                    trimmed = trimmed.replacingOccurrences(of: matchedText, with: "")
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                    if trimmed.count < 3 {
+                        continue
+                    }
                 }
                 // Skip if line looks like a time
                 if extractTime(from: trimmed) != nil {

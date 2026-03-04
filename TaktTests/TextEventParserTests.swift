@@ -1155,6 +1155,83 @@ struct TextEventParserTests {
         try? r.write(toFile: "/tmp/takt_dataset_analysis.txt", atomically: true, encoding: .utf8)
         print(r)
     }
+    // MARK: - Natural Language Input Tests
+
+    @Test("Parse natural language: 'Buy a burger in 90 days'")
+    func testNaturalLanguageRelativeDays() throws {
+        let text = "Buy a burger in 90 days"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        // Date should be ~90 days from now
+        let expectedDate = calendar.date(byAdding: .day, value: 90, to: Date())!
+        let expectedDay = calendar.dateComponents([.day, .month, .year], from: expectedDate)
+        let actualDay = calendar.dateComponents([.day, .month, .year], from: event.date)
+        #expect(actualDay.day == expectedDay.day)
+        #expect(actualDay.month == expectedDay.month)
+        #expect(actualDay.year == expectedDay.year)
+
+        // Name should contain "Buy a burger", NOT be "Reminder" or empty
+        #expect(event.name.contains("Buy a burger"), "Expected name to contain 'Buy a burger', got: '\(event.name)'")
+        #expect(event.name != "Reminder", "Name should not be fallback 'Reminder'")
+    }
+
+    @Test("Parse natural language: 'Dentist appointment next Friday'")
+    func testNaturalLanguageNextFriday() throws {
+        let text = "Dentist appointment next Friday"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+
+        // Name should contain "Dentist appointment"
+        #expect(event.name.contains("Dentist"), "Expected name to contain 'Dentist', got: '\(event.name)'")
+        #expect(event.name != "Reminder", "Name should not be fallback 'Reminder'")
+    }
+
+    @Test("Parse natural language: 'Submit report in 2 weeks'")
+    func testNaturalLanguageTwoWeeks() throws {
+        let text = "Submit report in 2 weeks"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+
+        // Name should contain "Submit report"
+        #expect(event.name.contains("Submit report"), "Expected name to contain 'Submit report', got: '\(event.name)'")
+        #expect(event.name != "Reminder", "Name should not be fallback 'Reminder'")
+    }
+
+    @Test("Parse natural language: 'doctor appointment tomorrow at 12' preserves time")
+    func testNaturalLanguageTomorrowAtTime() throws {
+        let text = "doctor appointment tomorrow at 12"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1)
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        // Date should be tomorrow
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date())!
+        let expectedDay = calendar.dateComponents([.day, .month, .year], from: tomorrow)
+        let actualDay = calendar.dateComponents([.day, .month, .year], from: event.date)
+        #expect(actualDay.day == expectedDay.day)
+        #expect(actualDay.month == expectedDay.month)
+
+        // Time should be 12:00, NOT 09:00
+        let timeComponents = calendar.dateComponents([.hour], from: event.date)
+        #expect(timeComponents.hour == 12, "Expected hour to be 12, got: \(timeComponents.hour ?? -1)")
+
+        // Name should contain "doctor appointment"
+        #expect(event.name.lowercased().contains("doctor"), "Expected name to contain 'doctor', got: '\(event.name)'")
+    }
 }
 
 private class BundleToken {}
