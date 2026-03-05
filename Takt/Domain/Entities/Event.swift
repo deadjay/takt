@@ -62,4 +62,19 @@ extension Event {
         formatter.dateFormat = "MMM dd"
         return formatter.string(from: date).uppercased()
     }
+
+    /// Short time string e.g. "14:30" or "9:00 AM", nil if time is the default 09:00
+    var shortTimeLabel: String? {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: date)
+        let hour = components.hour ?? 9
+        let minute = components.minute ?? 0
+
+        // Hide if it's the default 9:00 (parser sets this when no time was found)
+        if hour == 9 && minute == 0 { return nil }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: date)
+    }
 }

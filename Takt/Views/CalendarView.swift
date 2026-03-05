@@ -257,20 +257,23 @@ struct EventRow: View {
             // Left: name + description
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.name)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(TaktTheme.textPrimary)
-                    .lineLimit(1)
+                    .lineLimit(3)
 
-                Text(event.notes ?? "No description")
-                    .font(.system(size: 14))
-                    .foregroundColor(TaktTheme.textSecondary)
-                    .lineLimit(1)
+                if let notes = event.notes, !notes.isEmpty {
+                    Text(notes)
+                        .font(.system(size: 12))
+                        .foregroundColor(TaktTheme.textMuted)
+                        .lineLimit(2)
+                        .lineSpacing(2)
+                }
             }
 
             Spacer()
 
-            // Right: date badge + deadline
-            VStack(alignment: .trailing, spacing: 8) {
+            // Right: date badge + time + deadline
+            VStack(alignment: .trailing, spacing: 6) {
                 // TODO: Style this as a silver pill badge (monospaced, bold)
                 Text(event.shortDateLabel)
                     .font(.system(size: 14, weight: .heavy, design: .monospaced))
@@ -279,6 +282,12 @@ struct EventRow: View {
                     .padding(.vertical, 4)
                     .background(TaktTheme.cardBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                if let time = event.shortTimeLabel {
+                    Text(time)
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundColor(TaktTheme.textMuted)
+                }
 
                 // TODO: Style the deadline badge (orange dot + label)
                 if let daysLeft = event.daysLeftLabel {
