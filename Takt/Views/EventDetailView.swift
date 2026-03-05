@@ -5,6 +5,7 @@ struct EventDetailView: View {
     @Binding var events: [Event]
     @Environment(\.presentationMode) var presentationMode
     @State private var showingDeleteAlert = false
+    @State private var showingImagePreview = false
 
     // Editable fields
     @State private var name: String
@@ -35,31 +36,43 @@ struct EventDetailView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    // Source image miniature
+                    // Source image miniature (tap to preview)
                     if let imageData = event.sourceImageData,
                        let uiImage = UIImage(data: imageData) {
-                        HStack {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 64, height: 64)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(TaktTheme.cardBorder, lineWidth: 1)
-                                )
+                        Button {
+                            showingImagePreview = true
+                        } label: {
+                            HStack {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 64, height: 64)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(TaktTheme.cardBorder, lineWidth: 1)
+                                    )
 
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("SOURCE IMAGE")
-                                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("SOURCE IMAGE")
+                                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                        .foregroundColor(TaktTheme.textMuted)
+                                        .tracking(1)
+                                    Text("Tap to preview")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(TaktTheme.textSecondary)
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                    .font(.system(size: 14))
                                     .foregroundColor(TaktTheme.textMuted)
-                                    .tracking(1)
-                                Text("Scanned input")
-                                    .font(.system(size: 13))
-                                    .foregroundColor(TaktTheme.textSecondary)
                             }
-
-                            Spacer()
+                        }
+                        .buttonStyle(.plain)
+                        .fullScreenCover(isPresented: $showingImagePreview) {
+                            ImagePreviewView(imageData: imageData)
                         }
                     }
 

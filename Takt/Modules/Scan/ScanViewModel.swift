@@ -208,16 +208,20 @@ final class ScanViewModel {
         selectedCandidateIndexes = Set(candidates.indices.filter { name.contains(candidates[$0]) })
     }
 
-    /// Generate a small thumbnail from the source image
-    private func generateThumbnail(from imageData: Data?, maxSize: CGFloat = 200) -> Data? {
+    /// Compress the source image for storage (keeps enough quality for full-screen preview)
+    private func compressSourceImage(from imageData: Data?, maxSize: CGFloat = 1200) -> Data? {
         guard let data = imageData, let image = UIImage(data: data) else { return nil }
         let scale = min(maxSize / image.size.width, maxSize / image.size.height, 1.0)
+        if scale >= 1.0 {
+            // Already small enough, just compress
+            return image.jpegData(compressionQuality: 0.7)
+        }
         let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
         UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
         image.draw(in: CGRect(origin: .zero, size: newSize))
-        let thumbnail = UIGraphicsGetImageFromCurrentImageContext()
+        let resized = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return thumbnail?.jpegData(compressionQuality: 0.6)
+        return resized?.jpegData(compressionQuality: 0.7)
     }
 
     /// Save current event and move to next (or finish)
@@ -225,15 +229,13 @@ final class ScanViewModel {
         guard var event = currentDraft ?? currentEvent else { return }
 
         // Attach source image thumbnail if available
-        if event.sourceImageData == nil, let thumbnailData = generateThumbnail(from: selectedImageData) {
-            event.sourceImageData = thumbnailData
+        if event.sourceImageData == nil, let imageData = compressSourceImage(from: selectedImageData) {
+            event.sourceImageData = imageData
         }
 
         do {
             try await addEventUseCase.execute(event)
 
-            // Show success feedback
-            showSuccessToast = true
             currentDraft = nil
             selectedCandidateIndexes = []
 
@@ -242,11 +244,9 @@ final class ScanViewModel {
                 currentEventIndex += 1
                 initCandidateSelection()
             } else {
-                // All events processed - reset after a delay for toast to show
-                Task {
-                    try? await Task.sleep(for: .seconds(0.5))
-                    reset()
-                }
+                // All events processed - signal success and reset immediately
+                showSuccessToast = true
+                reset()
             }
 
         } catch {

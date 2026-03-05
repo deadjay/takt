@@ -21,12 +21,17 @@ struct ScanView: View {
             // Main content
             if viewModel.isProcessing {
                 ProcessingView(showProgress: viewModel.showProgressIndicator)
+                    .transition(.opacity)
             } else if viewModel.hasExtractedEvents {
                 EventConfirmationView(viewModel: viewModel)
+                    .transition(.opacity)
             } else {
                 IdleStateView(viewModel: viewModel, showSuccessCheckmark: $showSuccessCheckmark)
+                    .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.hasExtractedEvents)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.isProcessing)
         .overlay(alignment: .center) {
             if showSuccessCheckmark {
                 Image(systemName: "checkmark.circle.fill")
@@ -43,9 +48,22 @@ struct ScanView: View {
         .onChange(of: viewModel.hasError) { _, hasError in
             showError = hasError
         }
+        .onChange(of: viewModel.showSuccessToast) { _, show in
+            guard show else { return }
+            withAnimation(.spring(response: 0.3)) {
+                showSuccessCheckmark = true
+            }
+            viewModel.showSuccessToast = false
+            Task {
+                try? await Task.sleep(for: .seconds(1.2))
+                withAnimation(.spring(response: 0.3)) {
+                    showSuccessCheckmark = false
+                }
+            }
+        }
         .onChange(of: viewModel.selectedImageData) { oldValue, newValue in
             guard newValue != nil else { return }
-            
+
             withAnimation(.spring(response: 0.3)) {
                 showSuccessCheckmark = true
             }
