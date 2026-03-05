@@ -62,13 +62,13 @@ struct EventsListView: View {
                 .tracking(2)
 
             Text("Events")
-                .font(.system(size: 42, weight: .black))
+                .font(.system(size: 32, weight: .black))
                 .foregroundColor(TaktTheme.textPrimary)
-                .tracking(-1.5)
+                .tracking(-1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, TaktTheme.contentPadding)
-        .padding(.vertical, 20)
+        .padding(.vertical, 12)
     }
 
     // MARK: - Empty State
@@ -124,7 +124,7 @@ struct EventsListView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .padding(.bottom, 60)
+            .padding(.bottom, 4)
             .onAppear { scrollProxy = proxy }
             .onChange(of: viewModel.searchText) { _, newValue in
                 Task {
@@ -237,7 +237,8 @@ struct EventsListView: View {
                     .foregroundColor(TaktTheme.accent)
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.vertical, 12)
+                .padding(.top, 0)
+                .padding(.bottom, 8)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             } else {
                 // Collapsed: search bar + calendar button
@@ -284,17 +285,12 @@ struct EventsListView: View {
                     }
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.vertical, 12)
+                .padding(.top, 0)
+                .padding(.bottom, 8)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .background(
-            LinearGradient(
-                colors: [TaktTheme.appBackground.opacity(0), TaktTheme.appBackground],
-                startPoint: .top,
-                endPoint: UnitPoint(x: 0.5, y: 0.4)
-            )
-        )
+        .background(TaktTheme.appBackground)
     }
 
     // MARK: - Actions
