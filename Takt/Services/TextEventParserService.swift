@@ -39,8 +39,10 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
     /// Parse text and extract all events with dates
     func parseEvents(from text: String) -> [Event] {
+        // Pre-process: strip status bar line from screenshot OCR
+        var cleanedText = stripStatusBar(from: text)
         // Pre-process: strip URLs to avoid false positives (e.g., /2026/03/15/ in URL paths)
-        let cleanedText = stripURLs(from: text)
+        cleanedText = stripURLs(from: cleanedText)
 
         // Stage 1: Regex-based extraction (current implementation)
         var events = parseEventsWithRegex(from: cleanedText)
@@ -382,94 +384,96 @@ final class TextEventParser: TextEventParserServiceProtocol {
     private func extractEventName(from lines: [String], currentIndex: Int, dateInfo: DateInfo, timeInfo: TimeInfo?) -> EventNameResult {
         let dateLine = lines[currentIndex]
 
-        // First, extract name from the date line itself (strip date + time)
+        // Strip date + time from the date line to see if there's remaining text
         var dateLineName = dateLine.replacingOccurrences(of: dateInfo.matchedText, with: "")
         if let timeInfo = timeInfo {
             dateLineName = dateLineName.replacingOccurrences(of: timeInfo.matchedText, with: "")
         }
         dateLineName = cleanNameText(dateLineName)
 
-        // Collect valid surrounding lines (up to 3 lines before, 5 after)
-        // OCR often splits poster text across many short lines, so we need a wider window
-        var contextLines: [(index: Int, text: String)] = []
+        let hasDateLineText = dateLineName.count >= 3
 
-        let searchStart = max(0, currentIndex - 3)
-        let searchEnd = min(lines.count - 1, currentIndex + 5)
+        // Find the nearest valid line above the date
+        let lineAbove = findNearestValidLine(in: lines, from: currentIndex, direction: -1)
+        // Find the nearest valid line below the date
+        let lineBelow = findNearestValidLine(in: lines, from: currentIndex, direction: +1)
 
-        for i in searchStart...searchEnd {
-            if i == currentIndex { continue }
-
-            let trimmed = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
-
-            // Skip empty/short lines
-            if trimmed.count < 3 { continue }
-            // Skip lines that contain dates
-            if extractDate(from: trimmed) != nil { continue }
-            // Skip lines that are just times
-            if extractTime(from: trimmed) != nil && trimmed.range(of: #"^\d{1,2}[.:]\d{2}\s*(Uhr|uhr|[ap]m)?$"#, options: .regularExpression) != nil { continue }
-            // Skip label-style metadata (e.g., "Datum:", "Preis:") — short labels only (≤12 chars)
-            let lowerTrimmed = trimmed.lowercased()
-            if trimmed.count <= 12 && lowerTrimmed.range(of: #"^[a-zäöü]+:\s*$"#, options: .regularExpression) != nil { continue }
-            // Skip lines that look like prices, weights, codes
-            if trimmed.range(of: #"^[\d.,€$£%]+\s*(€|kg|g|ml|l)?$"#, options: .regularExpression) != nil { continue }
-            // Skip batch/lot codes (e.g., "L04", "PN DE-1201")
-            if trimmed.range(of: #"^[A-Z]{1,2}[\s-]?\d{2,}"#, options: .regularExpression) != nil && trimmed.count < 15 { continue }
-
-            contextLines.append((index: i, text: trimmed))
-        }
-
-        // Build candidates list: all valid lines the user can pick from
         var allCandidates: [String] = []
-        if dateLineName.count >= 3 {
+        var name: String
+
+        if hasDateLineText {
+            // Case 1: Date line has text → use it + 1 line above
             allCandidates.append(dateLineName)
-        }
-        for line in contextLines.sorted(by: { $0.index < $1.index }) {
-            allCandidates.append(line.text)
-        }
-
-        // If date line has a good name already, use it (possibly enriched with one context line)
-        if dateLineName.count >= 3 {
-            // Add one preceding context line if it looks like a title
-            if let preceding = contextLines.first(where: { $0.index < currentIndex }) {
-                let combined = preceding.text + " - " + dateLineName
-                if combined.count <= 80 {
-                    return EventNameResult(name: combined, candidates: allCandidates)
-                }
-            }
-            return EventNameResult(name: dateLineName, candidates: allCandidates)
-        }
-
-        // Date line had no name — use surrounding lines
-        // Prefer lines before the date (titles are usually above)
-        // For poster-style OCR, lines after the date may be fragmented title text
-        let beforeLines = contextLines.filter { $0.index < currentIndex }
-        let afterLines = contextLines.filter { $0.index > currentIndex }
-
-        // Take up to 2 before lines and up to 3 after lines (OCR fragments)
-        // Join consecutive after-lines with spaces (they're likely one sentence split by OCR)
-        var selectedLines = Array(beforeLines.prefix(2)) + Array(afterLines.prefix(3))
-        selectedLines.sort { $0.index < $1.index }
-
-        // Join after-lines with space (OCR fragments), before-lines with newline (separate context)
-        var parts: [String] = []
-        var afterParts: [String] = []
-        for line in selectedLines {
-            if line.index < currentIndex {
-                parts.append(line.text)
+            if let above = lineAbove {
+                allCandidates.insert(above, at: 0)
+                name = above + " - " + dateLineName
             } else {
-                afterParts.append(line.text)
+                name = dateLineName
             }
-        }
-        if !afterParts.isEmpty {
-            parts.append(afterParts.joined(separator: " "))
-        }
-        let result = parts.joined(separator: "\n")
+        } else {
+            // Case 2: Date line is just a date → 1 line above + 1 line below
+            if let above = lineAbove { allCandidates.append(above) }
+            if let below = lineBelow { allCandidates.append(below) }
 
-        if result.isEmpty || result.count < 3 {
+            name = allCandidates.joined(separator: "\n")
+        }
+
+        if name.isEmpty || name.count < 3 {
             return EventNameResult(name: "", candidates: allCandidates)
         }
 
-        return EventNameResult(name: result, candidates: allCandidates)
+        return EventNameResult(name: name, candidates: allCandidates)
+    }
+
+    /// Find the nearest valid (non-junk) line in a given direction (-1 = up, +1 = down)
+    private func findNearestValidLine(in lines: [String], from index: Int, direction: Int) -> String? {
+        var i = index + direction
+        while i >= 0 && i < lines.count {
+            let trimmed = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Skip empty/short lines
+            if trimmed.count >= 3
+                // Skip lines that contain dates
+                && extractDate(from: trimmed) == nil
+                // Skip lines that are just times
+                && !(extractTime(from: trimmed) != nil && trimmed.range(of: #"^\d{1,2}[.:]\d{2}\s*(Uhr|uhr|[ap]m)?$"#, options: .regularExpression) != nil)
+                // Skip label-style metadata (e.g., "Datum:", "Preis:")
+                && !(trimmed.count <= 12 && trimmed.lowercased().range(of: #"^[a-zäöü]+:\s*$"#, options: .regularExpression) != nil)
+                // Skip prices, weights, codes
+                && trimmed.range(of: #"^[\d.,€$£%]+\s*(€|kg|g|ml|l)?$"#, options: .regularExpression) == nil
+                // Skip batch/lot codes
+                && !(trimmed.range(of: #"^[A-Z]{1,2}[\s-]?\d{2,}"#, options: .regularExpression) != nil && trimmed.count < 15)
+            {
+                return trimmed
+            }
+            i += direction
+        }
+        return nil
+    }
+
+    /// Find the nearest valid line in a direction for the NSDataDetector path
+    private func findNearestValidLineNS(in lines: [String], from index: Int, direction: Int, matchedText: String) -> String? {
+        var i = index + direction
+        while i >= 0 && i < lines.count {
+            var trimmed = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if trimmed.count < 3 { i += direction; continue }
+            // If line contains the matched date, strip it
+            if trimmed.contains(matchedText) {
+                trimmed = trimmed.replacingOccurrences(of: matchedText, with: "")
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmed.count < 3 { i += direction; continue }
+            }
+            // Skip times
+            if extractTime(from: trimmed) != nil { i += direction; continue }
+            // Skip other dates
+            if extractDate(from: trimmed) != nil { i += direction; continue }
+            // Skip label metadata
+            if trimmed.lowercased().range(of: #"^[a-zäöü]+:\s*"#, options: .regularExpression) != nil { i += direction; continue }
+
+            return trimmed
+        }
+        return nil
     }
 
     /// Clean up extracted name text by removing weekday abbreviations and trimming
@@ -518,6 +522,38 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return calendar.date(from: components) ?? date
     }
     
+    /// Strip the iPhone status bar line from screenshot OCR text.
+    /// The status bar is always the first line and is short with a standalone HH:MM time.
+    /// Without this, the status bar clock (e.g., "23:01") gets used as the event time.
+    ///
+    /// To avoid false positives (e.g., poster first line "Einlass: 17:00 Uhr"),
+    /// we check that the line has NO event-related keywords and NO date patterns.
+    private func stripStatusBar(from text: String) -> String {
+        let lines = text.components(separatedBy: .newlines)
+        guard let firstLine = lines.first else { return text }
+
+        let trimmed = firstLine.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Must be short and contain a time pattern
+        guard trimmed.count < 50,
+              trimmed.range(of: #"\d{1,2}:\d{2}"#, options: .regularExpression) != nil
+        else { return text }
+
+        // If line contains event-related words → it's real content, not a status bar
+        let lower = trimmed.lowercased()
+        let eventKeywords = ["uhr", "einlass", "beginn", "start", "show", "concert",
+                             "open", "doors", "eintritt", "veranstaltung",
+                             "ab ", "bis ", "am ", "um "]
+        for keyword in eventKeywords {
+            if lower.contains(keyword) { return text }
+        }
+
+        // If line contains a date → it's real content
+        if extractDate(from: trimmed) != nil { return text }
+
+        return lines.dropFirst().joined(separator: "\n")
+    }
+
     /// Strip URLs from text to prevent false positive date extraction from URL paths
     private func stripURLs(from text: String) -> String {
         guard let regex = try? NSRegularExpression(pattern: #"https?://\S+"#, options: []) else { return text }
@@ -879,9 +915,8 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 }
             }
 
-            // Extract event name from lines (use original text with newlines, not normalized)
-            // Strategy: Capture up to 3 valid lines near the date
-            // This gives user context (venue + title) to edit in confirmation UI
+            // Extract event name from nearby lines
+            // Strategy: date line has text → use it + 1 line above; no text → 1 above + 1 below
             let lines = text.components(separatedBy: .newlines)
 
             // Find which line contains the date
@@ -893,53 +928,40 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 }
             }
 
-            // Collect valid lines with their distance from date
-            var validLines: [(index: Int, distance: Int, line: String)] = []
-
-            for (index, line) in lines.enumerated() {
-                var trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-
-                // Skip if too short
-                if trimmed.count < 3 {
-                    continue
-                }
-
-                // If line contains the matched date text, strip it and keep the rest
-                if trimmed.contains(matchedText) {
-                    trimmed = trimmed.replacingOccurrences(of: matchedText, with: "")
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                    if trimmed.count < 3 {
-                        continue
-                    }
-                }
-                // Skip if line looks like a time
-                if extractTime(from: trimmed) != nil {
-                    continue
-                }
-                // Skip if line contains another date
-                if extractDate(from: trimmed) != nil {
-                    continue
-                }
-                // Skip label-style metadata lines (e.g., "Datum:", "Uhrzeit:")
-                let lowerTrimmed = trimmed.lowercased()
-                if lowerTrimmed.range(of: #"^[a-zäöü]+:\s*"#, options: .regularExpression) != nil {
-                    continue
-                }
-
-                // Calculate distance from date line
-                let distance = dateLineIndex >= 0 ? abs(index - dateLineIndex) : 999
-                validLines.append((index, distance, trimmed))
+            // Strip date from its line to check for remaining text
+            var dateLineText = ""
+            if dateLineIndex >= 0 {
+                dateLineText = lines[dateLineIndex]
+                    .replacingOccurrences(of: matchedText, with: "")
+                    .trimmingCharacters(in: CharacterSet(charactersIn: ":-,;.!?•"))
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                if dateLineText.count < 3 { dateLineText = "" }
             }
 
-            // Sort by distance (closest first), take up to 3 lines, restore original order
-            validLines.sort(by: { $0.distance < $1.distance })
-            let selectedLines = validLines.prefix(3).sorted(by: { $0.index < $1.index }).map { $0.line }
+            let hasDateLineText = !dateLineText.isEmpty
 
-            // All candidate lines for tappable title editing
-            let nsCandidates = validLines.sorted(by: { $0.index < $1.index }).map { $0.line }
+            // Find nearest valid line above/below using helper
+            let lineAbove = dateLineIndex >= 0 ? findNearestValidLineNS(in: lines, from: dateLineIndex, direction: -1, matchedText: matchedText) : nil
+            let lineBelow = dateLineIndex >= 0 ? findNearestValidLineNS(in: lines, from: dateLineIndex, direction: +1, matchedText: matchedText) : nil
 
-            // Join with newlines to preserve multi-line context
-            var eventName = selectedLines.joined(separator: "\n")
+            var nsCandidates: [String] = []
+            var eventName: String
+
+            if hasDateLineText {
+                // Date line has text → use it + 1 line above
+                nsCandidates.append(dateLineText)
+                if let above = lineAbove {
+                    nsCandidates.insert(above, at: 0)
+                    eventName = above + " - " + dateLineText
+                } else {
+                    eventName = dateLineText
+                }
+            } else {
+                // Date line is just a date → 1 above + 1 below
+                if let above = lineAbove { nsCandidates.append(above) }
+                if let below = lineBelow { nsCandidates.append(below) }
+                eventName = nsCandidates.joined(separator: "\n")
+            }
 
             if eventName.isEmpty {
                 eventName = "Reminder"
