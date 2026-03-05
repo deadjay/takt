@@ -129,6 +129,7 @@ struct EventConfirmationView: View {
                             ))
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(TaktTheme.textPrimary)
+                            .lineLimit(3)
                             .padding(.vertical, 12)
                             .overlay(
                                 Rectangle()
