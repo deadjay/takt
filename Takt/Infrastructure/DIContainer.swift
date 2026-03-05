@@ -15,6 +15,10 @@ final class DIContainer {
     private lazy var eventRepository: EventRepositoryProtocol = {
         UserDefaultsEventRepository()
     }()
+
+    private lazy var settingsRepository: SettingsRepositoryProtocol = {
+        UserDefaultsSettingsRepository()
+    }()
     
     // MARK: - Services
     
@@ -54,7 +58,15 @@ final class DIContainer {
     lazy var getEventsForDateUseCase: GetEventsForDateUseCaseProtocol = {
         GetEventsForDateUseCase(repository: eventRepository)
     }()
-    
+
+    lazy var getSettingsUseCase: GetSettingsUseCaseProtocol = {
+        GetSettingsUseCase_Settings(repository: settingsRepository)
+    }()
+
+    lazy var saveSettingsUseCase: SaveSettingsUseCaseProtocol = {
+        SaveSettingsUseCase(repository: settingsRepository)
+    }()
+
     // MARK: - ViewModels
     func makeEventsListViewModel() -> EventsListViewModel {
         EventsListViewModel(
@@ -86,6 +98,13 @@ final class DIContainer {
                          deleteEventUseCase: deleteEventUseCase,
                          textRecognitionService: textRecognitionService,
                          textParser: textEventParserService
+        )
+    }
+
+    func makeSettingsViewModel() -> SettingsViewModel {
+        SettingsViewModel(
+            getSettingsUseCase: getSettingsUseCase,
+            saveSettingsUseCase: saveSettingsUseCase
         )
     }
 

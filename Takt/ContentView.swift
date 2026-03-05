@@ -11,6 +11,7 @@ import UIKit
 struct ContentView: View {
     @Bindable var viewModel: ContentViewModel
     @State private var showCalendarInEventsTab: Bool = false
+    @State private var settingsViewModel = DIContainer.shared.makeSettingsViewModel()
 
     var body: some View {
         TabView {
@@ -36,9 +37,25 @@ struct ContentView: View {
                 Image(systemName: "list.bullet")
                 Text("Events")
             }
+
+            // Settings Tab
+            SettingsView(viewModel: settingsViewModel)
+                .tabItem {
+                    Image(systemName: "gearshape")
+                    Text("Settings")
+                }
         }
+        .preferredColorScheme(colorScheme)
         .task {
             await viewModel.onAppear()
+        }
+    }
+
+    private var colorScheme: ColorScheme? {
+        switch settingsViewModel.appearanceMode {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
         }
     }
 }
