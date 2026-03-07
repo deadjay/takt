@@ -109,7 +109,6 @@ struct EventsListView: View {
             List {
                 // Past day groups
                 ForEach(viewModel.pastDayGroups) { group in
-                    dayHeader(for: group.date)
                     ForEach(group.events) { event in
                         eventRow(for: event)
                     }
@@ -131,10 +130,6 @@ struct EventsListView: View {
 
                 // Upcoming day groups
                 ForEach(viewModel.upcomingDayGroups) { group in
-                    // Skip today header — the todayDivider already covers it
-                    if !Calendar.current.isDateInToday(group.date) {
-                        dayHeader(for: group.date)
-                    }
                     ForEach(group.events) { event in
                         eventRow(for: event)
                     }
@@ -171,18 +166,6 @@ struct EventsListView: View {
                     Label("Delete", systemImage: "trash")
                 }
             }
-    }
-
-    private func dayHeader(for date: Date) -> some View {
-        Text(viewModel.dayHeaderLabel(for: date))
-            .font(.system(size: 11, weight: .semibold, design: .monospaced))
-            .foregroundColor(TaktTheme.textMuted)
-            .tracking(1)
-            .padding(.vertical, 4)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .listRowInsets(EdgeInsets(top: 8, leading: TaktTheme.contentPadding, bottom: 0, trailing: TaktTheme.contentPadding))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
     }
 
     private var todayDivider: some View {

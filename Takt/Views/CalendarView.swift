@@ -283,16 +283,25 @@ struct EventRow: View {
 
             Spacer()
 
-            // Right: date badge + time + deadline
+            // Right: date badges + time + deadline
             VStack(alignment: .trailing, spacing: 6) {
-                // TODO: Style this as a silver pill badge (monospaced, bold)
-                Text(event.shortDateLabel)
-                    .font(.system(size: 14, weight: .heavy, design: .monospaced))
-                    .foregroundColor(TaktTheme.textPrimary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(TaktTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                HStack(spacing: 4) {
+                    Text(event.shortWeekdayLabel)
+                        .font(.system(size: 14, weight: .heavy, design: .monospaced))
+                        .foregroundColor(TaktTheme.textPrimary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(TaktTheme.cardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                    Text(event.shortDateLabel)
+                        .font(.system(size: 14, weight: .heavy, design: .monospaced))
+                        .foregroundColor(TaktTheme.textPrimary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(TaktTheme.cardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
 
                 if let time = event.shortTimeLabel {
                     Text(time)

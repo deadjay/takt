@@ -103,6 +103,13 @@ extension Event {
         return "\(days) Days Left"
     }
 
+    /// Short uppercase weekday string e.g. "SAT"
+    var shortWeekdayLabel: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE"
+        return formatter.string(from: date).uppercased()
+    }
+
     /// Short uppercase date string e.g. "FEB 14"
     var shortDateLabel: String {
         let formatter = DateFormatter()
