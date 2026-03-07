@@ -10,7 +10,7 @@ import UIKit
 
 struct ImageInputButton: View {
     let icon: String
-    let label: String      // e.g. "01 / CAPTURE"
+    let label: String      // e.g. "CAPTURE"
     let title: String      // e.g. "Scan"
     @Binding var imageData: Data?
     let sourceType: SourceType
@@ -51,7 +51,7 @@ struct ImageInputButton: View {
             .clipShape(RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius)
-                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
+                    .stroke(TaktTheme.accent.opacity(0.5), lineWidth: 1.5)
             )
         }
         .sheet(isPresented: $showingPicker) {

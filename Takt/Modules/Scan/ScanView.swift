@@ -124,7 +124,7 @@ private struct IdleStateView: View {
                     HStack(spacing: 12) {
                         ImageInputButton(
                             icon: "camera.fill",
-                            label: "01 / CAPTURE",
+                            label: "CAPTURE",
                             title: "Scan",
                             imageData: $viewModel.selectedImageData,
                             sourceType: .camera,
@@ -143,7 +143,7 @@ private struct IdleStateView: View {
 
                         ImageInputButton(
                             icon: "photo.fill",
-                            label: "02 / IMPORT",
+                            label: "IMPORT",
                             title: "Attach",
                             imageData: $viewModel.selectedImageData,
                             sourceType: .photoLibrary,
@@ -411,7 +411,7 @@ private struct TextInputField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("03 / INPUT")
+            Text("INPUT")
                 .font(TaktTheme.cardLabelFont)
                 .foregroundColor(TaktTheme.textMuted)
                 .textCase(.uppercase)
