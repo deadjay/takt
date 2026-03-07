@@ -11,9 +11,10 @@ import UIKit
 struct ImageInputButton: View {
     let icon: String
     let label: String      // e.g. "01 / CAPTURE"
-    let title: String      // e.g. "Make Photo"
+    let title: String      // e.g. "Scan"
     @Binding var imageData: Data?
     let sourceType: SourceType
+    var onTap: (() -> Void)? = nil
 
     @State private var selectedImage: UIImage?
     @State private var showingPicker = false
@@ -24,39 +25,32 @@ struct ImageInputButton: View {
     }
 
     var body: some View {
-        // TODO: You implement the card design here!
-        // Design spec:
-        // - Square card, fills available width (use .frame(maxWidth: .infinity))
-        // - Aspect ratio 1:1 (square)
-        // - Background: TaktTheme.cardBackground
-        // - Corner radius: TaktTheme.cardCornerRadius (26pt)
-        // - Border: 1px TaktTheme.cardBorder
-        // - Content aligned bottom-left:
-        //   - Label text (e.g. "01 / CAPTURE") in TaktTheme.cardLabelFont, TaktTheme.textMuted color
-        //   - Title text (e.g. "Make Photo") in TaktTheme.cardTitleFont, TaktTheme.textPrimary color
-        // - Padding: 24pt inside
-        //
-        // Wrap everything in a Button that sets showingPicker = true
-        // Keep the .sheet and .onChange modifiers below
-
         Button {
+            onTap?()
             showingPicker = true
         } label: {
-            HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundColor(TaktTheme.textMuted)
 
-                Text(title.uppercased())
-                    .font(.system(size: 14, weight: .bold))
-                    .tracking(0.8)
+                Spacer()
+
+                Text(label)
+                    .font(TaktTheme.cardLabelFont)
+                    .foregroundColor(TaktTheme.textMuted)
+
+                Text(title)
+                    .font(TaktTheme.cardTitleFont)
+                    .foregroundColor(TaktTheme.textPrimary)
             }
-            .foregroundColor(TaktTheme.textPrimary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .aspectRatio(1, contentMode: .fit)
             .background(TaktTheme.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius)
                     .stroke(TaktTheme.cardBorder, lineWidth: 1)
             )
         }

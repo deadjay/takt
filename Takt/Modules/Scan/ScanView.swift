@@ -78,6 +78,16 @@ private struct IdleStateView: View {
     @Binding var showSuccessCheckmark: Bool
     @State private var showInfo = false
 
+    // Animation tracking
+    @State private var scanButtonCenter: CGPoint = .zero
+    @State private var attachButtonCenter: CGPoint = .zero
+    @State private var detectButtonFrame: CGRect = .zero
+    @State private var isAnimatingThumbnail = false
+    @State private var thumbnailLanded = false
+    @State private var lastInputWasCamera = true
+
+    private var hasImage: Bool { viewModel.selectedImageData != nil }
+
     var body: some View {
         ZStack {
             TaktTheme.appBackground
@@ -106,68 +116,29 @@ private struct IdleStateView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 24)
 
-                // Scrollable content area
-                ScrollView {
-                    VStack(spacing: 0) {
-                        // Text input card
-                        TextInputField(
-                            text: $viewModel.inputText,
-                            onPaste: {
-                                viewModel.pasteFromClipboard()
-                            }
-                        )
-                        .padding(.horizontal, TaktTheme.contentPadding)
+                Spacer(minLength: 0)
 
-                        // Image thumbnail preview (shown after attach)
-                        if let imageData = viewModel.selectedImageData,
-                           let uiImage = UIImage(data: imageData) {
-                            HStack(spacing: 12) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 48, height: 48)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                                Text("Image attached")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(TaktTheme.textSecondary)
-
-                                Spacer()
-
-                                Button {
-                                    viewModel.selectedImageData = nil
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.system(size: 18))
-                                        .foregroundColor(TaktTheme.textMuted)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            .padding(12)
-                            .background(TaktTheme.cardBackground)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .stroke(TaktTheme.accent.opacity(0.3), lineWidth: 1)
-                            )
-                            .padding(.horizontal, TaktTheme.contentPadding)
-                            .padding(.top, 12)
-                            .transition(.scale(scale: 0.8).combined(with: .opacity))
-                        }
-                    }
-                }
-                .scrollDismissesKeyboard(.interactively)
-
-                // Bottom sticky buttons
+                // Bottom input area
                 VStack(spacing: 10) {
-                    // Camera + Attach row
+                    // Scan + Attach (square, side by side)
                     HStack(spacing: 12) {
                         ImageInputButton(
                             icon: "camera.fill",
                             label: "01 / CAPTURE",
                             title: "Scan",
                             imageData: $viewModel.selectedImageData,
-                            sourceType: .camera
+                            sourceType: .camera,
+                            onTap: { lastInputWasCamera = true }
+                        )
+                        .background(
+                            GeometryReader { geo in
+                                Color.clear.onAppear {
+                                    scanButtonCenter = CGPoint(
+                                        x: geo.frame(in: .named("idle")).midX,
+                                        y: geo.frame(in: .named("idle")).midY
+                                    )
+                                }
+                            }
                         )
 
                         ImageInputButton(
@@ -175,11 +146,33 @@ private struct IdleStateView: View {
                             label: "02 / IMPORT",
                             title: "Attach",
                             imageData: $viewModel.selectedImageData,
-                            sourceType: .photoLibrary
+                            sourceType: .photoLibrary,
+                            onTap: { lastInputWasCamera = false }
+                        )
+                        .background(
+                            GeometryReader { geo in
+                                Color.clear.onAppear {
+                                    attachButtonCenter = CGPoint(
+                                        x: geo.frame(in: .named("idle")).midX,
+                                        y: geo.frame(in: .named("idle")).midY
+                                    )
+                                }
+                            }
                         )
                     }
 
-                    // Detect button
+                    OrSeparator()
+
+                    // Text input (disabled when image attached)
+                    TextInputField(
+                        text: $viewModel.inputText,
+                        isDisabled: hasImage,
+                        onPaste: {
+                            viewModel.pasteFromClipboard()
+                        }
+                    )
+
+                    // Detect Events button
                     Button {
                         Task {
                             if viewModel.selectedImageData != nil {
@@ -204,22 +197,100 @@ private struct IdleStateView: View {
                         .clipShape(RoundedRectangle(cornerRadius: TaktTheme.magicButtonCornerRadius))
                         .shadow(color: TaktTheme.accent.opacity(0.30), radius: 15, y: 8)
                     }
-                    .disabled(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty)
-                    .opacity(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty ? 0.5 : 1.0)
+                    .disabled(!hasImage && viewModel.inputText.isEmpty)
+                    .opacity(!hasImage && viewModel.inputText.isEmpty ? 0.5 : 1.0)
+                    .overlay(alignment: .leading) {
+                        // Static thumbnail on detect button (shown after animation lands)
+                        if hasImage && !isAnimatingThumbnail,
+                           let imageData = viewModel.selectedImageData,
+                           let uiImage = UIImage(data: imageData) {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.selectedImageData = nil
+                                }
+                            } label: {
+                                ZStack(alignment: .topTrailing) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 36, height: 36)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.white)
+                                        .shadow(color: .black.opacity(0.5), radius: 2)
+                                        .offset(x: 6, y: -6)
+                                }
+                            }
+                            .offset(x: 16)
+                            .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                    .background(
+                        GeometryReader { geo in
+                            Color.clear.onAppear {
+                                detectButtonFrame = geo.frame(in: .named("idle"))
+                            }
+                        }
+                    )
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 10)
                 .padding(.bottom, 8)
-                .background(
-                    TaktTheme.appBackground
-                        .shadow(color: .black.opacity(0.05), radius: 8, y: -4)
-                )
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: viewModel.selectedImageData != nil)
+        .coordinateSpace(name: "idle")
+        // Floating animated thumbnail
+        .overlay {
+            if isAnimatingThumbnail,
+               let imageData = viewModel.selectedImageData,
+               let uiImage = UIImage(data: imageData) {
+                let sourceCenter = lastInputWasCamera ? scanButtonCenter : attachButtonCenter
+                let landingX = detectButtonFrame.minX + 34 // 16 offset + 18 half-width
+                let landingY = detectButtonFrame.midY
+
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 36, height: 36)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                    .position(
+                        x: thumbnailLanded ? landingX : sourceCenter.x,
+                        y: thumbnailLanded ? landingY : sourceCenter.y
+                    )
+            }
+        }
+        .onChange(of: viewModel.selectedImageData) { old, new in
+            if old == nil && new != nil {
+                startThumbnailAnimation()
+            } else if new == nil {
+                isAnimatingThumbnail = false
+                thumbnailLanded = false
+            }
+        }
         .sheet(isPresented: $showInfo) {
             InfoSheet()
                 .presentationDetents([.medium])
+        }
+    }
+
+    private func startThumbnailAnimation() {
+        guard scanButtonCenter != .zero || attachButtonCenter != .zero else { return }
+
+        thumbnailLanded = false
+        isAnimatingThumbnail = true
+
+        // Allow first frame to render at source position
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.55)) {
+                thumbnailLanded = true
+            }
+        }
+
+        // After animation settles, switch to static thumbnail on detect button
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            isAnimatingThumbnail = false
         }
     }
 }
@@ -335,13 +406,10 @@ private struct TipRow: View {
 
 private struct TextInputField: View {
     @Binding var text: String
+    var isDisabled: Bool = false
     let onPaste: () -> Void
 
     var body: some View {
-        // TODO: You can restyle this card to match the design!
-        // It should look like the action cards but wider (full width, not square)
-        // Label: "03 / INPUT", Title area is the text field
-
         VStack(alignment: .leading, spacing: 8) {
             Text("03 / INPUT")
                 .font(TaktTheme.cardLabelFont)
@@ -353,18 +421,21 @@ private struct TextInputField: View {
                     .textFieldStyle(.plain)
                     .font(TaktTheme.textFieldFont)
                     .foregroundColor(TaktTheme.textPrimary)
+                    .disabled(isDisabled)
 
-                Button {
-                    onPaste()
-                } label: {
-                    Text("Paste")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(TaktTheme.accent)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(TaktTheme.accent.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                if !isDisabled {
+                    Button {
+                        onPaste()
+                    } label: {
+                        Text("Paste")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(TaktTheme.accent)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(TaktTheme.accent.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
                 }
             }
         }
@@ -376,6 +447,7 @@ private struct TextInputField: View {
             RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius)
                 .stroke(TaktTheme.cardBorder, lineWidth: 1)
         )
+        .opacity(isDisabled ? 0.4 : 1.0)
     }
 }
 
