@@ -393,29 +393,27 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
         let hasDateLineText = dateLineName.count >= 3
 
-        // Find the nearest valid line above the date
-        let lineAbove = findNearestValidLine(in: lines, from: currentIndex, direction: -1)
-        // Find the nearest valid line below the date
-        let lineBelow = findNearestValidLine(in: lines, from: currentIndex, direction: +1)
+        // Gather up to 3 valid lines above and below the date for candidates
+        let linesAbove = findNearestValidLines(in: lines, from: currentIndex, direction: -1, count: 3)
+        let linesBelow = findNearestValidLines(in: lines, from: currentIndex, direction: +1, count: 3)
 
+        // Build candidates: lines above (closest first) + date line text + lines below
         var allCandidates: [String] = []
-        var name: String
+        allCandidates.append(contentsOf: linesAbove)
+        if hasDateLineText { allCandidates.append(dateLineName) }
+        allCandidates.append(contentsOf: linesBelow)
 
+        // Default name: use the closest context
+        var name: String
         if hasDateLineText {
-            // Case 1: Date line has text → use it + 1 line above
-            allCandidates.append(dateLineName)
-            if let above = lineAbove {
-                allCandidates.insert(above, at: 0)
-                name = above + " - " + dateLineName
+            if let closest = linesAbove.first {
+                name = closest + " - " + dateLineName
             } else {
                 name = dateLineName
             }
         } else {
-            // Case 2: Date line is just a date → 1 line above + 1 line below
-            if let above = lineAbove { allCandidates.append(above) }
-            if let below = lineBelow { allCandidates.append(below) }
-
-            name = allCandidates.joined(separator: "\n")
+            let closest = [linesAbove.first, linesBelow.first].compactMap { $0 }
+            name = closest.joined(separator: "\n")
         }
 
         if name.isEmpty || name.count < 3 {
@@ -425,55 +423,50 @@ final class TextEventParser: TextEventParserServiceProtocol {
         return EventNameResult(name: name, candidates: allCandidates)
     }
 
-    /// Find the nearest valid (non-junk) line in a given direction (-1 = up, +1 = down)
-    private func findNearestValidLine(in lines: [String], from index: Int, direction: Int) -> String? {
+    /// Find up to `count` valid (non-junk) lines in a given direction (-1 = up, +1 = down)
+    /// Returns lines ordered from closest to farthest from the date line.
+    private func findNearestValidLines(in lines: [String], from index: Int, direction: Int, count: Int) -> [String] {
+        var result: [String] = []
         var i = index + direction
-        while i >= 0 && i < lines.count {
+        while i >= 0 && i < lines.count && result.count < count {
             let trimmed = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
 
-            // Skip empty/short lines
             if trimmed.count >= 3
-                // Skip lines that contain dates
                 && extractDate(from: trimmed) == nil
-                // Skip lines that are just times
                 && !(extractTime(from: trimmed) != nil && trimmed.range(of: #"^\d{1,2}[.:]\d{2}\s*(Uhr|uhr|[ap]m)?$"#, options: .regularExpression) != nil)
-                // Skip label-style metadata (e.g., "Datum:", "Preis:")
                 && !(trimmed.count <= 12 && trimmed.lowercased().range(of: #"^[a-zäöü]+:\s*$"#, options: .regularExpression) != nil)
-                // Skip prices, weights, codes
                 && trimmed.range(of: #"^[\d.,€$£%]+\s*(€|kg|g|ml|l)?$"#, options: .regularExpression) == nil
-                // Skip batch/lot codes
                 && !(trimmed.range(of: #"^[A-Z]{1,2}[\s-]?\d{2,}"#, options: .regularExpression) != nil && trimmed.count < 15)
             {
-                return trimmed
+                result.append(trimmed)
             }
             i += direction
         }
-        return nil
+        return result
     }
 
-    /// Find the nearest valid line in a direction for the NSDataDetector path
-    private func findNearestValidLineNS(in lines: [String], from index: Int, direction: Int, matchedText: String) -> String? {
+    /// Find up to `count` valid lines in a direction for the NSDataDetector path.
+    /// Returns lines ordered from closest to farthest from the date line.
+    private func findNearestValidLinesNS(in lines: [String], from index: Int, direction: Int, count: Int, matchedText: String) -> [String] {
+        var result: [String] = []
         var i = index + direction
-        while i >= 0 && i < lines.count {
+        while i >= 0 && i < lines.count && result.count < count {
             var trimmed = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
 
             if trimmed.count < 3 { i += direction; continue }
-            // If line contains the matched date, strip it
             if trimmed.contains(matchedText) {
                 trimmed = trimmed.replacingOccurrences(of: matchedText, with: "")
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 if trimmed.count < 3 { i += direction; continue }
             }
-            // Skip times
             if extractTime(from: trimmed) != nil { i += direction; continue }
-            // Skip other dates
             if extractDate(from: trimmed) != nil { i += direction; continue }
-            // Skip label metadata
             if trimmed.lowercased().range(of: #"^[a-zäöü]+:\s*"#, options: .regularExpression) != nil { i += direction; continue }
 
-            return trimmed
+            result.append(trimmed)
+            i += direction
         }
-        return nil
+        return result
     }
 
     /// Clean up extracted name text by removing weekday abbreviations and trimming
@@ -940,27 +933,26 @@ final class TextEventParser: TextEventParserServiceProtocol {
 
             let hasDateLineText = !dateLineText.isEmpty
 
-            // Find nearest valid line above/below using helper
-            let lineAbove = dateLineIndex >= 0 ? findNearestValidLineNS(in: lines, from: dateLineIndex, direction: -1, matchedText: matchedText) : nil
-            let lineBelow = dateLineIndex >= 0 ? findNearestValidLineNS(in: lines, from: dateLineIndex, direction: +1, matchedText: matchedText) : nil
+            // Gather up to 3 valid lines above and below using helper
+            let nsLinesAbove = dateLineIndex >= 0 ? findNearestValidLinesNS(in: lines, from: dateLineIndex, direction: -1, count: 3, matchedText: matchedText) : []
+            let nsLinesBelow = dateLineIndex >= 0 ? findNearestValidLinesNS(in: lines, from: dateLineIndex, direction: +1, count: 3, matchedText: matchedText) : []
 
+            // Build candidates: lines above (closest first) + date line text + lines below
             var nsCandidates: [String] = []
-            var eventName: String
+            nsCandidates.append(contentsOf: nsLinesAbove)
+            if hasDateLineText { nsCandidates.append(dateLineText) }
+            nsCandidates.append(contentsOf: nsLinesBelow)
 
+            var eventName: String
             if hasDateLineText {
-                // Date line has text → use it + 1 line above
-                nsCandidates.append(dateLineText)
-                if let above = lineAbove {
-                    nsCandidates.insert(above, at: 0)
-                    eventName = above + " - " + dateLineText
+                if let closest = nsLinesAbove.first {
+                    eventName = closest + " - " + dateLineText
                 } else {
                     eventName = dateLineText
                 }
             } else {
-                // Date line is just a date → 1 above + 1 below
-                if let above = lineAbove { nsCandidates.append(above) }
-                if let below = lineBelow { nsCandidates.append(below) }
-                eventName = nsCandidates.joined(separator: "\n")
+                let closest = [nsLinesAbove.first, nsLinesBelow.first].compactMap { $0 }
+                eventName = closest.joined(separator: "\n")
             }
 
             if eventName.isEmpty {
