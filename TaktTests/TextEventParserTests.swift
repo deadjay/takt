@@ -1232,6 +1232,27 @@ struct TextEventParserTests {
         // Name should contain "doctor appointment"
         #expect(event.name.lowercased().contains("doctor"), "Expected name to contain 'doctor', got: '\(event.name)'")
     }
+
+    @Test("Parse 'Buy bread tomorrow' — relative date without time")
+    func testNaturalLanguageTomorrowNoTime() throws {
+        let text = "Buy bread tomorrow"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1, "Expected 1 event, got \(events.count)")
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+
+        // Date should be tomorrow
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date())!
+        let expectedDay = calendar.dateComponents([.day, .month, .year], from: tomorrow)
+        let actualDay = calendar.dateComponents([.day, .month, .year], from: event.date)
+        #expect(actualDay.day == expectedDay.day)
+        #expect(actualDay.month == expectedDay.month)
+
+        // Name should contain "Buy bread"
+        #expect(event.name.lowercased().contains("buy bread"), "Expected name to contain 'buy bread', got: '\(event.name)'")
+    }
 }
 
 private class BundleToken {}

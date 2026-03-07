@@ -731,10 +731,13 @@ final class TextEventParser: TextEventParserServiceProtocol {
                 }
             }
 
-            if lowercasedMatch == "today" ||
-               lowercasedMatch == "tomorrow" ||
-               lowercasedMatch == "heute" ||
-               lowercasedMatch == "morgen" ||
+            // Relative words like "tomorrow" are valid in short text input
+            // but noise in multi-line OCR. Skip only for multi-line text.
+            let isMultiLine = text.components(separatedBy: .newlines).count > 3
+            let isRelativeWord = lowercasedMatch == "today" || lowercasedMatch == "tomorrow" ||
+                                 lowercasedMatch == "heute" || lowercasedMatch == "morgen"
+
+            if (isRelativeWord && isMultiLine) ||
                lowercasedMatch.contains("starting today") ||
                lowercasedMatch.contains("ab heute") ||
                lowercasedMatch.range(of: "^\\d{1,2}:\\d{2}$", options: .regularExpression) != nil ||
