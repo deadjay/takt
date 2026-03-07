@@ -15,6 +15,7 @@ struct EventDetailView: View {
     @State private var deadline: Date?
     @State private var notes: String
     @State private var hasDeadline: Bool
+    @State private var reminders: [ReminderOffset]
 
     init(event: Event, events: Binding<[Event]>, onSave: ((Event) -> Void)? = nil, onDelete: ((UUID) -> Void)? = nil) {
         self.event = event
@@ -26,6 +27,7 @@ struct EventDetailView: View {
         self._deadline = State(initialValue: event.deadline)
         self._notes = State(initialValue: event.notes ?? "")
         self._hasDeadline = State(initialValue: event.deadline != nil)
+        self._reminders = State(initialValue: event.reminders)
     }
 
     // TODO: 🎨 STYLE THIS SHEET (refer to EditEventReference.html)
@@ -157,6 +159,9 @@ struct EventDetailView: View {
                         }
                     }
 
+                    // Reminders
+                    remindersSection
+
                     // Notes
                     VStack(alignment: .leading, spacing: 8) {
                         Text("NOTES")
@@ -240,6 +245,44 @@ struct EventDetailView: View {
         }
     }
 
+    // MARK: - Reminders Section
+
+    private var remindersSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("REMINDERS")
+                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                .foregroundColor(TaktTheme.textMuted)
+                .tracking(1)
+
+            ForEach(Array(reminders.enumerated()), id: \.offset) { (index: Int, reminder: ReminderOffset) in
+                reminderRow(index: index, reminder: reminder)
+            }
+
+            if reminders.count < 3 {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        let used = Set(reminders)
+                        if let next = ReminderOffset.allCases.first(where: { !used.contains($0) }) {
+                            reminders.append(next)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(TaktTheme.accent)
+
+                        Text("Add Reminder")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(TaktTheme.accent)
+                    }
+                    .padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
     // MARK: - Actions
 
     private func saveChanges() {
@@ -252,6 +295,7 @@ struct EventDetailView: View {
         events[index].date = date
         events[index].deadline = hasDeadline ? deadline : nil
         events[index].notes = trimmedNotes.isEmpty ? nil : trimmedNotes
+        events[index].reminders = reminders
 
         onSave?(events[index])
         presentationMode.wrappedValue.dismiss()
@@ -262,6 +306,47 @@ struct EventDetailView: View {
         onDelete?(id)
         events.removeAll { $0.id == id }
         presentationMode.wrappedValue.dismiss()
+    }
+
+    @ViewBuilder
+    private func reminderRow(index: Int, reminder: ReminderOffset) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "bell.fill")
+                .font(.system(size: 14))
+                .foregroundColor(TaktTheme.accent)
+                .frame(width: 20)
+
+            Picker("", selection: Binding(
+                get: { reminder },
+                set: { reminders[index] = $0 }
+            )) {
+                ForEach(availableOffsets(for: index)) { offset in
+                    Text(offset.displayName).tag(offset)
+                }
+            }
+            .labelsHidden()
+            .tint(TaktTheme.textPrimary)
+
+            Spacer()
+
+            Button {
+                let idx = index
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    _ = reminders.remove(at: idx)
+                }
+            } label: {
+                Image(systemName: "minus.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundColor(.red.opacity(0.7))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 6)
+    }
+
+    private func availableOffsets(for index: Int) -> [ReminderOffset] {
+        let usedByOthers = Set(reminders.enumerated().compactMap { i, o in i == index ? nil : o })
+        return ReminderOffset.allCases.filter { !usedByOthers.contains($0) }
     }
 
     private func computeDaysLeft() -> String? {

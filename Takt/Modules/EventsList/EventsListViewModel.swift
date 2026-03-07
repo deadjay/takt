@@ -22,18 +22,21 @@ final class EventsListViewModel {
     private let updateEventUseCase: UpdateEventUseCaseProtocol
     private let deleteEventUseCase: DeleteEventUseCaseProtocol
     private let searchEventsUseCase: SearchEventsUseCaseProtocol
+    private let notificationService: NotificationServiceProtocol
 
     // MARK: - Init
     init(
         getEventsUseCase: GetEventsUseCaseProtocol,
         updateEventUseCase: UpdateEventUseCaseProtocol,
         deleteEventUseCase: DeleteEventUseCaseProtocol,
-        searchEventsUseCase: SearchEventsUseCaseProtocol
+        searchEventsUseCase: SearchEventsUseCaseProtocol,
+        notificationService: NotificationServiceProtocol
     ) {
         self.getEventsUseCase = getEventsUseCase
         self.updateEventUseCase = updateEventUseCase
         self.deleteEventUseCase = deleteEventUseCase
         self.searchEventsUseCase = searchEventsUseCase
+        self.notificationService = notificationService
     }
 
     // MARK: - Computed Properties
@@ -113,6 +116,7 @@ final class EventsListViewModel {
     func updateEvent(_ event: Event) async {
         do {
             try await updateEventUseCase.execute(event)
+            await notificationService.scheduleReminders(for: event)
             await loadEvents()
         } catch {
             errorMessage = error.localizedDescription
@@ -127,6 +131,9 @@ final class EventsListViewModel {
         defer { isLoading = false }
 
         do {
+            for id in ids {
+                notificationService.cancelReminders(for: id)
+            }
             try await deleteEventUseCase.execute(withIds: ids)
             await loadEvents()
         } catch {

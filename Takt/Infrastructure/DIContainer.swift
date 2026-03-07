@@ -21,13 +21,17 @@ final class DIContainer {
     }()
     
     // MARK: - Services
-    
+
     lazy var textRecognitionService: TextRecognitionServiceProtocol = {
         DefaultTextRecognitionService()
     }()
-    
+
     lazy var textEventParserService: TextEventParserServiceProtocol = {
         TextEventParser()
+    }()
+
+    lazy var notificationService: NotificationServiceProtocol = {
+        NotificationService()
     }()
 
     // MARK: - Use Cases
@@ -73,7 +77,8 @@ final class DIContainer {
             getEventsUseCase: getEventsUseCase,
             updateEventUseCase: updateEventUseCase,
             deleteEventUseCase: deleteEventUseCase,
-            searchEventsUseCase: searchEventsUseCase
+            searchEventsUseCase: searchEventsUseCase,
+            notificationService: notificationService
         )
     }
 
@@ -81,7 +86,8 @@ final class DIContainer {
         ScanViewModel(
             textRecognitionService: textRecognitionService,
             textEventParserService: textEventParserService,
-            addEventUseCase: addEventUseCase
+            addEventUseCase: addEventUseCase,
+            notificationService: notificationService
         )
     }
 
@@ -98,7 +104,8 @@ final class DIContainer {
                          updateEventUseCase: updateEventUseCase,
                          deleteEventUseCase: deleteEventUseCase,
                          textRecognitionService: textRecognitionService,
-                         textParser: textEventParserService
+                         textParser: textEventParserService,
+                         notificationService: notificationService
         )
     }
 

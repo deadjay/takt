@@ -42,6 +42,12 @@ struct ScanViewModelTests {
         }
     }
 
+    class MockNotificationService: NotificationServiceProtocol {
+        func requestPermission() async -> Bool { true }
+        func scheduleReminders(for event: Event) async {}
+        func cancelReminders(for eventId: UUID) {}
+    }
+
     // MARK: - Test Setup
 
     @MainActor
@@ -58,7 +64,8 @@ struct ScanViewModelTests {
         let viewModel = ScanViewModel(
             textRecognitionService: mockOCR,
             textEventParserService: mockParser,
-            addEventUseCase: mockUseCase
+            addEventUseCase: mockUseCase,
+            notificationService: MockNotificationService()
         )
 
         return (viewModel, mockOCR, mockParser, mockUseCase)

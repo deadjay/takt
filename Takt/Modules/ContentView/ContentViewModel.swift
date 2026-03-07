@@ -47,6 +47,7 @@ final class ContentViewModel {
     private let deleteEventUseCase: DeleteEventUseCaseProtocol
     private let textRecognitionService: TextRecognitionServiceProtocol
     private let textParser: TextEventParserServiceProtocol
+    private let notificationService: NotificationServiceProtocol
 
     // MARK: Init
     init(
@@ -55,7 +56,8 @@ final class ContentViewModel {
         updateEventUseCase: UpdateEventUseCaseProtocol,
         deleteEventUseCase: DeleteEventUseCaseProtocol,
         textRecognitionService: TextRecognitionServiceProtocol,
-        textParser: TextEventParserServiceProtocol
+        textParser: TextEventParserServiceProtocol,
+        notificationService: NotificationServiceProtocol
     ) {
         self.getEventsUseCase = getEventsUseCase
         self.addEventUseCase = addEventUseCase
@@ -63,10 +65,12 @@ final class ContentViewModel {
         self.deleteEventUseCase = deleteEventUseCase
         self.textRecognitionService = textRecognitionService
         self.textParser = textParser
+        self.notificationService = notificationService
     }
 
     // MARK: Lifecycle
     func onAppear() async {
+        _ = await notificationService.requestPermission()
         await loadEvents()
     }
 
@@ -125,6 +129,7 @@ final class ContentViewModel {
         defer { isLoading = false }
         do {
             try await addEventUseCase.execute(event)
+            await notificationService.scheduleReminders(for: event)
             await loadEvents()
             resetDraftState()
         } catch {
@@ -153,6 +158,7 @@ final class ContentViewModel {
         defer { isLoading = false }
         do {
             for ev in toDelete {
+                notificationService.cancelReminders(for: ev.id)
                 try await deleteEventUseCase.execute(ev)
             }
             await loadEvents()
@@ -167,6 +173,7 @@ final class ContentViewModel {
         defer { isLoading = false }
         do {
             try await updateEventUseCase.execute(event)
+            await notificationService.scheduleReminders(for: event)
             await loadEvents()
         } catch {
             errorMessage = localized(error)

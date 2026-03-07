@@ -33,6 +33,9 @@ final class ScanViewModel {
     // Title candidate selection (indexes of selected candidates)
     var selectedCandidateIndexes: Set<Int> = []
 
+    // Reminders for current event being confirmed
+    var currentReminders: [ReminderOffset] = []
+
     // UI state
     var showSuccessToast: Bool = false
     var errorMessage: String?
@@ -66,17 +69,20 @@ final class ScanViewModel {
     private let textRecognitionService: TextRecognitionServiceProtocol
     private let textEventParserService: TextEventParserServiceProtocol
     private let addEventUseCase: AddEventUseCaseProtocol
+    private let notificationService: NotificationServiceProtocol
 
     // MARK: - Init
 
     init(
         textRecognitionService: TextRecognitionServiceProtocol,
         textEventParserService: TextEventParserServiceProtocol,
-        addEventUseCase: AddEventUseCaseProtocol
+        addEventUseCase: AddEventUseCaseProtocol,
+        notificationService: NotificationServiceProtocol
     ) {
         self.textRecognitionService = textRecognitionService
         self.textEventParserService = textEventParserService
         self.addEventUseCase = addEventUseCase
+        self.notificationService = notificationService
     }
 
     // MARK: - Actions
@@ -224,9 +230,36 @@ final class ScanViewModel {
         return resized?.jpegData(compressionQuality: 0.7)
     }
 
+    func addReminder() {
+        guard currentReminders.count < 3 else { return }
+        let used = Set(currentReminders)
+        if let next = ReminderOffset.allCases.first(where: { !used.contains($0) }) {
+            currentReminders.append(next)
+        }
+    }
+
+    func removeReminder(at index: Int) {
+        guard currentReminders.indices.contains(index) else { return }
+        currentReminders.remove(at: index)
+    }
+
+    func setReminder(at index: Int, to offset: ReminderOffset) {
+        guard currentReminders.indices.contains(index) else { return }
+        currentReminders[index] = offset
+    }
+
+    /// Available offsets for a picker at the given index (excludes offsets used by other reminders).
+    func availableOffsets(for index: Int) -> [ReminderOffset] {
+        let usedByOthers = Set(currentReminders.enumerated().compactMap { i, o in i == index ? nil : o })
+        return ReminderOffset.allCases.filter { !usedByOthers.contains($0) }
+    }
+
     /// Save current event and move to next (or finish)
     func saveCurrentEvent() async {
         guard var event = currentDraft ?? currentEvent else { return }
+
+        // Apply reminders
+        event.reminders = currentReminders
 
         // Attach source image thumbnail if available
         if event.sourceImageData == nil, let imageData = compressSourceImage(from: selectedImageData) {
@@ -235,9 +268,11 @@ final class ScanViewModel {
 
         do {
             try await addEventUseCase.execute(event)
+            await notificationService.scheduleReminders(for: event)
 
             currentDraft = nil
             selectedCandidateIndexes = []
+            currentReminders = []
 
             // Move to next event or finish
             if currentEventIndex < extractedEvents.count - 1 {
@@ -258,6 +293,7 @@ final class ScanViewModel {
     func skipCurrentEvent() {
         currentDraft = nil
         selectedCandidateIndexes = []
+        currentReminders = []
 
         if currentEventIndex < extractedEvents.count - 1 {
             currentEventIndex += 1
@@ -281,6 +317,7 @@ final class ScanViewModel {
         currentEventIndex = 0
         currentDraft = nil
         selectedCandidateIndexes = []
+        currentReminders = []
         errorMessage = nil
         showSuccessToast = false
         isProcessing = false

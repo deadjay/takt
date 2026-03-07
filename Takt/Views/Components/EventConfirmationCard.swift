@@ -209,6 +209,68 @@ struct EventConfirmationView: View {
                             .clipped()
                         }
 
+                        // Reminders
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("REMINDERS")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(TaktTheme.textMuted)
+                                .tracking(2)
+
+                            ForEach(Array(viewModel.currentReminders.enumerated()), id: \.offset) { index, reminder in
+                                HStack(spacing: 12) {
+                                    Image(systemName: "bell.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(TaktTheme.accent)
+                                        .frame(width: 20)
+
+                                    Picker("", selection: Binding(
+                                        get: { reminder },
+                                        set: { viewModel.setReminder(at: index, to: $0) }
+                                    )) {
+                                        ForEach(viewModel.availableOffsets(for: index)) { offset in
+                                            Text(offset.displayName).tag(offset)
+                                        }
+                                    }
+                                    .labelsHidden()
+                                    .tint(TaktTheme.textPrimary)
+
+                                    Spacer()
+
+                                    Button {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            viewModel.removeReminder(at: index)
+                                        }
+                                    } label: {
+                                        Image(systemName: "minus.circle.fill")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(.red.opacity(0.7))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                .padding(.vertical, 6)
+                            }
+
+                            if viewModel.currentReminders.count < 3 {
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        viewModel.addReminder()
+                                    }
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(TaktTheme.accent)
+
+                                        Text("Add Reminder")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(TaktTheme.accent)
+                                    }
+                                    .padding(.vertical, 6)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+
                         // Input Text (collapsed by default)
                         VStack(alignment: .leading, spacing: 8) {
                             Button {

@@ -360,7 +360,8 @@ private struct TextInputField: View {
         viewModel: ScanViewModel(
             textRecognitionService: DIContainer.shared.textRecognitionService,
             textEventParserService: DIContainer.shared.textEventParserService,
-            addEventUseCase: DIContainer.shared.addEventUseCase
+            addEventUseCase: DIContainer.shared.addEventUseCase,
+            notificationService: DIContainer.shared.notificationService
         )
     )
 }
@@ -369,6 +370,7 @@ private struct TextInputField: View {
     IdleStateView(viewModel: ScanViewModel(
         textRecognitionService: DIContainer.shared.textRecognitionService,
         textEventParserService: DIContainer.shared.textEventParserService,
-        addEventUseCase: DIContainer.shared.addEventUseCase
+        addEventUseCase: DIContainer.shared.addEventUseCase,
+        notificationService: DIContainer.shared.notificationService
     ), showSuccessCheckmark: .constant(true))
 }
