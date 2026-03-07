@@ -95,22 +95,29 @@ private struct IdleStateView: View {
 
             VStack(spacing: 0) {
                 // Header
-                HStack(alignment: .center) {
-                    Text("Takt.")
-                        .font(.system(size: 30, weight: .heavy))
-                        .tracking(-1.6)
-                        .foregroundColor(TaktTheme.textPrimary)
-                        .textCase(.uppercase)
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .center) {
+                        Text("Takt.")
+                            .font(.system(size: 48, weight: .heavy))
+                            .tracking(-2.4)
+                            .foregroundColor(TaktTheme.textPrimary)
+                            .textCase(.uppercase)
 
-                    Spacer()
+                        Spacer()
 
-                    Button {
-                        showInfo = true
-                    } label: {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 20))
-                            .foregroundColor(TaktTheme.textMuted)
+                        Button {
+                            showInfo = true
+                        } label: {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 20))
+                                .foregroundColor(TaktTheme.textMuted)
+                        }
                     }
+
+                    Text("Snap a photo, upload an image, or paste text — Takt extracts dates and creates reminders automatically.")
+                        .font(.system(size: 15))
+                        .foregroundColor(TaktTheme.textSecondary)
+                        .lineSpacing(3)
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
                 .padding(.top, 16)
@@ -304,11 +311,6 @@ private struct InfoSheet: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Snap a photo, upload an image, or paste text — Takt extracts dates and creates reminders automatically.")
-                        .font(.system(size: 15))
-                        .foregroundColor(TaktTheme.textSecondary)
-                        .lineSpacing(3)
-
                     VStack(alignment: .leading, spacing: 6) {
                         Text("WHAT WORKS")
                             .font(.system(size: 11, weight: .heavy, design: .monospaced))
