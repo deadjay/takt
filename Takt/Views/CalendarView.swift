@@ -3,6 +3,9 @@ import SwiftUI
 struct CalendarView: View {
     @Binding var events: [Event]
     @Binding var showCalendar: Bool
+    var onSave: ((Event) -> Void)? = nil
+    var onDelete: ((UUID) -> Void)? = nil
+    var onAppearReload: (() async -> Void)? = nil
     @State private var selectedDate = Date()
     @State private var selectedEvent: Event?
 
@@ -135,8 +138,16 @@ struct CalendarView: View {
                 .padding(.horizontal, TaktTheme.contentPadding)
                 .padding(.vertical, 12)
             }
+            .task {
+                await onAppearReload?()
+            }
             .sheet(item: $selectedEvent) { event in
-                EventDetailView(event: event, events: $events)
+                EventDetailView(
+                    event: event,
+                    events: $events,
+                    onSave: onSave,
+                    onDelete: onDelete
+                )
             }
     }
     

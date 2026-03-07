@@ -19,16 +19,19 @@ final class EventsListViewModel {
 
     // MARK: - Dependencies
     private let getEventsUseCase: GetEventsUseCaseProtocol
+    private let updateEventUseCase: UpdateEventUseCaseProtocol
     private let deleteEventUseCase: DeleteEventUseCaseProtocol
     private let searchEventsUseCase: SearchEventsUseCaseProtocol
 
     // MARK: - Init
     init(
         getEventsUseCase: GetEventsUseCaseProtocol,
+        updateEventUseCase: UpdateEventUseCaseProtocol,
         deleteEventUseCase: DeleteEventUseCaseProtocol,
         searchEventsUseCase: SearchEventsUseCaseProtocol
     ) {
         self.getEventsUseCase = getEventsUseCase
+        self.updateEventUseCase = updateEventUseCase
         self.deleteEventUseCase = deleteEventUseCase
         self.searchEventsUseCase = searchEventsUseCase
     }
@@ -50,6 +53,30 @@ final class EventsListViewModel {
     var todayInsertIndex: Int {
         let startOfToday = Calendar.current.startOfDay(for: Date())
         return filteredEvents.firstIndex { $0.date >= startOfToday } ?? filteredEvents.count
+    }
+
+    /// Events grouped by calendar day, sorted chronologically.
+    /// Each group has a date (start of day) and its events.
+    var dayGroups: [DayGroup] {
+        let calendar = Calendar.current
+        let grouped = Dictionary(grouping: filteredEvents) { event in
+            calendar.startOfDay(for: event.date)
+        }
+        return grouped
+            .map { DayGroup(date: $0.key, events: $0.value.sorted { $0.date < $1.date }) }
+            .sorted { $0.date < $1.date }
+    }
+
+    /// Day groups before today
+    var pastDayGroups: [DayGroup] {
+        let startOfToday = Calendar.current.startOfDay(for: Date())
+        return dayGroups.filter { $0.date < startOfToday }
+    }
+
+    /// Day groups from today onward
+    var upcomingDayGroups: [DayGroup] {
+        let startOfToday = Calendar.current.startOfDay(for: Date())
+        return dayGroups.filter { $0.date >= startOfToday }
     }
 
     // MARK: - Actions
@@ -83,6 +110,16 @@ final class EventsListViewModel {
     }
 
     @MainActor
+    func updateEvent(_ event: Event) async {
+        do {
+            try await updateEventUseCase.execute(event)
+            await loadEvents()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    @MainActor
     func deleteEvents(withIds ids: [UUID]) async {
         isLoading = true
         errorMessage = nil
@@ -96,4 +133,22 @@ final class EventsListViewModel {
             errorMessage = error.localizedDescription
         }
     }
+
+    /// Weekday header label for a date: "MONDAY, MAR 09"
+    func dayHeaderLabel(for date: Date) -> String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return todayLabel }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, MMM dd"
+        return formatter.string(from: date).uppercased()
+    }
+}
+
+// MARK: - Supporting Types
+
+struct DayGroup: Identifiable {
+    let date: Date
+    let events: [Event]
+    var id: Date { date }
 }

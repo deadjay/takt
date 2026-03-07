@@ -25,7 +25,19 @@ struct ContentView: View {
             // Events Tab — ZStack keeps tab identity stable
             ZStack {
                 if showCalendarInEventsTab {
-                    CalendarView(events: $viewModel.events, showCalendar: $showCalendarInEventsTab)
+                    CalendarView(
+                        events: $viewModel.events,
+                        showCalendar: $showCalendarInEventsTab,
+                        onSave: { event in Task { await viewModel.update(event: event) } },
+                        onDelete: { id in
+                            Task {
+                                if let idx = viewModel.events.firstIndex(where: { $0.id == id }) {
+                                    await viewModel.delete(at: IndexSet(integer: idx))
+                                }
+                            }
+                        },
+                        onAppearReload: { await viewModel.loadEvents() }
+                    )
                 } else {
                     EventsListView(
                         viewModel: DIContainer.shared.makeEventsListViewModel(),

@@ -71,6 +71,7 @@ final class DIContainer {
     func makeEventsListViewModel() -> EventsListViewModel {
         EventsListViewModel(
             getEventsUseCase: getEventsUseCase,
+            updateEventUseCase: updateEventUseCase,
             deleteEventUseCase: deleteEventUseCase,
             searchEventsUseCase: searchEventsUseCase
         )

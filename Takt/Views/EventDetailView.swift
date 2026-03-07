@@ -3,6 +3,8 @@ import SwiftUI
 struct EventDetailView: View {
     let event: Event
     @Binding var events: [Event]
+    var onSave: ((Event) -> Void)? = nil
+    var onDelete: ((UUID) -> Void)? = nil
     @Environment(\.presentationMode) var presentationMode
     @State private var showingDeleteAlert = false
     @State private var showingImagePreview = false
@@ -14,9 +16,11 @@ struct EventDetailView: View {
     @State private var notes: String
     @State private var hasDeadline: Bool
 
-    init(event: Event, events: Binding<[Event]>) {
+    init(event: Event, events: Binding<[Event]>, onSave: ((Event) -> Void)? = nil, onDelete: ((UUID) -> Void)? = nil) {
         self.event = event
         self._events = events
+        self.onSave = onSave
+        self.onDelete = onDelete
         self._name = State(initialValue: event.name)
         self._date = State(initialValue: event.date)
         self._deadline = State(initialValue: event.deadline)
@@ -241,16 +245,22 @@ struct EventDetailView: View {
     private func saveChanges() {
         guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
 
-        events[index].name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        events[index].name = trimmedName
         events[index].date = date
         events[index].deadline = hasDeadline ? deadline : nil
-        events[index].notes = notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        events[index].notes = trimmedNotes.isEmpty ? nil : trimmedNotes
 
+        onSave?(events[index])
         presentationMode.wrappedValue.dismiss()
     }
 
     private func deleteEvent() {
-        events.removeAll { $0.id == event.id }
+        let id = event.id
+        onDelete?(id)
+        events.removeAll { $0.id == id }
         presentationMode.wrappedValue.dismiss()
     }
 
