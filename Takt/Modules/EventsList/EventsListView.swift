@@ -48,7 +48,16 @@ struct EventsListView: View {
             }
         }
         .sheet(item: $selectedEvent) { event in
-            EventDetailView(event: event, events: $viewModel.events)
+            EventDetailView(
+                event: event,
+                events: $viewModel.events,
+                onSave: { updated in
+                    Task { await viewModel.updateEvent(updated) }
+                },
+                onDelete: { id in
+                    Task { await viewModel.deleteEvents(withIds: [id]) }
+                }
+            )
         }
     }
 
@@ -98,14 +107,17 @@ struct EventsListView: View {
     private var eventsList: some View {
         ScrollViewReader { proxy in
             List {
-                // Past events (oldest first)
-                ForEach(viewModel.filteredEvents.prefix(viewModel.todayInsertIndex)) { event in
-                    eventRow(for: event)
+                // Past day groups
+                ForEach(viewModel.pastDayGroups) { group in
+                    dayHeader(for: group.date)
+                    ForEach(group.events) { event in
+                        eventRow(for: event)
+                    }
                 }
 
                 // Previous Events label (only if there are past events)
-                if viewModel.todayInsertIndex > 0 {
-                    sectionLabel("PREVIOUS EVENTS ↑")
+                if !viewModel.pastDayGroups.isEmpty {
+                    sectionLabel("PREVIOUS EVENTS \u{2191}")
                 }
 
                 // Today divider (always present)
@@ -113,13 +125,19 @@ struct EventsListView: View {
                     .id("today")
 
                 // Upcoming Events label (only if there are future events)
-                if viewModel.todayInsertIndex < viewModel.filteredEvents.count {
-                    sectionLabel("UPCOMING EVENTS ↓")
+                if !viewModel.upcomingDayGroups.isEmpty {
+                    sectionLabel("UPCOMING EVENTS \u{2193}")
                 }
 
-                // Future events
-                ForEach(viewModel.filteredEvents.suffix(from: viewModel.todayInsertIndex)) { event in
-                    eventRow(for: event)
+                // Upcoming day groups
+                ForEach(viewModel.upcomingDayGroups) { group in
+                    // Skip today header — the todayDivider already covers it
+                    if !Calendar.current.isDateInToday(group.date) {
+                        dayHeader(for: group.date)
+                    }
+                    ForEach(group.events) { event in
+                        eventRow(for: event)
+                    }
                 }
             }
             .listStyle(.plain)
@@ -142,7 +160,7 @@ struct EventsListView: View {
                 selectedEvent = event
             }
             .listRowInsets(EdgeInsets(top: 0, leading: TaktTheme.contentPadding, bottom: 0, trailing: TaktTheme.contentPadding))
-            .listRowBackground(Color.clear)
+            .listRowBackground(Calendar.current.isDateInToday(event.date) ? TaktTheme.accent.opacity(0.08) : Color.clear)
             .listRowSeparatorTint(TaktTheme.cardBorder)
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
@@ -153,6 +171,18 @@ struct EventsListView: View {
                     Label("Delete", systemImage: "trash")
                 }
             }
+    }
+
+    private func dayHeader(for date: Date) -> some View {
+        Text(viewModel.dayHeaderLabel(for: date))
+            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            .foregroundColor(TaktTheme.textMuted)
+            .tracking(1)
+            .padding(.vertical, 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .listRowInsets(EdgeInsets(top: 8, leading: TaktTheme.contentPadding, bottom: 0, trailing: TaktTheme.contentPadding))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
     }
 
     private var todayDivider: some View {
