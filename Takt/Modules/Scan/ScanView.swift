@@ -61,20 +61,6 @@ struct ScanView: View {
                 }
             }
         }
-        .onChange(of: viewModel.selectedImageData) { oldValue, newValue in
-            guard newValue != nil else { return }
-
-            withAnimation(.spring(response: 0.3)) {
-                showSuccessCheckmark = true
-            }
-
-            Task {
-                try? await Task.sleep(for: .seconds(1))
-                withAnimation(.spring(response: 0.3)) {
-                    showSuccessCheckmark = false
-                }
-            }
-        }
         .alert("Error", isPresented: $showError) {
             Button("OK") {
                 viewModel.clearError()
@@ -94,70 +80,106 @@ private struct IdleStateView: View {
 
     var body: some View {
         ZStack {
-            // Background
             TaktTheme.appBackground
                 .ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Header
-                    HStack(alignment: .center) {
-                        Text("Takt.")
-                            .font(.system(size: 30, weight: .heavy))
-                            .tracking(-1.6)
-                            .foregroundColor(TaktTheme.textPrimary)
-                            .textCase(.uppercase)
+            VStack(spacing: 0) {
+                // Header
+                HStack(alignment: .center) {
+                    Text("Takt.")
+                        .font(.system(size: 30, weight: .heavy))
+                        .tracking(-1.6)
+                        .foregroundColor(TaktTheme.textPrimary)
+                        .textCase(.uppercase)
 
-                        Spacer()
+                    Spacer()
 
-                        Button {
-                            showInfo = true
-                        } label: {
-                            Image(systemName: "info.circle")
-                                .font(.system(size: 20))
-                                .foregroundColor(TaktTheme.textMuted)
+                    Button {
+                        showInfo = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 20))
+                            .foregroundColor(TaktTheme.textMuted)
+                    }
+                }
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.top, 16)
+                .padding(.bottom, 24)
+
+                // Scrollable content area
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // Text input card
+                        TextInputField(
+                            text: $viewModel.inputText,
+                            onPaste: {
+                                viewModel.pasteFromClipboard()
+                            }
+                        )
+                        .padding(.horizontal, TaktTheme.contentPadding)
+
+                        // Image thumbnail preview (shown after attach)
+                        if let imageData = viewModel.selectedImageData,
+                           let uiImage = UIImage(data: imageData) {
+                            HStack(spacing: 12) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 48, height: 48)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                                Text("Image attached")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(TaktTheme.textSecondary)
+
+                                Spacer()
+
+                                Button {
+                                    viewModel.selectedImageData = nil
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(TaktTheme.textMuted)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(12)
+                            .background(TaktTheme.cardBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(TaktTheme.accent.opacity(0.3), lineWidth: 1)
+                            )
+                            .padding(.horizontal, TaktTheme.contentPadding)
+                            .padding(.top, 12)
+                            .transition(.scale(scale: 0.8).combined(with: .opacity))
                         }
                     }
-                    .padding(.horizontal, TaktTheme.contentPadding)
-                    .padding(.top, 16)
-                    .padding(.bottom, 24)
+                }
+                .scrollDismissesKeyboard(.interactively)
 
-                    // Two square action cards in a row
-                    HStack(spacing: 16) {
-                        // Camera card (01 / CAPTURE - "Make Photo")
+                // Bottom sticky buttons
+                VStack(spacing: 10) {
+                    // Camera + Attach row
+                    HStack(spacing: 12) {
                         ImageInputButton(
                             icon: "camera.fill",
                             label: "01 / CAPTURE",
-                            title: "Make Photo",
+                            title: "Scan",
                             imageData: $viewModel.selectedImageData,
                             sourceType: .camera
                         )
 
-                        // Upload card (02 / IMPORT - "Attach Image")
                         ImageInputButton(
                             icon: "photo.fill",
                             label: "02 / IMPORT",
-                            title: "Attach Image",
+                            title: "Attach",
                             imageData: $viewModel.selectedImageData,
                             sourceType: .photoLibrary
                         )
                     }
-                    .padding(.horizontal, TaktTheme.contentPadding)
 
-                    // "or" separator
-                    OrSeparator()
-                        .padding(.horizontal, TaktTheme.contentPadding)
-
-                    // Text input card
-                    TextInputField(
-                        text: $viewModel.inputText,
-                        onPaste: {
-                            viewModel.pasteFromClipboard()
-                        }
-                    )
-                    .padding(.horizontal, TaktTheme.contentPadding)
-
-                    // Magic button
+                    // Detect button
                     Button {
                         Task {
                             if viewModel.selectedImageData != nil {
@@ -184,13 +206,17 @@ private struct IdleStateView: View {
                     }
                     .disabled(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty)
                     .opacity(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty ? 0.5 : 1.0)
-                    .padding(.horizontal, TaktTheme.contentPadding)
-                    .padding(.top, 20)
-                    .padding(.bottom, 16)
                 }
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.top, 10)
+                .padding(.bottom, 8)
+                .background(
+                    TaktTheme.appBackground
+                        .shadow(color: .black.opacity(0.05), radius: 8, y: -4)
+                )
             }
-            .scrollDismissesKeyboard(.interactively)
         }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.selectedImageData != nil)
         .sheet(isPresented: $showInfo) {
             InfoSheet()
                 .presentationDetents([.medium])

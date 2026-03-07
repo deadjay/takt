@@ -42,22 +42,21 @@ struct ImageInputButton: View {
         Button {
             showingPicker = true
         } label: {
-            VStack(alignment: .leading, spacing: 8) {
-                Spacer()
-                Text(label.uppercased())
-                    .font(TaktTheme.cardLabelFont)
-                    .foregroundColor(TaktTheme.textMuted)
-                Text(title)
-                    .font(TaktTheme.cardTitleFont)
-                    .foregroundColor(TaktTheme.textPrimary)
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .semibold))
+
+                Text(title.uppercased())
+                    .font(.system(size: 14, weight: .bold))
+                    .tracking(0.8)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(24)
-            .aspectRatio(1, contentMode: .fit)
+            .foregroundColor(TaktTheme.textPrimary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
             .background(TaktTheme.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
-                RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius)
+                RoundedRectangle(cornerRadius: 16)
                     .stroke(TaktTheme.cardBorder, lineWidth: 1)
             )
         }
