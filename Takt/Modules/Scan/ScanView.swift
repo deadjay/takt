@@ -90,6 +90,7 @@ struct ScanView: View {
 private struct IdleStateView: View {
     @Bindable var viewModel: ScanViewModel
     @Binding var showSuccessCheckmark: Bool
+    @State private var showInfo = false
 
     var body: some View {
         ZStack {
@@ -100,19 +101,23 @@ private struct IdleStateView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     // Header
-                    VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .center) {
                         Text("Takt.")
                             .font(.system(size: 30, weight: .heavy))
                             .tracking(-1.6)
                             .foregroundColor(TaktTheme.textPrimary)
                             .textCase(.uppercase)
 
-                        Text("Snap a photo, upload an image, or paste text — Takt extracts dates and creates reminders automatically.")
-                            .font(.system(size: 13))
-                            .foregroundColor(TaktTheme.textSecondary)
-                            .lineSpacing(2)
+                        Spacer()
+
+                        Button {
+                            showInfo = true
+                        } label: {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 20))
+                                .foregroundColor(TaktTheme.textMuted)
+                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, TaktTheme.contentPadding)
                     .padding(.top, 16)
                     .padding(.bottom, 24)
@@ -152,20 +157,6 @@ private struct IdleStateView: View {
                     )
                     .padding(.horizontal, TaktTheme.contentPadding)
 
-                    // Quick Tips
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("QUICK TIPS")
-                            .font(TaktTheme.cardLabelFont)
-                            .foregroundColor(TaktTheme.textMuted)
-                            .padding(.bottom, 4)
-
-                        TipRow(text: "Works with tickets, receipts, food labels, subscriptions")
-                        TipRow(text: "Detects dates, times, and deadlines automatically")
-                        TipRow(text: "Everything stays on your device — fully offline")
-                    }
-                    .padding(.horizontal, TaktTheme.contentPadding)
-                    .padding(.top, 20)
-
                     // Magic button
                     Button {
                         Task {
@@ -194,11 +185,70 @@ private struct IdleStateView: View {
                     .disabled(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty)
                     .opacity(viewModel.selectedImageData == nil && viewModel.inputText.isEmpty ? 0.5 : 1.0)
                     .padding(.horizontal, TaktTheme.contentPadding)
-                    .padding(.top, 12)
+                    .padding(.top, 20)
                     .padding(.bottom, 16)
                 }
             }
             .scrollDismissesKeyboard(.interactively)
+        }
+        .sheet(isPresented: $showInfo) {
+            InfoSheet()
+                .presentationDetents([.medium])
+        }
+    }
+}
+
+// MARK: - Info Sheet
+
+private struct InfoSheet: View {
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Snap a photo, upload an image, or paste text — Takt extracts dates and creates reminders automatically.")
+                        .font(.system(size: 15))
+                        .foregroundColor(TaktTheme.textSecondary)
+                        .lineSpacing(3)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("WHAT WORKS")
+                            .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                            .foregroundColor(TaktTheme.textMuted)
+                            .tracking(1)
+                            .padding(.bottom, 2)
+
+                        TipRow(text: "Concert tickets, posters, and flyers")
+                        TipRow(text: "Food expiry labels and best-before dates")
+                        TipRow(text: "Subscription renewal screenshots")
+                        TipRow(text: "Receipts with deadlines and due dates")
+                        TipRow(text: "Any text with a date in it")
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("GOOD TO KNOW")
+                            .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                            .foregroundColor(TaktTheme.textMuted)
+                            .tracking(1)
+                            .padding(.bottom, 2)
+
+                        TipRow(text: "Everything stays on your device — fully offline")
+                        TipRow(text: "Detects dates, times, and deadlines automatically")
+                        TipRow(text: "Supports German and English date formats")
+                    }
+                }
+                .padding(TaktTheme.contentPadding)
+            }
+            .background(TaktTheme.appBackground)
+            .navigationTitle("How it works")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundColor(TaktTheme.accent)
+                }
+            }
         }
     }
 }
