@@ -3,6 +3,7 @@ import Foundation
 enum ReminderOffset: String, Codable, CaseIterable, Identifiable, Equatable {
     case fifteenMinutes = "15min"
     case oneHour = "1h"
+    case twelveHours = "12h"
     case oneDay = "1d"
     case twoDays = "2d"
     case oneWeek = "1w"
@@ -13,6 +14,7 @@ enum ReminderOffset: String, Codable, CaseIterable, Identifiable, Equatable {
         switch self {
         case .fifteenMinutes: return "15 min before"
         case .oneHour: return "1 hour before"
+        case .twelveHours: return "12 hours before"
         case .oneDay: return "1 day before"
         case .twoDays: return "2 days before"
         case .oneWeek: return "1 week before"
@@ -23,12 +25,24 @@ enum ReminderOffset: String, Codable, CaseIterable, Identifiable, Equatable {
         switch self {
         case .fifteenMinutes: return 15 * 60
         case .oneHour: return 60 * 60
+        case .twelveHours: return 12 * 60 * 60
         case .oneDay: return 24 * 60 * 60
         case .twoDays: return 2 * 24 * 60 * 60
         case .oneWeek: return 7 * 24 * 60 * 60
         }
     }
+}
 
+enum Reminder: Codable, Equatable, Identifiable {
+    case preset(ReminderOffset)
+    case custom(Date)
+
+    var id: String {
+        switch self {
+        case .preset(let offset): return offset.rawValue
+        case .custom(let date): return "custom-\(Int(date.timeIntervalSince1970))"
+        }
+    }
 }
 
 struct Event: Identifiable, Codable, Equatable {
@@ -41,9 +55,9 @@ struct Event: Identifiable, Codable, Equatable {
     var createdAt: Date = Date()
     var sourceImageData: Data?
     var titleCandidates: [String]?
-    var reminders: [ReminderOffset] = []
+    var reminders: [Reminder] = []
 
-    public init(name: String, date: Date, deadline: Date? = nil, notes: String? = nil, sourceImageData: Data? = nil, titleCandidates: [String]? = nil, reminders: [ReminderOffset] = []) {
+    public init(name: String, date: Date, deadline: Date? = nil, notes: String? = nil, sourceImageData: Data? = nil, titleCandidates: [String]? = nil, reminders: [Reminder] = []) {
         self.name = name
         self.date = date
         self.deadline = deadline
@@ -64,7 +78,14 @@ struct Event: Identifiable, Codable, Equatable {
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
         sourceImageData = try container.decodeIfPresent(Data.self, forKey: .sourceImageData)
         titleCandidates = try container.decodeIfPresent([String].self, forKey: .titleCandidates)
-        reminders = try container.decodeIfPresent([ReminderOffset].self, forKey: .reminders) ?? []
+        // Try new Reminder format first, fall back to legacy [ReminderOffset]
+        if let r = try? container.decodeIfPresent([Reminder].self, forKey: .reminders) {
+            reminders = r ?? []
+        } else if let offsets = try? container.decodeIfPresent([ReminderOffset].self, forKey: .reminders) {
+            reminders = (offsets ?? []).map { .preset($0) }
+        } else {
+            reminders = []
+        }
     }
 }
 

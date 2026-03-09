@@ -15,7 +15,7 @@ struct EventDetailView: View {
     @State private var deadline: Date?
     @State private var notes: String
     @State private var hasDeadline: Bool
-    @State private var reminders: [ReminderOffset]
+    @State private var reminders: [Reminder]
 
     init(event: Event, events: Binding<[Event]>, onSave: ((Event) -> Void)? = nil, onDelete: ((UUID) -> Void)? = nil) {
         self.event = event
@@ -254,16 +254,18 @@ struct EventDetailView: View {
                 .foregroundColor(TaktTheme.textMuted)
                 .tracking(1)
 
-            ForEach(Array(reminders.enumerated()), id: \.offset) { (index: Int, reminder: ReminderOffset) in
+            ForEach(Array(reminders.enumerated()), id: \.offset) { (index: Int, reminder: Reminder) in
                 reminderRow(index: index, reminder: reminder)
             }
 
             if reminders.count < 3 {
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
-                        let used = Set(reminders)
-                        if let next = ReminderOffset.allCases.first(where: { !used.contains($0) }) {
-                            reminders.append(next)
+                        let usedPresets = Set(reminders.compactMap {
+                            if case .preset(let o) = $0 { return o } else { return nil }
+                        })
+                        if let next = ReminderOffset.allCases.first(where: { !usedPresets.contains($0) }) {
+                            reminders.append(.preset(next))
                         }
                     }
                 } label: {
@@ -309,23 +311,45 @@ struct EventDetailView: View {
     }
 
     @ViewBuilder
-    private func reminderRow(index: Int, reminder: ReminderOffset) -> some View {
+    private func reminderRow(index: Int, reminder: Reminder) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "bell.fill")
                 .font(.system(size: 14))
                 .foregroundColor(TaktTheme.accent)
                 .frame(width: 20)
 
-            Picker("", selection: Binding(
-                get: { reminder },
-                set: { reminders[index] = $0 }
-            )) {
-                ForEach(availableOffsets(for: index)) { offset in
-                    Text(offset.displayName).tag(offset)
+            switch reminder {
+            case .preset(let offset):
+                Menu {
+                    ForEach(availableOffsets(for: index)) { o in
+                        Button(o.displayName) {
+                            reminders[index] = .preset(o)
+                        }
+                    }
+                    Divider()
+                    Button("Custom...") {
+                        reminders[index] = .custom(date)
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(offset.displayName)
+                            .font(.system(size: 15))
+                            .foregroundColor(TaktTheme.textPrimary)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 10))
+                            .foregroundColor(TaktTheme.textMuted)
+                    }
                 }
+
+            case .custom(let reminderDate):
+                DatePicker("", selection: Binding(
+                    get: { reminderDate },
+                    set: { reminders[index] = .custom($0) }
+                ), displayedComponents: [.date, .hourAndMinute])
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .tint(TaktTheme.accent)
             }
-            .labelsHidden()
-            .tint(TaktTheme.textPrimary)
 
             Spacer()
 
@@ -345,7 +369,10 @@ struct EventDetailView: View {
     }
 
     private func availableOffsets(for index: Int) -> [ReminderOffset] {
-        let usedByOthers = Set(reminders.enumerated().compactMap { i, o in i == index ? nil : o })
+        let usedByOthers = Set(reminders.enumerated().compactMap { i, r -> ReminderOffset? in
+            guard i != index, case .preset(let o) = r else { return nil }
+            return o
+        })
         return ReminderOffset.allCases.filter { !usedByOthers.contains($0) }
     }
 

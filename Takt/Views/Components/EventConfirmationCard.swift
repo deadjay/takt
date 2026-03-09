@@ -223,16 +223,39 @@ struct EventConfirmationView: View {
                                         .foregroundColor(TaktTheme.accent)
                                         .frame(width: 20)
 
-                                    Picker("", selection: Binding(
-                                        get: { reminder },
-                                        set: { viewModel.setReminder(at: index, to: $0) }
-                                    )) {
-                                        ForEach(viewModel.availableOffsets(for: index)) { offset in
-                                            Text(offset.displayName).tag(offset)
+                                    switch reminder {
+                                    case .preset(let offset):
+                                        Menu {
+                                            ForEach(viewModel.availableOffsets(for: index)) { o in
+                                                Button(o.displayName) {
+                                                    viewModel.setReminderPreset(at: index, to: o)
+                                                }
+                                            }
+                                            Divider()
+                                            Button("Custom...") {
+                                                let eventDate = viewModel.displayEvent?.date ?? Date()
+                                                viewModel.setReminderCustomDate(at: index, to: eventDate)
+                                            }
+                                        } label: {
+                                            HStack(spacing: 4) {
+                                                Text(offset.displayName)
+                                                    .font(.system(size: 15))
+                                                    .foregroundColor(TaktTheme.textPrimary)
+                                                Image(systemName: "chevron.up.chevron.down")
+                                                    .font(.system(size: 10))
+                                                    .foregroundColor(TaktTheme.textMuted)
+                                            }
                                         }
+
+                                    case .custom(let date):
+                                        DatePicker("", selection: Binding(
+                                            get: { date },
+                                            set: { viewModel.setReminderCustomDate(at: index, to: $0) }
+                                        ), displayedComponents: [.date, .hourAndMinute])
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden()
+                                        .tint(TaktTheme.accent)
                                     }
-                                    .labelsHidden()
-                                    .tint(TaktTheme.textPrimary)
 
                                     Spacer()
 

@@ -34,7 +34,7 @@ final class ScanViewModel {
     var selectedCandidateIndexes: Set<Int> = []
 
     // Reminders for current event being confirmed
-    var currentReminders: [ReminderOffset] = []
+    var currentReminders: [Reminder] = []
 
     // UI state
     var showSuccessToast: Bool = false
@@ -232,9 +232,11 @@ final class ScanViewModel {
 
     func addReminder() {
         guard currentReminders.count < 3 else { return }
-        let used = Set(currentReminders)
-        if let next = ReminderOffset.allCases.first(where: { !used.contains($0) }) {
-            currentReminders.append(next)
+        let usedPresets = Set(currentReminders.compactMap {
+            if case .preset(let o) = $0 { return o } else { return nil }
+        })
+        if let next = ReminderOffset.allCases.first(where: { !usedPresets.contains($0) }) {
+            currentReminders.append(.preset(next))
         }
     }
 
@@ -243,14 +245,22 @@ final class ScanViewModel {
         currentReminders.remove(at: index)
     }
 
-    func setReminder(at index: Int, to offset: ReminderOffset) {
+    func setReminderPreset(at index: Int, to offset: ReminderOffset) {
         guard currentReminders.indices.contains(index) else { return }
-        currentReminders[index] = offset
+        currentReminders[index] = .preset(offset)
     }
 
-    /// Available offsets for a picker at the given index (excludes offsets used by other reminders).
+    func setReminderCustomDate(at index: Int, to date: Date) {
+        guard currentReminders.indices.contains(index) else { return }
+        currentReminders[index] = .custom(date)
+    }
+
+    /// Available preset offsets for a picker at the given index (excludes presets used by other rows).
     func availableOffsets(for index: Int) -> [ReminderOffset] {
-        let usedByOthers = Set(currentReminders.enumerated().compactMap { i, o in i == index ? nil : o })
+        let usedByOthers = Set(currentReminders.enumerated().compactMap { i, r -> ReminderOffset? in
+            guard i != index, case .preset(let o) = r else { return nil }
+            return o
+        })
         return ReminderOffset.allCases.filter { !usedByOthers.contains($0) }
     }
 

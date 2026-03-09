@@ -28,13 +28,31 @@ final class NotificationService: NotificationServiceProtocol {
         let referenceDate = event.deadline ?? event.date
         let isDeadline = event.deadline != nil
 
-        for offset in event.reminders {
-            let fireDate = referenceDate.addingTimeInterval(-offset.timeInterval)
+        for reminder in event.reminders {
+            let fireDate: Date
+            let body: String
+            let identifier: String
+
+            switch reminder {
+            case .preset(let offset):
+                fireDate = referenceDate.addingTimeInterval(-offset.timeInterval)
+                body = isDeadline ? deadlineBody(for: offset) : notificationBody(for: offset)
+                identifier = "\(event.id.uuidString)-\(offset.rawValue)"
+
+            case .custom(let date):
+                fireDate = date
+                let formatter = DateFormatter()
+                formatter.dateStyle = .short
+                formatter.timeStyle = .short
+                body = "Custom reminder: \(formatter.string(from: date))"
+                identifier = "\(event.id.uuidString)-custom-\(Int(date.timeIntervalSince1970))"
+            }
+
             guard fireDate > Date() else { continue }
 
             let content = UNMutableNotificationContent()
             content.title = event.name
-            content.body = isDeadline ? deadlineBody(for: offset) : notificationBody(for: offset)
+            content.body = body
             content.sound = .default
 
             let components = Calendar.current.dateComponents(
@@ -42,8 +60,6 @@ final class NotificationService: NotificationServiceProtocol {
                 from: fireDate
             )
             let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-
-            let identifier = "\(event.id.uuidString)-\(offset.rawValue)"
             let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
             do {
@@ -56,8 +72,21 @@ final class NotificationService: NotificationServiceProtocol {
 
     /// Cancel all reminders for an event.
     func cancelReminders(for eventId: UUID) {
-        let identifiers = ReminderOffset.allCases.map { "\(eventId.uuidString)-\($0.rawValue)" }
-        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        let prefix = eventId.uuidString
+
+        // Cancel all known preset identifiers immediately
+        let presetIds = ReminderOffset.allCases.map { "\(prefix)-\($0.rawValue)" }
+        center.removePendingNotificationRequests(withIdentifiers: presetIds)
+
+        // Also cancel any custom identifiers by querying pending requests
+        center.getPendingNotificationRequests { requests in
+            let customIds = requests
+                .filter { $0.identifier.hasPrefix("\(prefix)-custom") }
+                .map { $0.identifier }
+            if !customIds.isEmpty {
+                self.center.removePendingNotificationRequests(withIdentifiers: customIds)
+            }
+        }
     }
 
     // MARK: - Private
@@ -66,6 +95,7 @@ final class NotificationService: NotificationServiceProtocol {
         switch offset {
         case .fifteenMinutes: return "Starting in 15 minutes"
         case .oneHour: return "Starting in 1 hour"
+        case .twelveHours: return "Starting in 12 hours"
         case .oneDay: return "Starting in 1 day"
         case .twoDays: return "Starting in 2 days"
         case .oneWeek: return "Starting in 1 week"
@@ -76,6 +106,7 @@ final class NotificationService: NotificationServiceProtocol {
         switch offset {
         case .fifteenMinutes: return "Deadline in 15 minutes"
         case .oneHour: return "Deadline in 1 hour"
+        case .twelveHours: return "Deadline in 12 hours"
         case .oneDay: return "Deadline in 1 day"
         case .twoDays: return "Deadline in 2 days"
         case .oneWeek: return "Deadline in 1 week"
