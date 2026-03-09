@@ -218,9 +218,9 @@ struct EventsListView: View {
                             .foregroundColor(TaktTheme.accent)
                             .font(.system(size: 16))
 
-                        TextField("Search extracted events...", text: $viewModel.searchText)
+                        TextField("Search events...", text: $viewModel.searchText)
                             .font(.system(size: 16))
-                            .foregroundColor(.white)
+                            .foregroundColor(TaktTheme.textPrimary)
                             .focused($searchFieldFocused)
 
                         if !viewModel.searchText.isEmpty {
@@ -228,14 +228,14 @@ struct EventsListView: View {
                                 viewModel.searchText = ""
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.white.opacity(0.4))
+                                    .foregroundColor(TaktTheme.textMuted)
                                     .font(.system(size: 14))
                             }
                         }
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
-                    .background(Color(red: 0.1, green: 0.1, blue: 0.1))
+                    .background(TaktTheme.cardBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .shadow(color: .black.opacity(0.15), radius: 15, y: 5)
 
@@ -250,8 +250,7 @@ struct EventsListView: View {
                     .foregroundColor(TaktTheme.accent)
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 0)
-                .padding(.bottom, 8)
+                .padding(.vertical, 12)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             } else {
                 // Collapsed: search bar + calendar button
@@ -269,16 +268,36 @@ struct EventsListView: View {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 16))
                                 .foregroundColor(TaktTheme.accent)
-                            Text("Search extracted events...")
+                            Text("Search events...")
                                 .font(.system(size: 16))
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundColor(TaktTheme.textMuted)
                             Spacer()
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 16)
-                        .background(Color(red: 0.1, green: 0.1, blue: 0.1))
+                        .background(TaktTheme.cardBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .shadow(color: .black.opacity(0.15), radius: 15, y: 5)
+                    }
+
+                    // Today button
+                    Button {
+                        if let proxy = scrollProxy {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                proxy.scrollTo("today", anchor: .top)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "arrow.uturn.left")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(TaktTheme.textPrimary)
+                            .frame(width: 52, height: 52)
+                            .background(TaktTheme.cardBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
+                            )
                     }
 
                     // Calendar toggle button
@@ -298,12 +317,17 @@ struct EventsListView: View {
                     }
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.top, 0)
-                .padding(.bottom, 8)
+                .padding(.vertical, 12)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .background(TaktTheme.appBackground)
+        .background(
+            LinearGradient(
+                colors: [TaktTheme.appBackground.opacity(0), TaktTheme.appBackground],
+                startPoint: .top,
+                endPoint: UnitPoint(x: 0.5, y: 0.4)
+            )
+        )
     }
 
     // MARK: - Actions
