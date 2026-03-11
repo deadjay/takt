@@ -22,6 +22,7 @@ struct CalendarView: View {
     
     var body: some View {
         VStack(spacing: 0) {
+                VStack(spacing: 0) {
                 // Month header (with list button top-right)
                 HStack {
                     Button(action: previousMonth) {
@@ -78,7 +79,9 @@ struct CalendarView: View {
                     }
                 }
                 .padding(.horizontal)
-                
+                }
+                .background(.ultraThinMaterial)
+
                 // Events for selected date
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
@@ -120,7 +123,7 @@ struct CalendarView: View {
                 
                 Spacer()
 
-                // Bottom bar with list-view toggle (same position as EventsListView's calendar button)
+                // Bottom bar with list-view toggle
                 HStack {
                     Spacer()
 
@@ -141,6 +144,7 @@ struct CalendarView: View {
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
                 .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
             }
             .task {
                 await onAppearReload?()

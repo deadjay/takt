@@ -29,15 +29,22 @@ struct EventsListView: View {
                 if viewModel.events.isEmpty && !viewModel.isLoading {
                     emptyStateView
                 } else {
-                    // Event rows with header overlay
+                    // Event rows with header overlay + floating buttons
                     eventsList
                         .safeAreaInset(edge: .top, spacing: 0) {
                             eventsHeader
                         }
+                        .overlay(alignment: .bottomTrailing) {
+                            if !isSearching {
+                                floatingButtons
+                            }
+                        }
                 }
 
-                // Bottom bar: search + calendar button
-                bottomBar
+                // Expanded search bar (below list)
+                if isSearching {
+                    expandedSearchBar
+                }
             }
         }
         .task {
@@ -145,7 +152,7 @@ struct EventsListView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .padding(.bottom, 4)
+            .contentMargins(.bottom, 80)
             .onAppear { scrollProxy = proxy }
             .onChange(of: viewModel.searchText) { _, newValue in
                 Task {
@@ -216,128 +223,107 @@ struct EventsListView: View {
         }
     }
 
-    // MARK: - Bottom Bar (Search + Calendar button)
+    // MARK: - Bottom Bar
 
-    private var bottomBar: some View {
-        VStack(spacing: 0) {
-            if isSearching {
-                // Expanded search field
-                HStack(spacing: 12) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(TaktTheme.accent)
-                            .font(.system(size: 16))
+    // MARK: - Floating Buttons
 
-                        TextField("Search events...", text: $viewModel.searchText)
-                            .font(.system(size: 16))
-                            .foregroundColor(TaktTheme.textPrimary)
-                            .focused($searchFieldFocused)
-
-                        if !viewModel.searchText.isEmpty {
-                            Button {
-                                viewModel.searchText = ""
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(TaktTheme.textMuted)
-                                    .font(.system(size: 14))
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .background(TaktTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.15), radius: 15, y: 5)
-
-                    Button("Cancel") {
-                        viewModel.searchText = ""
-                        searchFieldFocused = false
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isSearching = false
-                        }
-                    }
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(TaktTheme.accent)
+    private var floatingButtons: some View {
+        HStack(spacing: 12) {
+            // Search
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isSearching = true
                 }
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.vertical, 12)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            } else {
-                // Collapsed: search bar + calendar button
-                HStack(spacing: 12) {
-                    // Search button (expands)
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isSearching = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            searchFieldFocused = true
-                        }
-                    } label: {
-                        HStack(spacing: 12) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 16))
-                                .foregroundColor(TaktTheme.accent)
-                            Text("Search events...")
-                                .font(.system(size: 16))
-                                .foregroundColor(TaktTheme.textMuted)
-                            Spacer()
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 16)
-                        .background(TaktTheme.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: .black.opacity(0.15), radius: 15, y: 5)
-                    }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    searchFieldFocused = true
+                }
+            } label: {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(TaktTheme.textPrimary)
+                    .frame(width: 48, height: 48)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+            }
 
-                    // Today button
-                    Button {
-                        if let proxy = scrollProxy {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                proxy.scrollTo("today", anchor: .top)
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "arrow.uturn.left")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(TaktTheme.textPrimary)
-                            .frame(width: 52, height: 52)
-                            .background(TaktTheme.cardBackground)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
-                            )
-                    }
-
-                    // Calendar toggle button
-                    Button {
-                        showCalendar = true
-                    } label: {
-                        Image(systemName: "calendar")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(TaktTheme.textPrimary)
-                            .frame(width: 52, height: 52)
-                            .background(TaktTheme.cardBackground)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
-                            )
+            // Today
+            Button {
+                if let proxy = scrollProxy {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        proxy.scrollTo("today", anchor: .top)
                     }
                 }
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.vertical, 12)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+            } label: {
+                Image(systemName: "arrow.uturn.left")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(TaktTheme.textPrimary)
+                    .frame(width: 48, height: 48)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+            }
+
+            // Calendar
+            Button {
+                showCalendar = true
+            } label: {
+                Image(systemName: "calendar")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(TaktTheme.textPrimary)
+                    .frame(width: 48, height: 48)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
             }
         }
-        .background(
-            LinearGradient(
-                colors: [TaktTheme.appBackground.opacity(0), TaktTheme.appBackground],
-                startPoint: .top,
-                endPoint: UnitPoint(x: 0.5, y: 0.4)
-            )
-        )
+        .padding(.trailing, TaktTheme.contentPadding)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Expanded Search Bar
+
+    private var expandedSearchBar: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(TaktTheme.accent)
+                    .font(.system(size: 16))
+
+                TextField("Search events...", text: $viewModel.searchText)
+                    .font(.system(size: 16))
+                    .foregroundColor(TaktTheme.textPrimary)
+                    .focused($searchFieldFocused)
+
+                if !viewModel.searchText.isEmpty {
+                    Button {
+                        viewModel.searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(TaktTheme.textMuted)
+                            .font(.system(size: 14))
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .background(TaktTheme.cardBackground)
+            .clipShape(Capsule())
+            .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+
+            Button("Cancel") {
+                viewModel.searchText = ""
+                searchFieldFocused = false
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isSearching = false
+                }
+            }
+            .font(.system(size: 15, weight: .medium))
+            .foregroundColor(TaktTheme.accent)
+        }
+        .padding(.horizontal, TaktTheme.contentPadding)
+        .padding(.vertical, 12)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
     // MARK: - Actions
