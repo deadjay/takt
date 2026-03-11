@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ScanView: View {
     @State private var viewModel: ScanViewModel
@@ -85,6 +86,7 @@ private struct IdleStateView: View {
     @State private var isAnimatingThumbnail = false
     @State private var thumbnailLanded = false
     @State private var lastInputWasCamera = true
+    @State private var isDropTargeted = false
 
     private var hasImage: Bool { viewModel.selectedImageData != nil }
 
@@ -127,6 +129,25 @@ private struct IdleStateView: View {
 
                 // Bottom input area
                 VStack(spacing: 10) {
+                    // Drag & Drop area
+                    VStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(TaktTheme.textMuted.opacity(0.4), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
+                            .frame(height: 56)
+                            .overlay {
+                                VStack(spacing: 2) {
+                                    Image(systemName: "square.and.arrow.down")
+                                        .font(.system(size: 20, weight: .medium))
+                                        .foregroundColor(TaktTheme.textMuted)
+                                    Text("Drag & Drop")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(TaktTheme.textMuted)
+                                }
+                            }
+
+                        OrSeparator()
+                    }
+
                     // Scan + Attach (square, side by side)
                     HStack(spacing: 12) {
                         ImageInputButton(
@@ -266,6 +287,26 @@ private struct IdleStateView: View {
                         x: thumbnailLanded ? landingX : sourceCenter.x,
                         y: thumbnailLanded ? landingY : sourceCenter.y
                     )
+            }
+        }
+        .dropDestination(for: Data.self) { items, _ in
+            guard let data = items.first,
+                  let uiImage = UIImage(data: data),
+                  let jpeg = uiImage.jpegData(compressionQuality: 0.9) else { return false }
+            viewModel.selectedImageData = jpeg
+            Task { await viewModel.processImage() }
+            return true
+        } isTargeted: { targeted in
+            isDropTargeted = targeted
+        }
+        .overlay {
+            if isDropTargeted {
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(TaktTheme.accent, lineWidth: 3)
+                    .background(TaktTheme.accent.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .padding(8)
+                    .allowsHitTesting(false)
             }
         }
         .onChange(of: viewModel.selectedImageData) { old, new in
@@ -419,7 +460,7 @@ private struct TextInputField: View {
                 .textCase(.uppercase)
 
             HStack(spacing: 8) {
-                TextField("Paste or type text...", text: $text)
+                TextField("Live Concert next Thursday at 20...", text: $text)
                     .textFieldStyle(.plain)
                     .font(TaktTheme.textFieldFont)
                     .foregroundColor(TaktTheme.textPrimary)
