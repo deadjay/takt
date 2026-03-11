@@ -123,12 +123,17 @@ struct EventsListView: View {
                 todayDivider
                     .id("today")
 
+                // All of today's events
+                ForEach(viewModel.todayEvents) { event in
+                    eventRow(for: event)
+                }
+
                 // Upcoming Events label (only if there are future events)
                 if !viewModel.upcomingDayGroups.isEmpty {
                     sectionLabel("UPCOMING EVENTS \u{2193}")
                 }
 
-                // Upcoming day groups
+                // Tomorrow onward
                 ForEach(viewModel.upcomingDayGroups) { group in
                     ForEach(group.events) { event in
                         eventRow(for: event)
@@ -341,3 +346,4 @@ struct EventsListView: View {
         }
     }
 }
+

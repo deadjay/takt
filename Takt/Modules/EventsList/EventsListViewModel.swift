@@ -76,10 +76,16 @@ final class EventsListViewModel {
         return dayGroups.filter { $0.date < startOfToday }
     }
 
-    /// Day groups from today onward
+    /// All of today's events
+    var todayEvents: [Event] {
+        filteredEvents.filter { Calendar.current.isDateInToday($0.date) }
+    }
+
+    /// Day groups from tomorrow onward
     var upcomingDayGroups: [DayGroup] {
-        let startOfToday = Calendar.current.startOfDay(for: Date())
-        return dayGroups.filter { $0.date >= startOfToday }
+        let calendar = Calendar.current
+        let startOfTomorrow = calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: Date())!)
+        return dayGroups.filter { $0.date >= startOfTomorrow }
     }
 
     // MARK: - Actions
