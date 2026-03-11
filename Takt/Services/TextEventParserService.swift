@@ -303,14 +303,31 @@ final class TextEventParser: TextEventParserServiceProtocol {
             }
         }
 
-        // Handle 2-digit years (e.g., "25.12.24" -> "25.12.2024" or "02/09/26" -> "02/09/2026")
+        // Handle 2-digit years (e.g., "25.12.24" -> "25.12.2024" or "3/2/26" -> "03/02/2026")
         if format.contains("yy") && !format.contains("yyyy") {
             let separator = format.contains("/") ? "/" : (format.contains("-") ? "-" : ".")
             let components = text.components(separatedBy: CharacterSet(charactersIn: "./- "))
             if components.count >= 3, let year = Int(components[2]), year < 100 {
                 let fullYear = 2000 + year
+                var resolvedFormat = format.replacingOccurrences(of: "yy", with: "yyyy")
+
+                // Slash dates default to US (MM/dd) since EU typically uses dots.
+                // Disambiguate when one value > 12 forces a specific interpretation:
+                // - first > 12: must be day → dd/MM (EU)
+                // - second > 12: must be day → MM/dd (US)
+                // - both ≤ 12: ambiguous → default US (MM/dd) for slash format
+                if separator == "/", resolvedFormat == "dd/MM/yyyy",
+                   let first = Int(components[0]) {
+                    if first > 12 {
+                        // first > 12 → must be day, keep dd/MM
+                    } else {
+                        // first ≤ 12 → treat as US month/day
+                        resolvedFormat = "MM/dd/yyyy"
+                    }
+                }
+
                 let fullDateText = "\(components[0])\(separator)\(components[1])\(separator)\(fullYear)"
-                formatter.dateFormat = format.replacingOccurrences(of: "yy", with: "yyyy")
+                formatter.dateFormat = resolvedFormat
                 return formatter.date(from: fullDateText)
             }
         }
