@@ -3,6 +3,7 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -15,19 +16,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchImage2222x.png" translatesAutoresizingMaskIntoConstraints="NO" id="mL7-ec-SIW">
-                                <rect key="frame" x="-315.66666666666669" y="-61" width="1024.3333333333333" height="1024"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="1024" id="uy1-fc-lxC"/>
-                                </constraints>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchImageFinal.png" translatesAutoresizingMaskIntoConstraints="NO" id="wvO-4v-fN1">
+                                <rect key="frame" x="-253.66666666666666" y="1" width="900.33333333333337" height="900"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
-                        <color key="backgroundColor" red="1" green="0.4431372549" blue="0.1450980392" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" name="AccentColor"/>
                         <constraints>
-                            <constraint firstItem="mL7-ec-SIW" firstAttribute="height" secondItem="Ze5-6b-2t3" secondAttribute="height" multiplier="1.20188" id="720-R8-Ohp"/>
-                            <constraint firstItem="mL7-ec-SIW" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="FPv-Gr-1Yo"/>
-                            <constraint firstItem="mL7-ec-SIW" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="25" id="nsP-43-ywR"/>
+                            <constraint firstItem="wvO-4v-fN1" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="2.29008" id="Avs-0h-RRz"/>
+                            <constraint firstItem="wvO-4v-fN1" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="dxd-8O-mIN"/>
+                            <constraint firstItem="wvO-4v-fN1" firstAttribute="height" secondItem="Ze5-6b-2t3" secondAttribute="height" multiplier="1.05634" id="qo5-Qp-8jt"/>
+                            <constraint firstItem="wvO-4v-fN1" firstAttribute="centerY" secondItem="Bcu-3y-fUS" secondAttribute="centerY" id="wMh-UY-mEu"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -37,6 +36,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchImage2222x.png" width="2048" height="2048"/>
+        <image name="LaunchImageFinal.png" width="2048" height="2048"/>
+        <namedColor name="AccentColor">
+            <color red="0.96862745098039216" green="0.25098039215686274" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>
