@@ -9,7 +9,11 @@ struct CalendarView: View {
     @State private var selectedDate = Date()
     @State private var selectedEvent: Event?
 
-    private let calendar = Calendar.current
+    private let calendar: Calendar = {
+        var cal = Calendar.current
+        cal.firstWeekday = 2 // Monday
+        return cal
+    }()
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
@@ -44,7 +48,7 @@ struct CalendarView: View {
                 
                 // Days of week header
                 HStack {
-                    ForEach(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], id: \.self) { day in
+                    ForEach(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], id: \.self) { day in
                         Text(day)
                             .font(.caption)
                             .fontWeight(.medium)
@@ -170,8 +174,11 @@ struct CalendarView: View {
         
         var days: [Date?] = []
         
-        // Add empty cells for days before the first day of the month
-        for _ in 1..<firstWeekday {
+        // Add empty cells for days before the first day of the month (Monday-first)
+        // .weekday: Sun=1, Mon=2, ..., Sat=7
+        // For Monday-first: Mon=0 empties, Tue=1, Wed=2, ..., Sun=6
+        let emptySlots = (firstWeekday + 5) % 7
+        for _ in 0..<emptySlots {
             days.append(nil)
         }
         
@@ -208,8 +215,12 @@ struct DayCell: View {
     let events: [Event]
     let isSelected: Bool
     let isToday: Bool
-    
-    private let calendar = Calendar.current
+
+    private let calendar: Calendar = {
+        var cal = Calendar.current
+        cal.firstWeekday = 2
+        return cal
+    }()
     
     var body: some View {
         VStack(spacing: 2) {
