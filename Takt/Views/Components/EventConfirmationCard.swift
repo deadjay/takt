@@ -15,6 +15,7 @@ struct EventConfirmationView: View {
 
     @Bindable var viewModel: ScanViewModel
     @State private var showInputText = false
+    @State private var showingImagePreview = false
 
     // MARK: - Body
 
@@ -28,6 +29,15 @@ struct EventConfirmationView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Header
+            Text("Add Event")
+                .font(.system(size: 32, weight: .black))
+                .foregroundColor(TaktTheme.textPrimary)
+                .tracking(-1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, TaktTheme.contentPadding)
+                .padding(.bottom, 16)
+
             // Counter badge
             if !viewModel.eventCounter.isEmpty {
                 HStack {
@@ -52,31 +62,43 @@ struct EventConfirmationView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
 
-                        // Source image miniature
+                        // Source image miniature (tap to preview)
                         if let imageData = viewModel.selectedImageData,
                            let uiImage = UIImage(data: imageData) {
-                            HStack {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 64, height: 64)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(TaktTheme.cardBorder, lineWidth: 1)
-                                    )
+                            Button {
+                                showingImagePreview = true
+                            } label: {
+                                HStack {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 64, height: 64)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(TaktTheme.cardBorder, lineWidth: 1)
+                                        )
 
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("SOURCE IMAGE")
-                                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("SOURCE IMAGE")
+                                            .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                            .foregroundColor(TaktTheme.textMuted)
+                                            .tracking(1)
+                                        Text("Tap to preview")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(TaktTheme.textSecondary)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                        .font(.system(size: 14))
                                         .foregroundColor(TaktTheme.textMuted)
-                                        .tracking(1)
-                                    Text("Scanned input")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(TaktTheme.textSecondary)
                                 }
-
-                                Spacer()
+                            }
+                            .buttonStyle(.plain)
+                            .fullScreenCover(isPresented: $showingImagePreview) {
+                                ImagePreviewView(imageData: imageData)
                             }
                         }
 
