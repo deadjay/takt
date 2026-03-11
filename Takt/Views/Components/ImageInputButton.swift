@@ -29,31 +29,42 @@ struct ImageInputButton: View {
             onTap?()
             showingPicker = true
         } label: {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(spacing: 8) {
+                Spacer()
+
                 Image(systemName: icon)
-                    .font(.system(size: 24, weight: .medium))
+                    .font(.system(size: 28, weight: .medium))
                     .foregroundColor(TaktTheme.textMuted)
 
                 Spacer()
 
-                Text(label)
-                    .font(TaktTheme.cardLabelFont)
-                    .foregroundColor(TaktTheme.textMuted)
+                VStack(spacing: 2) {
+                    Text(label)
+                        .font(TaktTheme.cardLabelFont)
+                        .foregroundColor(TaktTheme.textMuted)
 
-                Text(title)
-                    .font(TaktTheme.cardTitleFont)
-                    .foregroundColor(TaktTheme.textPrimary)
+                    Text(title)
+                        .font(TaktTheme.cardTitleFont)
+                        .foregroundColor(TaktTheme.textPrimary)
+                }
             }
-            .padding(24)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(20)
+            .frame(maxWidth: .infinity, minHeight: 120)
             .aspectRatio(1, contentMode: .fit)
-            .background(TaktTheme.cardBackground)
+            .fixedSize(horizontal: false, vertical: true)
+            .background(Color(UIColor { traits in
+                traits.userInterfaceStyle == .dark
+                    ? UIColor(white: 0.15, alpha: 1.0)
+                    : UIColor.white
+            }))
             .clipShape(RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: TaktTheme.cardCornerRadius)
                     .stroke(TaktTheme.accent.opacity(0.5), lineWidth: 1.5)
             )
+            .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
         }
+        .buttonStyle(PressScaleStyle())
         .sheet(isPresented: $showingPicker) {
             if sourceType == .camera {
                 CameraView(selectedImage: $selectedImage)
@@ -64,6 +75,17 @@ struct ImageInputButton: View {
         .onChange(of: selectedImage) { _, newImage in
             imageData = newImage?.jpegData(compressionQuality: 0.9)
         }
+    }
+}
+
+// MARK: - Press Scale Button Style
+
+private struct PressScaleStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
 

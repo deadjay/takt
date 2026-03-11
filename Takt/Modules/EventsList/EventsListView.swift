@@ -29,11 +29,11 @@ struct EventsListView: View {
                 if viewModel.events.isEmpty && !viewModel.isLoading {
                     emptyStateView
                 } else {
-                    // Header
-                    eventsHeader
-
-                    // Event rows
+                    // Event rows with header overlay
                     eventsList
+                        .safeAreaInset(edge: .top, spacing: 0) {
+                            eventsHeader
+                        }
                 }
 
                 // Bottom bar: search + calendar button
@@ -42,10 +42,6 @@ struct EventsListView: View {
         }
         .task {
             await viewModel.loadEvents()
-            if !didScrollToToday, let proxy = scrollProxy {
-                scrollToToday(proxy: proxy)
-                didScrollToToday = true
-            }
         }
         .sheet(item: $selectedEvent) { event in
             EventDetailView(
@@ -78,6 +74,7 @@ struct EventsListView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, TaktTheme.contentPadding)
         .padding(.vertical, 12)
+        .background(.ultraThinMaterial)
     }
 
     // MARK: - Empty State
@@ -122,6 +119,12 @@ struct EventsListView: View {
                 // Today divider (always present)
                 todayDivider
                     .id("today")
+                    .onAppear {
+                        if !didScrollToToday {
+                            didScrollToToday = true
+                            scrollToToday(proxy: proxy)
+                        }
+                    }
 
                 // All of today's events
                 ForEach(viewModel.todayEvents) { event in
@@ -207,7 +210,9 @@ struct EventsListView: View {
 
     private func scrollToToday(proxy: ScrollViewProxy) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            proxy.scrollTo("today", anchor: .top)
+            withAnimation(.easeOut(duration: 0.35)) {
+                proxy.scrollTo("today", anchor: .top)
+            }
         }
     }
 

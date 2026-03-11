@@ -40,22 +40,19 @@ struct EventConfirmationView: View {
 
             // Counter badge
             if !viewModel.eventCounter.isEmpty {
-                HStack {
-                    Spacer()
-                    Text(viewModel.eventCounter.uppercased())
-                        .font(.system(size: 10, weight: .medium, design: .monospaced))
-                        .foregroundColor(TaktTheme.accent)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(TaktTheme.accent.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(TaktTheme.accent.opacity(0.2), lineWidth: 1)
-                        )
-                }
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.bottom, 16)
+                Text(viewModel.eventCounter.uppercased())
+                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                    .foregroundColor(TaktTheme.accent)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(TaktTheme.accent.opacity(0.12))
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(TaktTheme.accent.opacity(0.25), lineWidth: 1)
+                    )
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.bottom, 16)
             }
 
             if let event = viewModel.displayEvent {

@@ -124,16 +124,19 @@ private struct IdleStateView: View {
                 .padding(.horizontal, TaktTheme.contentPadding)
                 .padding(.top, 16)
                 .padding(.bottom, 24)
+                .background(.ultraThinMaterial)
 
                 Spacer(minLength: 0)
 
                 // Bottom input area
+                ScrollViewReader { scrollProxy in
+                ScrollView {
                 VStack(spacing: 10) {
                     // Drag & Drop area
                     VStack(spacing: 6) {
                         RoundedRectangle(cornerRadius: 12)
                             .strokeBorder(TaktTheme.textMuted.opacity(0.4), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
-                            .frame(height: 56)
+                            .frame(height: 80)
                             .overlay {
                                 VStack(spacing: 2) {
                                     Image(systemName: "square.and.arrow.down")
@@ -152,7 +155,7 @@ private struct IdleStateView: View {
                     HStack(spacing: 12) {
                         ImageInputButton(
                             icon: "camera.fill",
-                            label: "CAPTURE",
+                            label: "PHOTO",
                             title: "Scan",
                             imageData: $viewModel.selectedImageData,
                             sourceType: .camera,
@@ -171,7 +174,7 @@ private struct IdleStateView: View {
 
                         ImageInputButton(
                             icon: "photo.fill",
-                            label: "IMPORT",
+                            label: "IMAGE",
                             title: "Attach",
                             imageData: $viewModel.selectedImageData,
                             sourceType: .photoLibrary,
@@ -262,9 +265,21 @@ private struct IdleStateView: View {
                             }
                         }
                     )
+                    .id("detectButton")
                 }
                 .padding(.horizontal, TaktTheme.contentPadding)
                 .padding(.bottom, 8)
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .scrollIndicators(.hidden)
+                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        withAnimation(.easeOut(duration: 0.25)) {
+                            scrollProxy.scrollTo("detectButton", anchor: .bottom)
+                        }
+                    }
+                }
+                }
             }
         }
         .coordinateSpace(name: "idle")
@@ -349,15 +364,35 @@ private struct InfoSheet: View {
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        NavigationView {
+        ZStack {
+            // Full blur background
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Header
+                    HStack {
+                        Text("How it works")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(TaktTheme.textPrimary)
+                        Spacer()
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(TaktTheme.textMuted.opacity(0.5))
+                        }
+                    }
+
+                    // What works
+                    VStack(alignment: .leading, spacing: 10) {
                         Text("WHAT WORKS")
                             .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                            .foregroundColor(TaktTheme.textMuted)
-                            .tracking(1)
-                            .padding(.bottom, 2)
+                            .foregroundColor(TaktTheme.accent)
+                            .tracking(1.5)
 
                         TipRow(text: "Concert tickets, posters, and flyers")
                         TipRow(text: "Food expiry labels and best-before dates")
@@ -366,12 +401,12 @@ private struct InfoSheet: View {
                         TipRow(text: "Any text with a date in it")
                     }
 
-                    VStack(alignment: .leading, spacing: 6) {
+                    // Good to know
+                    VStack(alignment: .leading, spacing: 10) {
                         Text("GOOD TO KNOW")
                             .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                            .foregroundColor(TaktTheme.textMuted)
-                            .tracking(1)
-                            .padding(.bottom, 2)
+                            .foregroundColor(TaktTheme.accent)
+                            .tracking(1.5)
 
                         TipRow(text: "Everything stays on your device — fully offline")
                         TipRow(text: "Detects dates, times, and deadlines automatically")
@@ -379,17 +414,10 @@ private struct InfoSheet: View {
                     }
                 }
                 .padding(TaktTheme.contentPadding)
-            }
-            .background(TaktTheme.appBackground)
-            .navigationTitle("How it works")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .foregroundColor(TaktTheme.accent)
-                }
+                .padding(.top, 8)
             }
         }
+        .presentationBackground(.clear)
     }
 }
 
@@ -437,12 +465,14 @@ private struct TipRow: View {
     let text: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 13) {
+        HStack(alignment: .top, spacing: 12) {
             Text("•")
-                .foregroundColor(TaktTheme.textMuted)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(TaktTheme.accent)
             Text(text)
-                .font(.system(size: 12))
-                .foregroundColor(TaktTheme.textMuted)
+                .font(.system(size: 15))
+                .foregroundColor(TaktTheme.textPrimary)
+                .lineSpacing(2)
         }
     }
 }
@@ -454,30 +484,41 @@ private struct TextInputField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("INPUT")
+            Text("TEXT")
                 .font(TaktTheme.cardLabelFont)
                 .foregroundColor(TaktTheme.textMuted)
                 .textCase(.uppercase)
 
-            HStack(spacing: 8) {
-                TextField("Live Concert next Thursday at 20...", text: $text)
+            HStack(alignment: .center, spacing: 8) {
+                TextField("Live Concert next Thursday at 20...", text: $text, axis: .vertical)
                     .textFieldStyle(.plain)
                     .font(TaktTheme.textFieldFont)
                     .foregroundColor(TaktTheme.textPrimary)
+                    .lineLimit(1...2)
                     .disabled(isDisabled)
 
                 if !isDisabled {
-                    Button {
-                        onPaste()
-                    } label: {
-                        Text("Paste")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(TaktTheme.accent)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(TaktTheme.accent.opacity(0.1))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    if !text.isEmpty {
+                        Button {
+                            text = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 18))
+                                .foregroundColor(TaktTheme.textMuted.opacity(0.6))
+                        }
+                    } else {
+                        Button {
+                            onPaste()
+                        } label: {
+                            Text("Paste")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(TaktTheme.accent)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(TaktTheme.accent.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
                     }
                 }
             }
