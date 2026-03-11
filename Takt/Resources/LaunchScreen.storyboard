@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24127" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24063"/>
-        <capability name="Named colors" minToolsVersion="9.0"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -16,19 +15,19 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="AppIcon" translatesAutoresizingMaskIntoConstraints="NO" id="icon-img">
-                                <rect key="frame" x="146.66666666666666" y="376" width="100" height="100"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchImage2222x.png" translatesAutoresizingMaskIntoConstraints="NO" id="mL7-ec-SIW">
+                                <rect key="frame" x="-315.66666666666669" y="-61" width="1024.3333333333333" height="1024"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="100" id="w-icon"/>
-                                    <constraint firstAttribute="height" constant="100" id="h-icon"/>
+                                    <constraint firstAttribute="width" constant="1024" id="uy1-fc-lxC"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
-                        <color key="backgroundColor" name="AccentColor"/>
+                        <color key="backgroundColor" red="1" green="0.4431372549" blue="0.1450980392" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="icon-img" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="cx-icon"/>
-                            <constraint firstItem="icon-img" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="cy-icon"/>
+                            <constraint firstItem="mL7-ec-SIW" firstAttribute="height" secondItem="Ze5-6b-2t3" secondAttribute="height" multiplier="1.20188" id="720-R8-Ohp"/>
+                            <constraint firstItem="mL7-ec-SIW" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="FPv-Gr-1Yo"/>
+                            <constraint firstItem="mL7-ec-SIW" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="25" id="nsP-43-ywR"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -38,9 +37,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="AppIcon" width="120" height="120"/>
-        <namedColor name="AccentColor">
-            <color red="0.96862745098039216" green="0.25098039215686274" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
+        <image name="LaunchImage2222x.png" width="2048" height="2048"/>
     </resources>
 </document>
