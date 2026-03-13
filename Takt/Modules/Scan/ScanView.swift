@@ -124,7 +124,6 @@ private struct IdleStateView: View {
                 .padding(.horizontal, TaktTheme.contentPadding)
                 .padding(.top, 16)
                 .padding(.bottom, 24)
-                .background(.ultraThinMaterial)
 
                 Spacer(minLength: 0)
 
@@ -132,6 +131,8 @@ private struct IdleStateView: View {
                 ScrollViewReader { scrollProxy in
                 ScrollView {
                 VStack(spacing: 10) {
+                    Spacer().frame(height: 4)
+
                     // Drag & Drop area
                     VStack(spacing: 6) {
                         RoundedRectangle(cornerRadius: 12)

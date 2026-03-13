@@ -81,6 +81,7 @@ struct CalendarView: View {
                 .padding(.horizontal)
                 }
                 .background(.ultraThinMaterial)
+                .padding(.bottom, 12)
 
                 // Events for selected date
                 VStack(alignment: .leading, spacing: 12) {
@@ -119,32 +120,23 @@ struct CalendarView: View {
                         }
                     }
                 }
-                .background(TaktTheme.cardBackground)
-                
+
                 Spacer()
-
-                // Bottom bar with list-view toggle
-                HStack {
-                    Spacer()
-
-                    Button {
-                        showCalendar = false
-                    } label: {
-                        Image(systemName: "list.bullet")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(TaktTheme.textPrimary)
-                            .frame(width: 52, height: 52)
-                            .background(TaktTheme.cardBackground)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(TaktTheme.cardBorder, lineWidth: 1)
-                            )
-                    }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                Button {
+                    showCalendar = false
+                } label: {
+                    Image(systemName: "list.bullet")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(TaktTheme.textPrimary)
+                        .frame(width: 48, height: 48)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
                 }
-                .padding(.horizontal, TaktTheme.contentPadding)
-                .padding(.vertical, 12)
-                .background(.ultraThinMaterial)
+                .padding(.trailing, TaktTheme.contentPadding)
+                .padding(.bottom, 16)
             }
             .task {
                 await onAppearReload?()

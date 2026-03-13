@@ -613,8 +613,10 @@ final class TextEventParser: TextEventParserServiceProtocol {
             let matchRange = match.range
             let matchedText = nsText.substring(with: matchRange)
 
-            // Check if this is a time-only match (e.g., "20:00", "20:00 Uhr", "3pm")
-            let isTimeOnly = matchedText.range(of: #"^\d{1,2}:\d{2}(\s*(Uhr|uhr|pm|am|PM|AM))?$"#, options: .regularExpression) != nil
+            // Check if this is a time-only match (e.g., "20:00", "20:00 Uhr", "3pm", "3 pm", "3pm (CET)")
+            let trimmedMatchText = matchedText.trimmingCharacters(in: .whitespacesAndNewlines)
+            let isTimeOnly = trimmedMatchText.range(of: #"^\d{1,2}:\d{2}(\s*(Uhr|uhr|pm|am|PM|AM))?$"#, options: .regularExpression) != nil ||
+                             trimmedMatchText.range(of: #"^\d{1,2}\s*(pm|am|PM|AM)\b"#, options: .regularExpression) != nil
 
             if isTimeOnly {
                 timeOnlyMatches.insert(index)
@@ -754,11 +756,16 @@ final class TextEventParser: TextEventParserServiceProtocol {
             let isRelativeWord = lowercasedMatch == "today" || lowercasedMatch == "tomorrow" ||
                                  lowercasedMatch == "heute" || lowercasedMatch == "morgen"
 
+            // Also check for bare time patterns like "3pm", "2 am" that NSDataDetector parsed as dates
+            let isBareTime = lowercasedMatch.range(of: #"^\d{1,2}\s*(pm|am)$"#, options: .regularExpression) != nil ||
+                             lowercasedMatch.range(of: #"^\d{1,2}\s*(pm|am)\b"#, options: .regularExpression) != nil
+
             if (isRelativeWord && isMultiLine) ||
                lowercasedMatch.contains("starting today") ||
                lowercasedMatch.contains("ab heute") ||
                lowercasedMatch.range(of: "^\\d{1,2}:\\d{2}$", options: .regularExpression) != nil ||
-               isWeekdayOnly {
+               isWeekdayOnly ||
+               (isBareTime && hasFullDateMatch) {
                 print("DEBUG: Skipping vague date: '\(matchedText)'")
                 continue
             }

@@ -1253,6 +1253,25 @@ struct TextEventParserTests {
         // Name should contain "Buy bread"
         #expect(event.name.lowercased().contains("buy bread"), "Expected name to contain 'buy bread', got: '\(event.name)'")
     }
+
+    // MARK: - Time Range Tests
+
+    @Test("Time range should produce single event, not two")
+    func testTimeRangeProducesSingleEvent() throws {
+        let text = "Qonto/ HR Interview @ Wed Mar 18, 2026 2pm - 3pm (CET)"
+        let events = parser.parseEvents(from: text)
+
+        #expect(events.count == 1, "Expected 1 event but got \(events.count) — '3pm' end time should not create a second event")
+
+        let event = try #require(events.first)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day, .month, .year, .hour], from: event.date)
+
+        #expect(components.day == 18)
+        #expect(components.month == 3)
+        #expect(components.year == 2026)
+        #expect(components.hour == 14) // 2pm
+    }
 }
 
 private class BundleToken {}
