@@ -1,5 +1,5 @@
 
-<img width="1024" height="1024" alt="TaktIcon-iOS-Default-1024x1024@1x" src="https://github.com/user-attachments/assets/d586f28c-5cfb-471d-9b63-53672637d566" />
+<img width="256" height="256" alt="TaktIcon-iOS-Default-1024x1024@1x" src="https://github.com/user-attachments/assets/d586f28c-5cfb-471d-9b63-53672637d566" />
 
 # Takts
 
