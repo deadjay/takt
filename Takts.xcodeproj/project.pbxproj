@@ -1,0 +1,751 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		94815BC02F3BA3BB00965FDC /* TaktsShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94815BB62F3BA3BB00965FDC /* TaktsShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		944E69142DFA27A8006271D8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 944E68FA2DFA27A6006271D8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 944E69012DFA27A6006271D8;
+			remoteInfo = Takts;
+		};
+		944E691E2DFA27A8006271D8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 944E68FA2DFA27A6006271D8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 944E69012DFA27A6006271D8;
+			remoteInfo = Takts;
+		};
+		94815BBE2F3BA3BB00965FDC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 944E68FA2DFA27A6006271D8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 94815BB52F3BA3BB00965FDC;
+			remoteInfo = TaktsShare;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		94815BC12F3BA3BB00965FDC /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				94815BC02F3BA3BB00965FDC /* TaktsShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		944E69022DFA27A6006271D8 /* Takts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Takts.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		944E69132DFA27A8006271D8 /* TaktsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TaktsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		944E691D2DFA27A8006271D8 /* TaktsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TaktsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		94815BB62F3BA3BB00965FDC /* TaktsShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TaktsShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		94A4A5FE2F0060CD004B683E /* Takts.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Takts.xctestplan; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		94815BC52F3BA3BB00965FDC /* Exceptions for "TaktsShare" folder in "TaktsShare" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 94815BB52F3BA3BB00965FDC /* TaktsShare */;
+		};
+		94A090A32E8967360012D3E5 /* Exceptions for "Takts" folder in "Takts" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/Info.plist,
+			);
+			target = 944E69012DFA27A6006271D8 /* Takts */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		944E69042DFA27A6006271D8 /* Takts */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				94A090A32E8967360012D3E5 /* Exceptions for "Takts" folder in "Takts" target */,
+			);
+			path = Takts;
+			sourceTree = "<group>";
+		};
+		944E69162DFA27A8006271D8 /* TaktsTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TaktsTests;
+			sourceTree = "<group>";
+		};
+		944E69202DFA27A8006271D8 /* TaktsUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TaktsUITests;
+			sourceTree = "<group>";
+		};
+		94815BB72F3BA3BB00965FDC /* TaktsShare */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				94815BC52F3BA3BB00965FDC /* Exceptions for "TaktsShare" folder in "TaktsShare" target */,
+			);
+			path = TaktsShare;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		944E68FF2DFA27A6006271D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		944E69102DFA27A8006271D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		944E691A2DFA27A8006271D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94815BB32F3BA3BB00965FDC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		944E68F92DFA27A6006271D8 = {
+			isa = PBXGroup;
+			children = (
+				94A4A5FE2F0060CD004B683E /* Takts.xctestplan */,
+				944E69042DFA27A6006271D8 /* Takts */,
+				944E69162DFA27A8006271D8 /* TaktsTests */,
+				944E69202DFA27A8006271D8 /* TaktsUITests */,
+				94815BB72F3BA3BB00965FDC /* TaktsShare */,
+				944E69032DFA27A6006271D8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		944E69032DFA27A6006271D8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				944E69022DFA27A6006271D8 /* Takts.app */,
+				944E69132DFA27A8006271D8 /* TaktsTests.xctest */,
+				944E691D2DFA27A8006271D8 /* TaktsUITests.xctest */,
+				94815BB62F3BA3BB00965FDC /* TaktsShare.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		944E69012DFA27A6006271D8 /* Takts */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 944E69272DFA27A8006271D8 /* Build configuration list for PBXNativeTarget "Takts" */;
+			buildPhases = (
+				944E68FE2DFA27A6006271D8 /* Sources */,
+				944E68FF2DFA27A6006271D8 /* Frameworks */,
+				944E69002DFA27A6006271D8 /* Resources */,
+				94815BC12F3BA3BB00965FDC /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				94815BBF2F3BA3BB00965FDC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				944E69042DFA27A6006271D8 /* Takts */,
+			);
+			name = Takts;
+			packageProductDependencies = (
+			);
+			productName = Takts;
+			productReference = 944E69022DFA27A6006271D8 /* Takts.app */;
+			productType = "com.apple.product-type.application";
+		};
+		944E69122DFA27A8006271D8 /* TaktsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 944E692A2DFA27A8006271D8 /* Build configuration list for PBXNativeTarget "TaktsTests" */;
+			buildPhases = (
+				944E690F2DFA27A8006271D8 /* Sources */,
+				944E69102DFA27A8006271D8 /* Frameworks */,
+				944E69112DFA27A8006271D8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				944E69152DFA27A8006271D8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				944E69162DFA27A8006271D8 /* TaktsTests */,
+			);
+			name = TaktsTests;
+			packageProductDependencies = (
+			);
+			productName = TaktsTests;
+			productReference = 944E69132DFA27A8006271D8 /* TaktsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		944E691C2DFA27A8006271D8 /* TaktsUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 944E692D2DFA27A8006271D8 /* Build configuration list for PBXNativeTarget "TaktsUITests" */;
+			buildPhases = (
+				944E69192DFA27A8006271D8 /* Sources */,
+				944E691A2DFA27A8006271D8 /* Frameworks */,
+				944E691B2DFA27A8006271D8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				944E691F2DFA27A8006271D8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				944E69202DFA27A8006271D8 /* TaktsUITests */,
+			);
+			name = TaktsUITests;
+			packageProductDependencies = (
+			);
+			productName = TaktsUITests;
+			productReference = 944E691D2DFA27A8006271D8 /* TaktsUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		94815BB52F3BA3BB00965FDC /* TaktsShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 94815BC42F3BA3BB00965FDC /* Build configuration list for PBXNativeTarget "TaktsShare" */;
+			buildPhases = (
+				94815BB22F3BA3BB00965FDC /* Sources */,
+				94815BB32F3BA3BB00965FDC /* Frameworks */,
+				94815BB42F3BA3BB00965FDC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				94815BB72F3BA3BB00965FDC /* TaktsShare */,
+			);
+			name = TaktsShare;
+			packageProductDependencies = (
+			);
+			productName = TaktsShare;
+			productReference = 94815BB62F3BA3BB00965FDC /* TaktsShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		944E68FA2DFA27A6006271D8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				KnownAssetTags = (
+					New,
+				);
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					944E69012DFA27A6006271D8 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					944E69122DFA27A8006271D8 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 944E69012DFA27A6006271D8;
+					};
+					944E691C2DFA27A8006271D8 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 944E69012DFA27A6006271D8;
+					};
+					94815BB52F3BA3BB00965FDC = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = 944E68FD2DFA27A6006271D8 /* Build configuration list for PBXProject "Takts" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 944E68F92DFA27A6006271D8;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 944E69032DFA27A6006271D8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				944E69012DFA27A6006271D8 /* Takts */,
+				944E69122DFA27A8006271D8 /* TaktsTests */,
+				944E691C2DFA27A8006271D8 /* TaktsUITests */,
+				94815BB52F3BA3BB00965FDC /* TaktsShare */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		944E69002DFA27A6006271D8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		944E69112DFA27A8006271D8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		944E691B2DFA27A8006271D8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94815BB42F3BA3BB00965FDC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		944E68FE2DFA27A6006271D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		944E690F2DFA27A8006271D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		944E69192DFA27A8006271D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94815BB22F3BA3BB00965FDC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		944E69152DFA27A8006271D8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 944E69012DFA27A6006271D8 /* Takts */;
+			targetProxy = 944E69142DFA27A8006271D8 /* PBXContainerItemProxy */;
+		};
+		944E691F2DFA27A8006271D8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 944E69012DFA27A6006271D8 /* Takts */;
+			targetProxy = 944E691E2DFA27A8006271D8 /* PBXContainerItemProxy */;
+		};
+		94815BBF2F3BA3BB00965FDC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 94815BB52F3BA3BB00965FDC /* TaktsShare */;
+			targetProxy = 94815BBE2F3BA3BB00965FDC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		944E69252DFA27A8006271D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		944E69262DFA27A8006271D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		944E69282DFA27A8006271D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Takts/Resources/Takts.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_ASSET_PATHS = "\"Takts/Preview Content\"";
+				DEVELOPMENT_TEAM = YJ4F37673C;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Takts/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktsLLC.Takts;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		944E69292DFA27A8006271D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Takts/Resources/Takts.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_ASSET_PATHS = "\"Takts/Preview Content\"";
+				DEVELOPMENT_TEAM = YJ4F37673C;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Takts/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktsLLC.Takts;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		944E692B2DFA27A8006271D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YJ4F37673C;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktsLLC.TaktsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Takts.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Takts";
+			};
+			name = Debug;
+		};
+		944E692C2DFA27A8006271D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YJ4F37673C;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktsLLC.TaktsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Takts.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Takts";
+			};
+			name = Release;
+		};
+		944E692E2DFA27A8006271D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YJ4F37673C;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktsLLC.TaktsUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Takts;
+			};
+			name = Debug;
+		};
+		944E692F2DFA27A8006271D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YJ4F37673C;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktsLLC.TaktsUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Takts;
+			};
+			name = Release;
+		};
+		94815BC22F3BA3BB00965FDC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YJ4F37673C;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TaktsShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TaktsShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktsLLC.Takts.TaktsShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		94815BC32F3BA3BB00965FDC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YJ4F37673C;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TaktsShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TaktsShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = taktsLLC.Takts.TaktsShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		944E68FD2DFA27A6006271D8 /* Build configuration list for PBXProject "Takts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				944E69252DFA27A8006271D8 /* Debug */,
+				944E69262DFA27A8006271D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		944E69272DFA27A8006271D8 /* Build configuration list for PBXNativeTarget "Takts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				944E69282DFA27A8006271D8 /* Debug */,
+				944E69292DFA27A8006271D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		944E692A2DFA27A8006271D8 /* Build configuration list for PBXNativeTarget "TaktsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				944E692B2DFA27A8006271D8 /* Debug */,
+				944E692C2DFA27A8006271D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		944E692D2DFA27A8006271D8 /* Build configuration list for PBXNativeTarget "TaktsUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				944E692E2DFA27A8006271D8 /* Debug */,
+				944E692F2DFA27A8006271D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		94815BC42F3BA3BB00965FDC /* Build configuration list for PBXNativeTarget "TaktsShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				94815BC22F3BA3BB00965FDC /* Debug */,
+				94815BC32F3BA3BB00965FDC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 944E68FA2DFA27A6006271D8 /* Project object */;
+}

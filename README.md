@@ -1,13 +1,13 @@
-# Takt
+# Takts
 
-Takt is an iOS app that extracts dates and deadlines from images and text. Point your camera at a concert ticket, food label, or subscription screenshot — Takt pulls out the dates and turns them into events.
+Takts is an iOS app that extracts dates and deadlines from images and text. Point your camera at a concert ticket, food label, or subscription screenshot — Takts pulls out the dates and turns them into events.
 
 Everything runs on-device. No cloud, no accounts, no tracking.
 
 ## How It Works
 
 1. **Scan** — Take a photo, pick from your library, or paste text
-2. **Review** — Takt extracts dates and suggests event titles you can tap to edit
+2. **Review** — Takts extracts dates and suggests event titles you can tap to edit
 3. **Save** — Events appear in your list, sorted around today
 
 ### What It Can Read
@@ -54,7 +54,7 @@ Requires Xcode 16+ and iOS 18.0+ deployment target.
 
 ```
 git clone <repo-url>
-open Takt.xcodeproj
+open Takts.xcodeproj
 ```
 
 Select your development team, build and run.
@@ -62,7 +62,7 @@ Select your development team, build and run.
 ## Project Structure
 
 ```
-Takt/
+Takts/
   Modules/
     Scan/           — Camera, photo picker, text input
     EventsList/     — Chronological event list with search

@@ -1,0 +1,38 @@
+{
+  "configurations" : [
+    {
+      "id" : "565F91D4-1AF3-4F58-8340-643D560339A7",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Takts.xcodeproj",
+      "identifier" : "944E69012DFA27A6006271D8",
+      "name" : "Takts"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Takts.xcodeproj",
+        "identifier" : "944E69122DFA27A8006271D8",
+        "name" : "TaktsTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Takts.xcodeproj",
+        "identifier" : "944E691C2DFA27A8006271D8",
+        "name" : "TaktsUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

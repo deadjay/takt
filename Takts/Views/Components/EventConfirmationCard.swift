@@ -1,0 +1,435 @@
+//
+//  EventConfirmationCard.swift
+//  Takt
+//
+//  Created by Artem Alekseev on 27.12.25.
+//
+
+import SwiftUI
+
+/// Displays a single extracted event for confirmation with Save/Skip/Cancel options.
+/// Redesigned to match AddEventReference.html style.
+struct EventConfirmationView: View {
+
+    // MARK: - Public Properties
+
+    @Bindable var viewModel: ScanViewModel
+    @State private var showInputText = false
+    @State private var showingImagePreview = false
+
+    // MARK: - Body
+
+    // TODO: 🎨 STYLE TWEAKS YOU CAN DO (refer to AddEventReference.html)
+    //
+    //   - Title input: try font size 32pt, weight .black, letter-spacing -1px
+    //   - Add an "etched line" under focused fields (orange gradient, 40px wide)
+    //   - Date values could use monospaced orange font like the HTML reference
+    //   - The "SAVE EVENT" button has a pulse glow animation in the HTML
+    //   - Status badge top-right: "Extracted X Dates" in orange pill
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            Text("Add Event")
+                .font(.system(size: 32, weight: .black))
+                .foregroundColor(TaktsTheme.textPrimary)
+                .tracking(-1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, TaktsTheme.contentPadding)
+                .padding(.bottom, 16)
+
+            // Counter badge
+            if !viewModel.eventCounter.isEmpty {
+                Text(viewModel.eventCounter.uppercased())
+                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                    .foregroundColor(TaktsTheme.accent)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(TaktsTheme.accent.opacity(0.12))
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(TaktsTheme.accent.opacity(0.25), lineWidth: 1)
+                    )
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.bottom, 16)
+            }
+
+            if let event = viewModel.displayEvent {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+
+                        // Source image miniature (tap to preview)
+                        if let imageData = viewModel.selectedImageData,
+                           let uiImage = UIImage(data: imageData) {
+                            Button {
+                                showingImagePreview = true
+                            } label: {
+                                HStack {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 64, height: 64)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(TaktsTheme.cardBorder, lineWidth: 1)
+                                        )
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("SOURCE IMAGE")
+                                            .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                            .foregroundColor(TaktsTheme.textMuted)
+                                            .tracking(1)
+                                        Text("Tap to preview")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(TaktsTheme.textSecondary)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(TaktsTheme.textMuted)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .fullScreenCover(isPresented: $showingImagePreview) {
+                                ImagePreviewView(imageData: imageData)
+                            }
+                        }
+
+                        // Event Title
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("EVENT TITLE")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(TaktsTheme.textMuted)
+                                .tracking(2)
+
+                            // Tappable line selector when candidates exist
+                            if let candidates = viewModel.currentEvent?.titleCandidates, candidates.count > 1 {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    ForEach(Array(candidates.enumerated()), id: \.offset) { index, line in
+                                        let isSelected = viewModel.selectedCandidateIndexes.contains(index)
+                                        Button {
+                                            viewModel.toggleCandidate(at: index)
+                                        } label: {
+                                            HStack(spacing: 10) {
+                                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                                    .font(.system(size: 16))
+                                                    .foregroundColor(isSelected ? TaktsTheme.accent : TaktsTheme.textMuted)
+
+                                                Text(line)
+                                                    .font(.system(size: 16, weight: isSelected ? .semibold : .regular))
+                                                    .foregroundColor(isSelected ? TaktsTheme.textPrimary : TaktsTheme.textMuted)
+                                                    .strikethrough(!isSelected, color: TaktsTheme.textMuted.opacity(0.5))
+                                                    .lineLimit(2)
+                                                    .multilineTextAlignment(.leading)
+                                            }
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 12)
+                                            .background(isSelected ? TaktsTheme.accent.opacity(0.08) : Color.clear)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+
+                            // Editable result field
+                            TextField("Untitled Event", text: Binding(
+                                get: { viewModel.displayEvent?.name ?? "" },
+                                set: {
+                                    viewModel.ensureDraft()
+                                    viewModel.currentDraft?.name = $0
+                                }
+                            ))
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(TaktsTheme.textPrimary)
+                            .lineLimit(3)
+                            .padding(.vertical, 12)
+                            .overlay(
+                                Rectangle()
+                                    .fill(TaktsTheme.cardBorder)
+                                    .frame(height: 1),
+                                alignment: .bottom
+                            )
+                        }
+
+                        // Date fields
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("EVENT DATE")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(TaktsTheme.textMuted)
+                                .tracking(2)
+
+                            DatePicker("", selection: Binding(
+                                get: { viewModel.displayEvent?.date ?? Date() },
+                                set: {
+                                    viewModel.ensureDraft()
+                                    viewModel.currentDraft?.date = $0
+                                }
+                            ), displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(.compact)
+                            .labelsHidden()
+                            .tint(TaktsTheme.accent)
+                            .padding(.vertical, 8)
+                            .overlay(
+                                Rectangle()
+                                    .fill(TaktsTheme.cardBorder)
+                                    .frame(height: 1),
+                                alignment: .bottom
+                            )
+                        }
+
+                        // Deadline
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("DEADLINE")
+                                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                    .foregroundColor(TaktsTheme.textMuted)
+                                    .tracking(2)
+
+                                Spacer()
+
+                                Toggle("", isOn: Binding(
+                                    get: { viewModel.displayEvent?.deadline != nil },
+                                    set: { hasDeadline in
+                                        let eventDate = viewModel.displayEvent?.date ?? Date()
+                                        viewModel.ensureDraft()
+                                        viewModel.currentDraft?.deadline = hasDeadline ? eventDate : nil
+                                    }))
+                                .labelsHidden()
+                                .tint(TaktsTheme.accent)
+                            }
+
+                            // Always render DatePicker to avoid format flicker on appear
+                            DatePicker("", selection: Binding(
+                                get: { viewModel.displayEvent?.deadline ?? viewModel.displayEvent?.date ?? Date() },
+                                set: {
+                                    viewModel.ensureDraft()
+                                    viewModel.currentDraft?.deadline = $0
+                                })
+                            , displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(.compact)
+                            .labelsHidden()
+                            .tint(TaktsTheme.accent)
+                            .padding(.vertical, 8)
+                            .overlay(
+                                Rectangle()
+                                    .fill(TaktsTheme.cardBorder)
+                                    .frame(height: 1),
+                                alignment: .bottom
+                            )
+                            .frame(height: viewModel.displayEvent?.deadline != nil ? nil : 0)
+                            .opacity(viewModel.displayEvent?.deadline != nil ? 1 : 0)
+                            .clipped()
+                        }
+
+                        // Reminders
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("REMINDERS")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(TaktsTheme.textMuted)
+                                .tracking(2)
+
+                            ForEach(Array(viewModel.currentReminders.enumerated()), id: \.offset) { index, reminder in
+                                HStack(spacing: 12) {
+                                    Image(systemName: "bell.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(TaktsTheme.accent)
+                                        .frame(width: 20)
+
+                                    switch reminder {
+                                    case .preset(let offset):
+                                        Menu {
+                                            ForEach(viewModel.availableOffsets(for: index)) { o in
+                                                Button(o.displayName) {
+                                                    viewModel.setReminderPreset(at: index, to: o)
+                                                }
+                                            }
+                                            Divider()
+                                            Button("Custom...") {
+                                                let eventDate = viewModel.displayEvent?.date ?? Date()
+                                                viewModel.setReminderCustomDate(at: index, to: eventDate)
+                                            }
+                                        } label: {
+                                            HStack(spacing: 4) {
+                                                Text(offset.displayName)
+                                                    .font(.system(size: 15))
+                                                    .foregroundColor(TaktsTheme.textPrimary)
+                                                Image(systemName: "chevron.up.chevron.down")
+                                                    .font(.system(size: 10))
+                                                    .foregroundColor(TaktsTheme.textMuted)
+                                            }
+                                        }
+
+                                    case .custom(let date):
+                                        DatePicker("", selection: Binding(
+                                            get: { date },
+                                            set: { viewModel.setReminderCustomDate(at: index, to: $0) }
+                                        ), displayedComponents: [.date, .hourAndMinute])
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden()
+                                        .tint(TaktsTheme.accent)
+                                    }
+
+                                    Spacer()
+
+                                    Button {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            viewModel.removeReminder(at: index)
+                                        }
+                                    } label: {
+                                        Image(systemName: "minus.circle.fill")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(.red.opacity(0.7))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                .padding(.vertical, 6)
+                            }
+
+                            if viewModel.currentReminders.count < 3 {
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        viewModel.addReminder()
+                                    }
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(TaktsTheme.accent)
+
+                                        Text("Add Reminder")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(TaktsTheme.accent)
+                                    }
+                                    .padding(.vertical, 6)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+
+                        // Input Text (collapsed by default)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    showInputText.toggle()
+                                }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Text("INPUT TEXT")
+                                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                        .foregroundColor(TaktsTheme.textMuted)
+                                        .tracking(2)
+
+                                    Image(systemName: showInputText ? "chevron.up" : "chevron.down")
+                                        .font(.system(size: 10, weight: .semibold))
+                                        .foregroundColor(TaktsTheme.textMuted)
+
+                                    Spacer()
+                                }
+                            }
+                            .buttonStyle(.plain)
+
+                            if showInputText {
+                                TextField("Add notes from scan...", text: Binding(
+                                    get: { viewModel.displayEvent?.notes ?? "" },
+                                    set: {
+                                        viewModel.ensureDraft()
+                                        viewModel.currentDraft?.notes = $0.isEmpty ? nil : $0
+                                    }
+                                ), axis: .vertical)
+                                .font(.system(size: 16))
+                                .foregroundColor(TaktsTheme.textPrimary)
+                                .lineLimit(3...)
+                                .lineSpacing(4)
+                                .padding(.vertical, 8)
+                                .overlay(
+                                    Rectangle()
+                                        .fill(TaktsTheme.cardBorder)
+                                        .frame(height: 1),
+                                    alignment: .bottom
+                                )
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                            }
+                        }
+                    }
+                    .padding(.horizontal, TaktsTheme.contentPadding)
+                    .padding(.bottom, 24)
+                }
+
+                // Action Buttons
+                VStack(spacing: 12) {
+                    // Save button
+                    Button {
+                        Task {
+                            viewModel.ensureDraft()
+                            await viewModel.saveCurrentEvent()
+                        }
+                    } label: {
+                        Text("SAVE EVENT")
+                            .font(.system(size: 16, weight: .bold))
+                            .tracking(0.5)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 64)
+                            .background(TaktsTheme.accent)
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .shadow(color: TaktsTheme.accent.opacity(0.3), radius: 15, y: 5)
+                    }
+
+                    // Skip + Cancel row
+                    HStack(spacing: 12) {
+                        Button {
+                            viewModel.skipCurrentEvent()
+                        } label: {
+                            Text("SKIP")
+                                .font(.system(size: 14, weight: .semibold))
+                                .tracking(0.5)
+                                .foregroundColor(TaktsTheme.textSecondary)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 52)
+                                .background(TaktsTheme.cardBackground)
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(TaktsTheme.cardBorder, lineWidth: 1)
+                                )
+                        }
+
+                        Button {
+                            viewModel.cancelAll()
+                        } label: {
+                            Text("CANCEL")
+                                .font(.system(size: 14, weight: .semibold))
+                                .tracking(0.5)
+                                .foregroundColor(.red.opacity(0.8))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 52)
+                                .background(TaktsTheme.cardBackground)
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(Color.red.opacity(0.1), lineWidth: 1)
+                                )
+                        }
+                    }
+                }
+                .padding(.horizontal, TaktsTheme.contentPadding)
+                .padding(.bottom, 16)
+                .background(
+                    LinearGradient(
+                        colors: [TaktsTheme.appBackground.opacity(0), TaktsTheme.appBackground],
+                        startPoint: .top,
+                        endPoint: UnitPoint(x: 0.5, y: 0.3)
+                    )
+                )
+            }
+        }
+        .padding(.top, 24)
+    }
+}
