@@ -1,3 +1,6 @@
+
+<img width="1024" height="1024" alt="TaktIcon-iOS-Default-1024x1024@1x" src="https://github.com/user-attachments/assets/d586f28c-5cfb-471d-9b63-53672637d566" />
+
 # Takts
 
 Takts is an iOS app that extracts dates and deadlines from images and text. Point your camera at a concert ticket, food label, or subscription screenshot — Takts pulls out the dates and turns them into events.
