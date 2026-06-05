@@ -120,8 +120,8 @@ extension Event {
 
         if days < 0 { return "Overdue" }
         if days == 0 { return "Today" }
-        if days == 1 { return "1 Day Left" }
-        return "\(days) Days Left"
+        if days == 1 { return "In 1 Day" }
+        return "In \(days) Days"
     }
 
     /// Short uppercase weekday string e.g. "SAT"

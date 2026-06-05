@@ -9,7 +9,6 @@ import Foundation
 import Observation
 
 // MARK: - ContentViewModel (Presentation Layer)
-// ViewModels must be framework-agnostic (no SwiftUI/UIKit imports). Use Data for image payloads.
 
 @MainActor
 @Observable
@@ -21,10 +20,8 @@ final class ContentViewModel {
     var isShowingAddEventSheet: Bool = false
     var errorMessage: String? = nil
 
-    // Domain entities displayed in UI
     var events: [Event] = []
 
-    // Parsed, not-yet-persisted candidates
     var extractedEvents: [Event] = []
 
     // MARK: Helpers (UI State)
@@ -35,7 +32,6 @@ final class ContentViewModel {
         isShowingAddEventSheet = false
     }
 
-    /// Call this from the view after presenting an error to clear it.
     func consumeError() {
         errorMessage = nil
     }

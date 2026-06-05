@@ -93,12 +93,12 @@ final class NotificationService: NotificationServiceProtocol {
 
     private func notificationBody(for offset: ReminderOffset) -> String {
         switch offset {
-        case .fifteenMinutes: return "Starting in 15 minutes"
-        case .oneHour: return "Starting in 1 hour"
-        case .twelveHours: return "Starting in 12 hours"
-        case .oneDay: return "Starting in 1 day"
-        case .twoDays: return "Starting in 2 days"
-        case .oneWeek: return "Starting in 1 week"
+        case .fifteenMinutes: return "Starts in 15 min."
+        case .oneHour: return "Starts in 1 hour"
+        case .twelveHours: return "Starts in 12 hours"
+        case .oneDay: return "Starts in 1 day"
+        case .twoDays: return "Starts in 2 days"
+        case .oneWeek: return "Starts in 1 week"
         }
     }
 

@@ -27,7 +27,7 @@ struct AddEventView: View {
                         }
 
                     if hasDeadline {
-                        DatePicker("Deadline", selection: Binding(
+                        DatePicker("Countdown", selection: Binding(
                             get: { deadline ?? date },
                             set: { deadline = $0 }
                         ), displayedComponents: [.date, .hourAndMinute])
